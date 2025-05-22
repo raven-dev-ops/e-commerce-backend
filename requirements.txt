@@ -12,8 +12,10 @@ django-rest-framework-mongoengine @ git+https://github.com/umutbozkurt/django-re
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
 dnspython==2.7.0
+gunicorn==23.0.0
 idna==3.10
 mongoengine==0.29.1
+packaging==25.0
 PyJWT==2.9.0
 pymongo==4.12.1
 python-dotenv==1.1.0

@@ -24,5 +24,5 @@ heroku ps -a $APP_NAME
 #echo "Opening APP..."
 #heroku open -a $APP_NAME
 
-#echo "Tailing logs..."
-#heroku logs --tail -a $APP_NAME
+echo "Tailing logs..."
+heroku logs --tail -a $APP_NAME
