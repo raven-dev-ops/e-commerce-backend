@@ -12,4 +12,4 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
 
-CMD ["python", "app.py"]
+CMD ["gunicorn", "backend.wsgi"]
