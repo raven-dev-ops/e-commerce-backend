@@ -43,11 +43,11 @@ INSTALLED_APPS = [
     'dj_rest_auth',
 
     # Your apps
-    'products',
-    'orders',
-    'rest_framework',
-    'users',
-    'data_loader',
+    'backend.products',
+    'backend.orders',
+    'backend.rest_framework',
+    'backed.users',
+    'backend.data_loader',
 ]
 
 MIDDLEWARE = [
