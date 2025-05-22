@@ -21,7 +21,10 @@ docker push registry.heroku.com/$APP_NAME/web
 
 # Releasing Docker container on Heroku
 echo "Releasing Docker container..."
-heroku container:release worker -a $APP_NAME
+heroku container:release web -a $APP_NAME
+
+echo "Restarting dynos to force new image deployment..."
+heroku ps:restart -a $APP_NAME
 
 # Checking process status on Heroku
 echo "Checking process status..."
