@@ -25,6 +25,8 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from . import views # Import the new view from the current app (backend)
+
+from authentication.views import AddressViewSet
 from authentication.views import UserRegistrationView, UserProfileView, ProfileView
 
 class ApiRootView(APIView):
@@ -33,11 +35,10 @@ class ApiRootView(APIView):
     """
     def get(self, request, format=None):
         return Response({
+
             'products': 'api/products/',
             'cart': 'api/cart/',
             'orders': 'api/orders/',
-from authentication.views import AddressViewSet
-
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
@@ -51,7 +52,7 @@ urlpatterns = [
     path('checkout/', include(router.urls)), # Include router URLs for checkout
     path('mongo-admin/', mongo_admin_site.urls),
     path('api/', include(router.urls)),
-    path('auth/', include('backend.authentication.urls')), # Include auth URLs under /auth/
+    path('auth/', include('authentication.urls')), # Include auth URLs under /auth/
     path('api/register/', UserRegistrationView.as_view(), name='user-registration'),
     path('api/login/', obtain_auth_token, name='api_token_auth'),
     path('api/profile/', ProfileView.as_view(), name='user_profile'), # New profile URL pattern
