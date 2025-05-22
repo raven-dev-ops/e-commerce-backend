@@ -13,11 +13,11 @@ docker build --no-cache -t main:latest .
 
 # Tagging Docker image for Heroku
 echo "Tagging Docker image..."
-docker tag main:latest registry.heroku.com/$APP_NAME/worker
+docker tag main:latest registry.heroku.com/$APP_NAME/web
 
 # Pushing Docker image to Heroku
 echo "Pushing Docker image to Heroku..."
-docker push registry.heroku.com/$APP_NAME/worker
+docker push registry.heroku.com/$APP_NAME/web
 
 # Releasing Docker container on Heroku
 echo "Releasing Docker container..."
