@@ -1,16 +1,18 @@
 #mongo_connection.py
 
 import mongoengine
+import os
 
 def connect_mongodb():
-    mongoengine.connect(
-        db='website',
-        host='mongodb+srv://gptfleet:GyUeIj6ohuDZhnVi@website.ora74qp.mongodb.net/',
-        authSource='admin',
-        retryWrites=True,
-        w='majority'
-    )
+    # Get the MongoDB connection string from the environment variable 
+    mongodb_uri = os.environ.get('MONGODB_URI')
 
+    if mongodb_uri:
+        mongoengine.connect(host=mongodb_uri)
+    else:
+        # Handle the case where the environment variable is not set 
+        print("Error: MONGODB_URI environment variable not set.") 
+        # You might want to raise an exception or handle this case appropriately 
 if __name__ == '__main__':
     # This block is for testing the connection
     connect_mongodb()
