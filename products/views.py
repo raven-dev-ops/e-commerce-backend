@@ -37,6 +37,7 @@ class ProductViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         queryset = Product.objects.all()
+        logging.info(f"Queryset object: Type={type(queryset)}, Representation={repr(queryset)}") # Added logging
         logging.info(f"Raw PyMongo query: {queryset._query}") # Added logging
         filter_params = self.request.query_params
         logging.info(f"Initial queryset length: {len(queryset)}")
