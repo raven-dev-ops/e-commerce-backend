@@ -19,7 +19,7 @@ class ProductViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      viewsets.GenericViewSet):
- serializer_class = ProductSerializer
+    serializer_class = ProductSerializer
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
@@ -29,7 +29,7 @@ class ProductViewSet(mixins.ListModelMixin,
         try:
             return Product.objects.get(id=ObjectId(pk))
         except Product.DoesNotExist:
-            raise Http404
+ Http404
         except Exception as e:
             # Optional: log or handle invalid ObjectId errors
             raise Http404
@@ -43,9 +43,10 @@ class ProductViewSet(mixins.ListModelMixin,
             if field_name in filter_params:
                 filter_kwargs = {f'{field_name}__{lookup_expr}': filter_params[field_name]}
                 queryset = queryset.filter(**filter_kwargs)
+ return queryset # Added return statement
 
-    def perform_create(self, serializer):
-        serializer.save()
+ def perform_create(self, serializer):
+ serializer.save()
 
     def perform_update(self, serializer):
-        serializer.save()
+ serializer.save()
