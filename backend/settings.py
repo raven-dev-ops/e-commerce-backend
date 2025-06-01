@@ -134,7 +134,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'ERROR',  # Set the minimum logging level to ERROR
+        'level': 'INFO',  # Set the minimum logging level to INFO
     },
     'loggers': {
         'django': {
@@ -142,14 +142,14 @@ LOGGING = {
             'level': 'INFO',  # You can set this to INFO or DEBUG for more detailed Django logs
             'propagate': False,
         },
-        'your_app_name': {  # Replace 'your_app_name' with the name of your application(s) if you want specific app logging
+        'products.views': {  # Logger for products.views
             'handlers': ['console'],
-            'level': 'ERROR', # Or INFO/DEBUG for more verbosity
+            'level': 'INFO', # Set level to INFO
             'propagate': False,
         },
         'mongoengine': {  # Optional: Log mongoengine activity
             'handlers': ['console'],
-            'level': 'ERROR', # Or INFO/DEBUG
+            'level': 'INFO', # Or INFO/DEBUG
             'propagate': False,
         },
         # Add other loggers as needed
