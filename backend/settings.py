@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third-party
-    'corsheaders',
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
@@ -47,7 +46,7 @@ INSTALLED_APPS = [
 
 # Middleware
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Must be first
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -119,7 +118,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://your-netlify-site.netlify.app').split(',')
+CORS_ALLOWED_ORIGINS = ["https://twiinz-beard-frontend.netlify.app"]
 
 # Optional: Allow all for development
 # CORS_ALLOW_ALL_ORIGINS = True  # Only use this for testing!
