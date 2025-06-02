@@ -152,7 +152,6 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# === REST framework & JWT config for MongoEngine (NO SQL token model) ===
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -164,4 +163,4 @@ REST_FRAMEWORK = {
 }
 
 REST_USE_JWT = True
-REST_AUTH_TOKEN_MODEL = None   # Explicitly disables SQL token model
+REST_AUTH_TOKEN_MODEL = None
