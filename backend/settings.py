@@ -11,6 +11,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-...')
 DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
+# Place this BEFORE INSTALLED_APPS and any app logic!
+REST_AUTH_TOKEN_MODEL = None
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -19,7 +22,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Social/auth-related
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -28,12 +30,10 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    # Third-party
     'corsheaders',
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
-    # Local apps
     'users',
     'products',
     'orders',
@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'reviews',
     'authentication',
 ]
-
-REST_AUTH_TOKEN_MODEL = None  # Prevents token model requirement for dj-rest-auth
 
 SITE_ID = 1
 
@@ -113,7 +111,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# CORS settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ['*']
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
