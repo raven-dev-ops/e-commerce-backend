@@ -57,7 +57,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'authentication.backends.MongoEngineBackend',  # Your custom backend
+    'authentication.backends.MongoEngineBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
@@ -101,9 +101,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Database (MongoDB only)
-DATABASES = {}
 MONGO_URI = os.getenv('MONGO_URI')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }}
 MONGODB_DATABASES = {
     "default": {
         "name": "website",
@@ -133,7 +136,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://twiinz-beard-frontend.netlify.app",
+    "https://twiinz-beard.netlify.app",
     "http://localhost:3000",
 ]
 
