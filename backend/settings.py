@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'authentication.backends.MongoEngineBackend',  # Your custom backend
+    'authentication.backends.MongoEngineBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
