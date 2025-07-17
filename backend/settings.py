@@ -1,5 +1,3 @@
-# backend/settings.py
-
 """
 Django settings for backend project.
 """
@@ -31,7 +29,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'dj_rest_auth',
-
     'dj_rest_auth.registration',
     'rest_framework.authtoken',
 
@@ -57,7 +54,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'authentication.backends.MongoEngineBackend',
+    'authentication.backends.MongoEngineBackend',  # Your custom backend
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
@@ -71,6 +68,15 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# --- dj-rest-auth & allauth NEW SIGNUP_FIELDS config ---
+from dj_rest_auth.registration.app_settings import app_settings as reg_app_settings
+
+reg_app_settings.SIGNUP_FIELDS = {
+    "username": {"required": True},  # Set to False if you do not require username
+    "email": {"required": True},     # Set to False to allow optional email (not recommended)
+}
+# ------------------------------------------------------
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -79,7 +85,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',]
+    'django.contrib.messages.middleware.MessageMiddleware',
+]
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -101,12 +108,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+# Database (MongoDB only)
+DATABASES = {}
 MONGO_URI = os.getenv('MONGO_URI')
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }}
 MONGODB_DATABASES = {
     "default": {
         "name": "website",
@@ -136,7 +140,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://twiinz-beard.netlify.app",
+    "https://twiinz-beard-frontend.netlify.app",
     "http://localhost:3000",
 ]
 
