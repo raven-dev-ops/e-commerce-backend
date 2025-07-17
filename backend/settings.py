@@ -1,7 +1,3 @@
-"""
-Django settings for backend project.
-"""
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -14,25 +10,26 @@ DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 INSTALLED_APPS = [
-    # Django core apps
+    # Django core
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     # Auth/social
-    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.instagram',
+
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'rest_framework.authtoken',
-
-    # REST Framework (no authtoken)
     'rest_framework',
 
     # Third-party (MongoEngine)
@@ -54,7 +51,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'authentication.backends.MongoEngineBackend',
+    'authentication.backends.MongoEngineBackend',  # Custom backend if you use Mongoengine
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
@@ -65,19 +62,29 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
             'key': ''
         }
+    },
+    'facebook': {
+        'APP': {
+            'client_id': os.getenv('FACEBOOK_APP_ID', ''),
+            'secret': os.getenv('FACEBOOK_APP_SECRET', ''),
+            'key': ''
+        }
+    },
+    'instagram': {
+        'APP': {
+            'client_id': os.getenv('INSTAGRAM_APP_ID', ''),
+            'secret': os.getenv('INSTAGRAM_APP_SECRET', ''),
+            'key': ''
+        }
     }
 }
 
-# -- Modern allauth/dj-rest-auth registration config --
-ACCOUNT_USERNAME_REQUIRED = True  # Set False if you want to disable username
+# Recommended account/signup fields for new allauth & dj-rest-auth versions
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"  # Or "email" if using email as username
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
-
-REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
-}
-# -----------------------------------------------------
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -110,13 +117,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
+# MongoDB Atlas configuration (no SQL databases)
+DATABASES = {}
 MONGO_URI = os.getenv('MONGO_URI')
 MONGODB_DATABASES = {
     "default": {
@@ -148,16 +150,14 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 CORS_ALLOWED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",
-    "http://localhost:27017",
+    "http://localhost:3000",
 ]
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
+        'console': {'class': 'logging.StreamHandler'},
     },
     'root': {
         'handlers': ['console'],
@@ -194,6 +194,10 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Enable JWT with dj-rest-auth
 REST_USE_JWT = True
 REST_AUTH_TOKEN_MODEL = None
+
+# Ignore deprecated warnings for signup fields (for now)
+import warnings
+warnings.filterwarnings('ignore', message="app_settings.USERNAME_REQUIRED is deprecated")
+warnings.filterwarnings('ignore', message="app_settings.EMAIL_REQUIRED is deprecated")
