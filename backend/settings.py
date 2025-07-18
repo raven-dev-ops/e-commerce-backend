@@ -117,8 +117,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# MongoDB Atlas configuration (no SQL databases)
-DATABASES = {}
+# Default SQL DB (needed for auth/session compatibility even if unused)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# MongoDB Atlas configuration
 MONGO_URI = os.getenv('MONGO_URI')
 MONGODB_DATABASES = {
     "default": {
