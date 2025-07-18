@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import warnings
+from mongoengine import connect
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -10,16 +12,22 @@ DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 INSTALLED_APPS = [
-    # Django core
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
+    # Removed default Django apps using relational DB
+    # 'django.contrib.admin',
+    # 'django.contrib.auth',
+    # 'django.contrib.contenttypes',
+    # 'django.contrib.sessions',
+    # 'django.contrib.messages',
+    # 'django.contrib.staticfiles',
+    # 'django.contrib.sites',
 
-    # Auth/social
+    # Only include apps that support MongoEngine or are non-relational
+    'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -27,16 +35,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.instagram',
 
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
-    'rest_framework.authtoken',
-    'rest_framework',
-
-    # Third-party (MongoEngine)
     'django_mongoengine',
     'django_mongoengine.mongo_admin',
 
-    # Local apps
     'users',
     'products',
     'orders',
@@ -45,13 +46,12 @@ INSTALLED_APPS = [
     'discounts',
     'reviews',
     'authentication',
-    'corsheaders',
 ]
 
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'authentication.backends.MongoEngineBackend',  # Custom backend if you use Mongoengine
+    'authentication.backends.MongoEngineBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
@@ -79,21 +79,15 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -107,8 +101,6 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -116,35 +108,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Default SQL DB (needed for auth/session compatibility even if unused)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# REMOVE default relational database setup
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
-# MongoDB Atlas configuration
-MONGO_URI = os.getenv('MONGODB_URI')
-MONGODB_DATABASES = {
-    "default": {
-        "name": "website",
-        "host": MONGO_URI,
-    }
-}
+# Connect to MongoDB
+MONGO_URI = os.getenv('MONGO_URI')
+connect(
+    db="website",
+    host=MONGO_URI,
+)
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 if not STRIPE_SECRET_KEY or not STRIPE_WEBHOOK_SECRET:
     raise ValueError("Stripe keys are not set in environment variables")
-
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -158,7 +141,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",
     "http://localhost:3000",
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 
 LOGGING = {
@@ -205,16 +187,5 @@ REST_FRAMEWORK = {
 REST_USE_JWT = True
 REST_AUTH_TOKEN_MODEL = None
 
-# Ignore deprecated warnings for signup fields (for now)
-import warnings
 warnings.filterwarnings('ignore', message="app_settings.USERNAME_REQUIRED is deprecated")
 warnings.filterwarnings('ignore', message="app_settings.EMAIL_REQUIRED is deprecated")
-
-# ✅ Explicit MongoEngine connection for Heroku runtime
-from mongoengine import connect
-
-connect(
-    db="website",  # Match this to your MongoDB database name
-    host=os.environ.get("MONGODB_URI"),
-    alias="default"
-)
