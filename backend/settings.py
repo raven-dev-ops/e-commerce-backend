@@ -79,7 +79,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Recommended account/signup fields for new allauth & dj-rest-auth versions
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
@@ -126,7 +125,7 @@ DATABASES = {
 }
 
 # MongoDB Atlas configuration
-MONGO_URI = os.getenv('MONGO_URI')
+MONGO_URI = os.getenv('MONGODB_URI')
 MONGODB_DATABASES = {
     "default": {
         "name": "website",
@@ -210,3 +209,12 @@ REST_AUTH_TOKEN_MODEL = None
 import warnings
 warnings.filterwarnings('ignore', message="app_settings.USERNAME_REQUIRED is deprecated")
 warnings.filterwarnings('ignore', message="app_settings.EMAIL_REQUIRED is deprecated")
+
+# ✅ Explicit MongoEngine connection for Heroku runtime
+from mongoengine import connect
+
+connect(
+    db="website",  # Match this to your MongoDB database name
+    host=os.environ.get("MONGODB_URI"),
+    alias="default"
+)
