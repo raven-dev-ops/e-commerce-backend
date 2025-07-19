@@ -1,9 +1,13 @@
 asgiref==3.8.1
 bcrypt==4.3.0
 certifi==2025.4.26
+cffi==1.17.1
 charset-normalizer==3.4.1
-dj-rest-auth[social]==7.0.1
+cryptography==45.0.5
+dj-database-url==3.0.1
+dj-rest-auth==7.0.1
 Django==4.2.21
+django-allauth==65.10.0
 django-cors-headers==4.7.0
 django-filter==25.1
 django-mongoengine @ git+https://github.com/MongoEngine/django-mongoengine.git@298cdcf59b21fe590958f57f27bf28e7192fcc4e
@@ -16,6 +20,9 @@ gunicorn==23.0.0
 idna==3.10
 mongoengine==0.29.1
 packaging==25.0
+psycopg==3.2.9
+psycopg2-binary==2.9.10
+pycparser==2.22
 PyJWT==2.9.0
 pymongo==4.12.1
 python-dotenv==1.1.0
@@ -26,9 +33,4 @@ stripe==12.0.1
 typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
-django-allauth==65.9.0
-dj-rest-auth==7.0.1
-cryptography>=41.0.0
-dj-database-url>=3.0.1
-psycopg2-binary>=2.9
 whitenoise==6.9.0
