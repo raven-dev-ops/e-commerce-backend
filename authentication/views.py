@@ -1,5 +1,3 @@
-# authentication/views.py
-
 from django.contrib.auth import authenticate
 from rest_framework import status, generics, mixins, viewsets
 from rest_framework.authentication import TokenAuthentication
@@ -15,6 +13,14 @@ from authentication.serializers import (
     AddressSerializer,
 )
 from authentication.models import Address
+
+# Social login imports
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from dj_rest_auth.registration.views import SocialLoginView
+
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
 
 
 class UserRegistrationView(APIView):
