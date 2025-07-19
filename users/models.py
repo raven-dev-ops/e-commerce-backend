@@ -2,7 +2,12 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
 class User(AbstractUser):
+    """
+    Custom User model extending Django's AbstractUser,
+    with custom related names for groups and permissions to avoid admin clashes.
+    """
     groups = models.ManyToManyField(
         Group,
         related_name='custom_user_set',
@@ -20,3 +25,6 @@ class User(AbstractUser):
         verbose_name=_('user permissions'),
         related_query_name='user',
     )
+
+    def __str__(self):
+        return self.username
