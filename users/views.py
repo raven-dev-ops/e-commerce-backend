@@ -1,14 +1,15 @@
-import logging
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions
 from rest_framework.serializers import ModelSerializer, CharField
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
+import logging
 
 logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 
@@ -21,7 +22,7 @@ class UserSerializer(ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User(**validated_data)
+        user = self.Meta.model(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -52,17 +53,13 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
+    callback_url = "https://twiinz-beard-frontend.netlify.app"
     client_class = OAuth2Client
 
-    def get_callback_url(self):
-        return "https://twiinz-beard-frontend.netlify.app"
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['callback_url'] = self.get_callback_url()
-        return context
-
     def post(self, request, *args, **kwargs):
-        logger.info("🔐 Received POST request for Google login")
-        logger.info("Request data: %s", request.data)
-        return super().post(request, *args, **kwargs)
+        logger.info("🔵 Google Login POST initiated with data: %s", request.data)
+        try:
+            return super().post(request, *args, **kwargs)
+        except ValidationError as e:
+            logger.error("🔴 Google Login failed: %s", e.detail)
+            raise e

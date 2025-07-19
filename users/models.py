@@ -1,23 +1,28 @@
 # users/models.py
 
-from mongoengine import Document, StringField, EmailField, ListField, ReferenceField
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-class User(Document):
+class User(AbstractUser):
     """
-    Custom MongoEngine User model replacing Django's AbstractUser.
+    Custom User model overriding the default ManyToMany fields for groups and user_permissions,
+    using unique related names to avoid clashes in the ORM.
     """
-    username = StringField(required=True, unique=True, max_length=150, verbose_name=_("username"))
-    email = EmailField(required=True, unique=True, verbose_name=_("email address"))
-    password = StringField(required=True, verbose_name=_("password"))
-    first_name = StringField(max_length=30, verbose_name=_("first name"))
-    last_name = StringField(max_length=150, verbose_name=_("last name"))
+    groups = models.ManyToManyField(
+        Group,
+        related_name='custom_user_set',
+        blank=True,
+        help_text=_('The groups this user belongs to.'),
+        verbose_name=_('groups'),
+        related_query_name='user',
+    )
 
-    meta = {
-        'collection': 'user',  # MongoDB collection name
-        'indexes': ['email', 'username'],
-        'ordering': ['username']
-    }
-
-    def __str__(self):
-        return self.username
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='custom_user_permissions_set',
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        verbose_name=_('user permissions'),
+        related_query_name='user',
+    )
