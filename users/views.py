@@ -7,6 +7,9 @@ from dj_rest_auth.registration.views import SocialLoginView
 
 User = get_user_model()
 
+# -------------------------
+# Serializers
+# -------------------------
 class UserSerializer(ModelSerializer):
     password = CharField(write_only=True)
 
@@ -30,6 +33,9 @@ class UserSerializer(ModelSerializer):
         instance.save()
         return instance
 
+# -------------------------
+# Views
+# -------------------------
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -45,8 +51,16 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
 
+    def get_callback_url(self):
+        # This must match the one registered in your Google Console
+        return "https://twiinz-beard-backend-11dfd7158830.herokuapp.com/accounts/google/login/callback/"
+
     def get_adapter_kwargs(self):
         return {
-            'client_class': OAuth2Client,
-            'callback_url': 'https://twiinz-beard-frontend.netlify.app',
+            "client_class": OAuth2Client
         }
+
+    # Optional debug logging (can be removed in production)
+    def post(self, request, *args, **kwargs):
+        print("🔍 Incoming Google auth request:", request.data)
+        return super().post(request, *args, **kwargs)
