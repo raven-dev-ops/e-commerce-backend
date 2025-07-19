@@ -48,5 +48,14 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 # Custom Google OAuth2 login
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client  # ✅ Required to resolve "Define client_class" error
-    callback_url = "https://twiinz-beard-frontend.netlify.app"  # ✅ Must match Google console settings
+    client_class = OAuth2Client
+    callback_url = "https://twiinz-beard-frontend.netlify.app"
+
+    def get_client_class_kwargs(self):
+        """
+        Fixes TypeError for multiple values of 'scope_delimiter'
+        """
+        return {
+            "request": self.request,
+            "callback_url": self.callback_url,
+        }
