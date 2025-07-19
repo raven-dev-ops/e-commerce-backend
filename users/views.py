@@ -3,6 +3,7 @@ from rest_framework.serializers import ModelSerializer, CharField
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
+from django.conf import settings
 
 def get_user_model_ref():
     from django.contrib.auth import get_user_model
@@ -45,5 +46,5 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "https://twiinz-beard-frontend.netlify.app"
     client_class = OAuth2Client
+    callback_url = "https://twiinz-beard-frontend.netlify.app/auth/callback/"
