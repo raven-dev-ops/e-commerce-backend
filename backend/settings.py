@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 import warnings
 from mongoengine import connect
-import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
