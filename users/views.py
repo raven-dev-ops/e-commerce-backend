@@ -1,29 +1,43 @@
 from rest_framework import generics, permissions
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.helpers import complete_social_login
-from allauth.socialaccount.models import SocialLogin
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView
-from allauth.socialaccount import app_settings
-from allauth.socialaccount.adapter import get_adapter
-from allauth.socialaccount.providers.google.provider import GoogleProvider
-from allauth.socialaccount.providers.base import AuthError
-from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import get_user_model
-
-from .serializers import UserSerializer
+from rest_framework.serializers import ModelSerializer, CharField
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 
 User = get_user_model()
 
+# User Serializer
+class UserSerializer(ModelSerializer):
+    password = CharField(write_only=True)
 
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+# Register endpoint
 class RegisterUserView(generics.CreateAPIView):
-    queryset = User.objects
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
-
+# Profile endpoint
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -31,7 +45,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
-
+# Custom Google OAuth2 login
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "https://twiinz-beard-frontend.netlify.app"
+    client_class = OAuth2Client  # ✅ Required to resolve "Define client_class" error
+    callback_url = "https://twiinz-beard-frontend.netlify.app"  # ✅ Must match Google console settings
