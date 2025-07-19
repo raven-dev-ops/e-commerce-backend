@@ -51,7 +51,6 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class CustomGoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client
     callback_url = "https://twiinz-beard-backend-11dfd7158830.herokuapp.com/accounts/google/login/callback/"
 
     def post(self, request, *args, **kwargs):
@@ -59,7 +58,7 @@ class CustomGoogleLogin(SocialLoginView):
             return super().post(request, *args, **kwargs)
         except Exception as e:
             import traceback
-            print("🔴 Google login error:\n", traceback.format_exc())
+            print("🔴 OAuth error:\n", traceback.format_exc())
             return Response(
                 {"detail": "OAuth error", "error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
