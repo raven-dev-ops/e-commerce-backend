@@ -6,12 +6,11 @@ from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 
-
 # ✅ Google login integration
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
-    # callback_url = 'https://twiinz-beard-frontend.netlify.app'  # Optional
+    callback_url = 'https://twiinz-beard-frontend.netlify.app'
 
 urlpatterns = [
     # Local user endpoints
@@ -24,11 +23,11 @@ urlpatterns = [
     # Registration endpoints (email verification, signup, etc.)
     path('auth/', include('dj_rest_auth.registration.urls')),
 
-    # ✅ Google social login endpoint
-    path('auth/google/', GoogleLogin.as_view(), name='google_login'),
+    # ✅ Corrected Google login endpoint (must include "login/")
+    path('auth/google/login/', GoogleLogin.as_view(), name='google_login'),
 
-    # Optional: Add these if needed later
+    # Optional: For future social providers or browser-based flows
     # path('auth/facebook/', FacebookLogin.as_view(), name='facebook_login'),
     # path('auth/instagram/', InstagramLogin.as_view(), name='instagram_login'),
-    # path('social/', include('allauth.socialaccount.urls')),  # For browser-based flows
+    # path('social/', include('allauth.socialaccount.urls')),
 ]
