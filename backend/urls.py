@@ -19,10 +19,8 @@ urlpatterns = [
     path('reviews/', include('reviews.urls')),
     path('authentication/', include('authentication.urls')),
 
-    # dj-rest-auth social endpoints (so you can POST to e.g. /social-auth/google/)
-    # path('social-auth/', include('dj_rest_auth.socialaccount.urls')),  # Optional, for broader social auth
-
-    # Django-allauth default endpoints
-    path('accounts/', include('allauth.urls')),
+    # REST auth endpoints
+    path('auth/', include('dj_rest_auth.urls')),  # login/logout/password reset
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),  # registration
+    path('auth/social/', include('allauth.socialaccount.urls')),  # social login e.g. /auth/social/google/
 ]
-
