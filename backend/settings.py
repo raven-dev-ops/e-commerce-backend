@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'authentication',
 ]
 
-SITE_ID = 1
+SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = [
     'authentication.backends.MongoEngineBackend',
@@ -81,10 +81,20 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Allauth modern config
-ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
-ACCOUNT_LOGIN_METHOD = 'username_email'
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# Allauth / dj-rest-auth config
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_SIGNUP_REDIRECT_URL = "/"
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -149,13 +159,14 @@ STATICFILES_DIRS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+SOCIALACCOUNT_ADAPTER = "authentication.adapters.CustomSocialAccountAdapter"
+
 CORS_ALLOWED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",
     "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# ✅ CSRF Trusted Origins (required for admin login in production)
 CSRF_TRUSTED_ORIGINS = [
     "https://twiinz-beard-frontend.netlify.app",
     "https://twiinz-beard-backend-11dfd7158830.herokuapp.com",
@@ -205,6 +216,5 @@ REST_FRAMEWORK = {
 REST_USE_JWT = True
 REST_AUTH_TOKEN_MODEL = None
 
-# Suppress deprecation warnings
 warnings.filterwarnings('ignore', message="app_settings.USERNAME_REQUIRED is deprecated")
 warnings.filterwarnings('ignore', message="app_settings.EMAIL_REQUIRED is deprecated")
