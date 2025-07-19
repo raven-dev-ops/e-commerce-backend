@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'authentication',
 ]
 
-SITE_ID = 1
+SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = [
     'authentication.backends.MongoEngineBackend',
