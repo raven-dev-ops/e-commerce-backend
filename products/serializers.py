@@ -2,11 +2,12 @@
 
 from rest_framework_mongoengine.serializers import DocumentSerializer
 from rest_framework import serializers
-from products.models import Product  # adjust import path as needed
+from products.models import Product
 
 class ProductSerializer(DocumentSerializer):
-    id = serializers.CharField(read_only=True)  # for MongoDB _id
-    
+    id = serializers.CharField(read_only=True)  # MongoDB ObjectId as string
+    _id = serializers.SerializerMethodField()   # Always a string for compatibility
+
     product_name = serializers.CharField(max_length=255)
     category = serializers.CharField(max_length=100)
     description = serializers.CharField()
@@ -26,8 +27,11 @@ class ProductSerializer(DocumentSerializer):
     average_rating = serializers.FloatField(read_only=True)
     review_count = serializers.IntegerField(read_only=True)
 
+    def get__id(self, obj):
+        # Ensures _id is always a string, no matter how it's stored
+        return str(obj.id)
+
     class Meta:
         model = Product
-        fields = '__all__'
-        # For mongoengine, use 'document' instead of 'model'
-        document = Product
+        fields = '__all__'  # include all model/document fields + id + _id
+        document = Product  # for MongoEngine compatibility
