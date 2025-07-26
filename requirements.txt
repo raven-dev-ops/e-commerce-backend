@@ -5,9 +5,9 @@ cffi==1.17.1
 charset-normalizer==3.4.1
 cryptography==45.0.5
 dj-database-url==3.0.1
-dj-rest-auth==7.0.1
+dj-rest-auth==4.0.1
 Django==4.2.21
-django-allauth==65.10.0
+django-allauth==0.54.0
 django-cors-headers==4.7.0
 django-filter==25.1
 django-mongoengine @ git+https://github.com/MongoEngine/django-mongoengine.git@298cdcf59b21fe590958f57f27bf28e7192fcc4e
@@ -27,6 +27,7 @@ PyJWT==2.9.0
 pymongo==4.12.1
 python-dotenv==1.1.0
 requests==2.32.3
+requests-oauthlib==1.3.1
 six==1.17.0
 sqlparse==0.5.3
 stripe==12.0.1
