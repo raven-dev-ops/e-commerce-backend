@@ -1,23 +1,31 @@
-# authentication/serializers.py
+# src/authentication/serializers.py
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from authentication.models import Address
 from rest_framework_mongoengine.serializers import DocumentSerializer
 
-# ——— your existing serializers ———
-
 class AddressSerializer(DocumentSerializer):
     class Meta:
         model = Address
         fields = (
-            'user', 'street', 'city', 'state', 'country', 'zip_code',
-            'is_default_shipping', 'is_default_billing'
+            'user',
+            'street',
+            'city',
+            'state',
+            'country',
+            'zip_code',
+            'is_default_shipping',
+            'is_default_billing',
         )
         read_only_fields = ('user',)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    """
+    You can remove this entire class if you want dj-rest-auth to use
+    its built-in RegisterSerializer instead.
+    """
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
@@ -34,9 +42,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'username', 'email', 'first_name', 'last_name',
-            'date_joined', 'last_login',
-            'default_shipping_address', 'default_billing_address'
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'date_joined',
+            'last_login',
+            'default_shipping_address',
+            'default_billing_address',
         )
 
     def get_default_shipping_address(self, obj):
@@ -54,7 +67,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return None
 
 
-# ——— custom social‑login serializer ———
+# ——— Custom Social‑Login Serializer ———
 
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -62,15 +75,14 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 
 class CustomSocialLoginSerializer(SocialLoginSerializer):
     """
-    Uses allauth's OAuth2Client but only supplies each init‑arg once,
-    so we don’t get “multiple values for argument 'scope_delimiter'”.
+    Wraps allauth's OAuth2Client but only passes each init‑arg once,
+    preventing the 'multiple values for argument "scope_delimiter"' error.
     """
     adapter_class = GoogleOAuth2Adapter
     client_class  = OAuth2Client
-    callback_url  = None  # or your front‑end callback
+    callback_url  = None  # e.g. your front‑end redirect URI
 
     def get_client(self, request, adapter):
-        # build the client with only the required args
         app = adapter.get_provider().get_app(request)
         return self.client_class(
             request=request,
