@@ -26,7 +26,7 @@ class ProductViewSet(
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
-    lookup_field = 'id' 
+    lookup_field = '_id' 
 
     def get_object(self):
         lookup_value = self.kwargs.get(self.lookup_field)
