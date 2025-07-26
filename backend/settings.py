@@ -217,8 +217,10 @@ REST_FRAMEWORK = {
 
 REST_USE_JWT = True
 REST_AUTH_TOKEN_MODEL = None
-REST_AUTH_REGISTER_SERIALIZERS = {
-    "SOCIAL_LOGIN_SERIALIZER": "authentication.custom_serializers.CustomSocialLoginSerializer",
+REST_AUTH_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'authentication.serializers.UserRegistrationSerializer',
+    'USER_DETAILS_SERIALIZER': 'authentication.serializers.UserProfileSerializer',
+    'SOCIAL_LOGIN_SERIALIZER': 'authentication.serializers.CustomSocialLoginSerializer',
 }
 
 warnings.filterwarnings('ignore', message="app_settings.USERNAME_REQUIRED is deprecated")
