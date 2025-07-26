@@ -1,6 +1,7 @@
-# products/models.py
-
-from mongoengine import Document, StringField, FloatField, ListField, DictField, BooleanField, IntField
+from mongoengine import (
+    Document, StringField, FloatField, ListField, DictField,
+    BooleanField, IntField
+)
 
 class Product(Document):
     product_name = StringField(max_length=255)
@@ -32,6 +33,11 @@ class Product(Document):
 
     def __str__(self):
         return self.product_name
+
+    @property
+    def id_str(self):
+        """Returns the _id as a string, regardless of its internal type."""
+        return str(self.id)  # self.id is ObjectId by default unless you override
 
 class Category(Document):
     name = StringField(max_length=100, required=True, unique=True)
