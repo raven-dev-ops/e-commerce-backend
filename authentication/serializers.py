@@ -5,30 +5,19 @@ from django.contrib.auth.models import User
 from authentication.models import Address
 from rest_framework_mongoengine.serializers import DocumentSerializer
 
-# dj-rest-auth / allauth imports
-from dj_rest_auth.registration.serializers import SocialLoginSerializer
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-
+# ——— your existing serializers ———
 
 class AddressSerializer(DocumentSerializer):
     class Meta:
         model = Address
         fields = (
-            'user',
-            'street',
-            'city',
-            'state',
-            'country',
-            'zip_code',
-            'is_default_shipping',
-            'is_default_billing',
+            'user', 'street', 'city', 'state', 'country', 'zip_code',
+            'is_default_shipping', 'is_default_billing'
         )
         read_only_fields = ('user',)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """Used by dj-rest-auth for email/password sign‑up."""
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
@@ -39,21 +28,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """Expose user profile + default addresses."""
     default_shipping_address = serializers.SerializerMethodField()
-    default_billing_address = serializers.SerializerMethodField()
+    default_billing_address  = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'date_joined',
-            'last_login',
-            'default_shipping_address',
-            'default_billing_address',
+            'username', 'email', 'first_name', 'last_name',
+            'date_joined', 'last_login',
+            'default_shipping_address', 'default_billing_address'
         )
 
     def get_default_shipping_address(self, obj):
@@ -71,21 +54,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return None
 
 
+# ——— custom social‑login serializer ———
+
+from dj_rest_auth.registration.serializers import SocialLoginSerializer
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+
 class CustomSocialLoginSerializer(SocialLoginSerializer):
     """
-    Overrides dj-rest-auth’s default so that OAuth2Client is
-    instantiated without duplicate 'scope_delimiter' args.
+    Uses allauth's OAuth2Client but only supplies each init‑arg once,
+    so we don’t get “multiple values for argument 'scope_delimiter'”.
     """
-    adapter_class = GoogleOAuth2Adapter  # swap for whichever provider you need
-    client_class = OAuth2Client
-    callback_url = None  # or your front‑end redirect URI
+    adapter_class = GoogleOAuth2Adapter
+    client_class  = OAuth2Client
+    callback_url  = None  # or your front‑end callback
 
     def get_client(self, request, adapter):
+        # build the client with only the required args
         app = adapter.get_provider().get_app(request)
         return self.client_class(
             request=request,
-            consumer_key=app.client_id,
-            consumer_secret=app.secret,
+            client_id=app.client_id,
+            client_secret=app.secret,
             access_token_url=adapter.access_token_url,
+            authorize_url=adapter.authorize_url,
             callback_url=self.callback_url,
         )
