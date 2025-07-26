@@ -14,40 +14,43 @@ import logging
 class CustomProductPagination(PageNumberPagination):
     page_size = 100
 
-class ProductViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
-                     mixins.CreateModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin,
-                     viewsets.GenericViewSet):
+class ProductViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = ProductSerializer
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
+    lookup_field = 'id' 
 
     def get_object(self):
-        pk = self.kwargs.get('pk')
+        lookup_value = self.kwargs.get(self.lookup_field)
         try:
-            return Product.objects.get(id=ObjectId(pk))
+            # Try as ObjectId first, fallback to plain string
+            try:
+                obj = Product.objects.get(id=ObjectId(lookup_value))
+            except Exception:
+                obj = Product.objects.get(id=lookup_value)
+            return obj
         except Product.DoesNotExist:
             raise Http404
         except Exception as e:
+            logging.error(f"Error retrieving product: {e}")
             raise Http404
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        logging.info(f"Queryset object: Type={type(queryset)}, Representation={repr(queryset)}") # Added logging
-        logging.info(f"Raw PyMongo query: {queryset._query}") # Added logging
+        logging.info(f"Queryset object: Type={type(queryset)}, Representation={repr(queryset)}")
+        logging.info(f"Raw PyMongo query: {getattr(queryset, '_query', None)}")
         filter_params = self.request.query_params
         logging.info(f"Initial queryset length: {len(queryset)}")
-
-        # Implement manual filtering based on ProductFilter fields
-        # for field_name, lookup_expr in ProductFilter.Meta.fields.items():
-        #     if field_name in filter_params:
-        #         filter_kwargs = {f'{field_name}__{lookup_expr}': filter_params[field_name]}
-        #         queryset = queryset.filter(**filter_kwargs)
+        # Manual filtering can be implemented here if needed
         return queryset
-        logging.info(f"Filtered queryset length: {len(queryset)}")
 
     def perform_create(self, serializer):
         serializer.save()
