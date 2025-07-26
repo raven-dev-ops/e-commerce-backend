@@ -73,16 +73,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class CustomSocialLoginSerializer(SocialLoginSerializer):
     """
-    Fixes the OAuth2Client __init__ signature clash by
-    constructing the client with explicit keyword-only args,
-    so 'scope_delimiter' is not passed twice.
+    Overrides dj-rest-auth’s default so that OAuth2Client is
+    instantiated without duplicate 'scope_delimiter' args.
     """
-    adapter_class = GoogleOAuth2Adapter  # swap out for any other provider
+    adapter_class = GoogleOAuth2Adapter  # swap for whichever provider you need
     client_class = OAuth2Client
-    callback_url = None  # or your front‑end callback URI
+    callback_url = None  # or your front‑end redirect URI
 
     def get_client(self, request, adapter):
-        # Grab the App credentials from allauth
         app = adapter.get_provider().get_app(request)
         return self.client_class(
             request=request,
