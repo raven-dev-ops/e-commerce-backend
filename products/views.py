@@ -12,7 +12,7 @@ from django.http import Http404
 import logging
 
 class CustomProductPagination(PageNumberPagination):
-    page_size = 100
+    page_size = None
 
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
