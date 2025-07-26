@@ -1,6 +1,6 @@
 # products/views.py
 
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 from products.models import Product
 from products.serializers import ProductSerializer
@@ -24,13 +24,13 @@ class ProductViewSet(
     filter_backends = [SearchFilter]
     search_fields = ['product_name', 'description', 'tags', 'category']
     pagination_class = CustomProductPagination
-    lookup_field = 'id'  # <- Critical for DRF to use ?id=<id> in URL
+    lookup_field = 'id'  # DRF will look for 'id' in the URL
 
     def get_object(self):
-        pk = self.kwargs.get(self.lookup_field)  # This will use 'id'
+        pk = self.kwargs.get(self.lookup_field)
         logging.info(f"Looking up Product with id: {pk}")
         try:
-            return Product.objects.get(id=pk)
+            return Product.objects.get(id=pk)  # For string-based IDs
         except Product.DoesNotExist:
             logging.error(f"Product with id {pk} not found")
             raise Http404
