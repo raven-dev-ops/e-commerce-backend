@@ -1,3 +1,5 @@
+# authentication/adapters.py
+
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
 from allauth.account.utils import user_email
@@ -21,6 +23,11 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
         try:
             existing_user = get_user_model_ref().objects.get(email=email)
-            sociallogin.connect(request, existing_user)
+            # Only connect if the email is verified
+            if hasattr(existing_user, "emailaddress_set") and \
+               existing_user.emailaddress_set.filter(email=email, verified=True).exists():
+                sociallogin.connect(request, existing_user)
+            # Else: skip connect, let Allauth create a new user
         except get_user_model_ref().DoesNotExist:
+            # No user with this email exists, Allauth will create a new user
             pass
