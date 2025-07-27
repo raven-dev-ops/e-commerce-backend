@@ -1,45 +1,22 @@
 # payments/models.py
 
 from django.db import models
-from django.utils import timezone
-
-
-class Invoice(models.Model):
-    invoice_number = models.CharField(max_length=50, unique=True)
-    customer_name = models.CharField(max_length=100)
-    customer_email = models.EmailField()
-    amount_due = models.DecimalField(max_digits=10, decimal_places=2)
-    issued_date = models.DateField(default=timezone.now)
-    due_date = models.DateField()
-    is_paid = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Invoice {self.invoice_number} - {self.customer_name}"
-
+from users.models import User
 
 class Payment(models.Model):
-    PAYMENT_METHODS = [
-        ('CC', 'Credit Card'),
-        ('PP', 'PayPal'),
-        ('BT', 'Bank Transfer'),
-        ('CA', 'Cash'),
-    ]
-
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='payments')
-    payment_date = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
+    invoice = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    method = models.CharField(max_length=2, choices=PAYMENT_METHODS)
-    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    method = models.CharField(max_length=20)
+    payment_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Payment of {self.amount} for Invoice {self.invoice.invoice_number}"
-
+        return f"Payment {self.id} - {self.user.username} - {self.amount}"
 
 class Transaction(models.Model):
-    payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name='transaction')
-    status = models.CharField(max_length=50)  # e.g., 'Pending', 'Completed', 'Failed'
-    processed_at = models.DateTimeField(default=timezone.now)
-    response_message = models.TextField(blank=True, null=True)
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='transactions')
+    status = models.CharField(max_length=20)
+    processed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Transaction for Payment ID {self.payment.id} - Status: {self.status}"
+        return f"Transaction {self.id} - {self.status}"

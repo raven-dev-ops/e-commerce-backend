@@ -1,44 +1,42 @@
 # orders/models.py
 
-from mongoengine import Document, EmbeddedDocument, fields
-from discounts.models import Discount
-from authentication.models import Address
+from django.db import models
+from django.conf import settings
+from authentication.models import Address  # Adjust import if Address is elsewhere
 
-class CartItem(EmbeddedDocument):
-    product_id = fields.StringField(required=True)  # Store MongoDB ObjectId as string
-    quantity = fields.IntField(required=True, min_value=1)
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Payment'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('canceled', 'Canceled'),
+        ('failed', 'Payment Failed'),
+    ]
 
-class Cart(Document):
-    user = fields.IntField(required=True)  # Django user ID
-    items = fields.ListField(fields.EmbeddedDocumentField(CartItem))
-    discount = fields.ReferenceField(Discount, null=True, required=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    created_at = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    shipping_cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    shipping_address = models.ForeignKey(Address, related_name='shipping_orders', null=True, blank=True, on_delete=models.SET_NULL)
+    billing_address = models.ForeignKey(Address, related_name='billing_orders', null=True, blank=True, on_delete=models.SET_NULL)
+    discount_code = models.CharField(max_length=50, blank=True, null=True)
+    shipped_date = models.DateTimeField(null=True, blank=True)
+    discount_type = models.CharField(max_length=20, blank=True, null=True, choices=[('percentage', 'Percentage'), ('fixed', 'Fixed')])
+    discount_value = models.FloatField(blank=True, null=True)
+    discount_amount = models.FloatField(blank=True, null=True)
 
-ORDER_STATUS_CHOICES = [
-    ('pending', 'Pending Payment'),
-    ('processing', 'Processing'),
-    ('shipped', 'Shipped'),
-    ('delivered', 'Delivered'),
-    ('canceled', 'Canceled'),
-    ('failed', 'Payment Failed'),
-]
+    def __str__(self):
+        return f"Order #{self.id} by {self.user.username}"
 
-class OrderItem(EmbeddedDocument):
-    product_id = fields.StringField(required=True)  # Store MongoDB ObjectId as string
-    quantity = fields.IntField(required=True, min_value=1)
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product_name = models.CharField(max_length=255)  # Or ForeignKey to a Product model if using Django ORM
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
-class Order(Document):
-    user = fields.IntField(required=True)  # Django user ID
-    created_at = fields.DateTimeField(required=True)
-    total_price = fields.DecimalField(required=True, precision=2)
-    shipping_cost = fields.DecimalField(default=0.0, precision=2)
-    tax_amount = fields.DecimalField(default=0.0, precision=2)
-    payment_intent_id = fields.StringField()  # Stripe PaymentIntent ID
-    status = fields.StringField(choices=ORDER_STATUS_CHOICES, default='pending')
-    shipping_address = fields.ReferenceField(Address, required=False, null=True)
-    billing_address = fields.ReferenceField(Address, required=False, null=True)
-    discount_code = fields.StringField(null=True)
-    shipped_date = fields.DateTimeField(null=True)
-    discount_type = fields.StringField(choices=['percentage', 'fixed'], null=True)
-    discount_value = fields.FloatField(null=True)
-    discount_amount = fields.FloatField(null=True)
-    items = fields.ListField(fields.EmbeddedDocumentField(OrderItem))
+    def __str__(self):
+        return f"{self.product_name} (x{self.quantity})"
