@@ -1,11 +1,12 @@
+# products/models.py
+
 from mongoengine import (
     Document, StringField, FloatField, ListField, DictField,
     BooleanField, IntField
 )
 
 class Product(Document):
-    # MongoEngine auto-generates _id (string, not ObjectId, unless you override)
-    _id = StringField(primary_key=True)  # <-- This ensures always string, not ObjectId!
+    _id = StringField(primary_key=True)  # Always a string
     product_name = StringField(max_length=255)
     category = StringField(max_length=100)
     description = StringField()
@@ -38,8 +39,11 @@ class Product(Document):
 
     @property
     def id_str(self):
-        return str(self._id)  # Always string
+        return str(self._id)
 
 class Category(Document):
     name = StringField(max_length=100, required=True, unique=True)
     description = StringField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name

@@ -1,8 +1,10 @@
 # discounts/models.py
 
-from mongoengine import Document, StringField, FloatField, BooleanField, DateTimeField, IntField, ListField, ReferenceField
+from mongoengine import (
+    Document, StringField, FloatField, BooleanField,
+    DateTimeField, IntField, ListField, ReferenceField
+)
 from products.models import Product, Category
-
 
 class Discount(Document):
     code = StringField(unique=True, required=True)
@@ -19,3 +21,6 @@ class Discount(Document):
     is_automatic = BooleanField(default=False)
     is_free_shipping = BooleanField(default=False)
     category = ReferenceField(Category, null=True)
+
+    def __str__(self):
+        return f"{self.code} ({self.discount_type})"

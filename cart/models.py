@@ -1,17 +1,18 @@
 # cart/models.py
 
-from mongoengine import Document, ReferenceField, IntField, DateTimeField, CASCADE, StringField
+from mongoengine import (
+    Document, ReferenceField, IntField, DateTimeField, CASCADE, StringField
+)
 from datetime import datetime
-from django.conf import settings
-from products.models import Product  # MongoEngine Document
+from products.models import Product
 
 class Cart(Document):
-    user_id = StringField(required=True)  # store user ID as string
+    user_id = StringField(required=True)  # Store user PK as string for portability
     created_at = DateTimeField(default=datetime.utcnow)
     updated_at = DateTimeField(default=datetime.utcnow)
 
     def __str__(self):
-        return f"Cart {self.id} for user {self.user_id}"
+        return f"Cart {str(self.id)} for user {self.user_id}"
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.utcnow()
