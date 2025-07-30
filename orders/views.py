@@ -69,7 +69,7 @@ class OrderViewSet(viewsets.ViewSet):
                 return Response({"detail": f"Product ID {item.product_id} not found."}, status=404)
             subtotal += product.price * item.quantity
             order_items.append({
-                "product_name": product.name,
+                "product_name": product.product_name,
                 "quantity": item.quantity,
                 "unit_price": product.price,
             })

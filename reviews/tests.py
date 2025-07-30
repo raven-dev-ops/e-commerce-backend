@@ -14,7 +14,10 @@ class ReviewModelSerializerTest(TestCase):
         # Create a test user
         self.user = User.objects.create_user(username='testuser', password='password')
         # Create a test product
+        Product.drop_collection()
+        Review.drop_collection()
         self.product = Product.objects.create(
+            _id="prod2",
             product_name="Test Product",
             category="Test Category",
             description="Test description",

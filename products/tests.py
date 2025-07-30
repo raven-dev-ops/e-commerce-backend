@@ -6,7 +6,9 @@ from products.serializers import ProductSerializer
 
 class ProductModelSerializerTest(TestCase):
     def setUp(self):
+        Product.drop_collection()
         self.product = Product.objects.create(
+            _id="prod1",
             product_name="Test Soap",
             category="Bath",
             description="A soothing soap",

@@ -151,12 +151,22 @@ if not DATABASE_URL:
     }
 
 MONGO_URI = os.getenv('MONGO_URI')
-MONGODB_DATABASES = {
-    "default": {
-        "name": "website",
-        "host": MONGO_URI,
+if MONGO_URI and MONGO_URI.startswith("mongomock://"):
+    import mongomock
+    MONGODB_DATABASES = {
+        "default": {
+            "name": "website",
+            "host": MONGO_URI.replace("mongomock://", "mongodb://"),
+            "mongo_client_class": mongomock.MongoClient,
+        }
     }
-}
+else:
+    MONGODB_DATABASES = {
+        "default": {
+            "name": "website",
+            "host": MONGO_URI,
+        }
+    }
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
