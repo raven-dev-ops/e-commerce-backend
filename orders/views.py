@@ -61,18 +61,25 @@ class OrderViewSet(viewsets.ViewSet):
 
         subtotal = 0
         order_items = []
+        product_updates = []
 
         for item in cart.items:
             try:
                 product = Product.objects.get(id=item.product_id)
             except Product.DoesNotExist:
                 return Response({"detail": f"Product ID {item.product_id} not found."}, status=404)
+
+            available = product.inventory - getattr(product, "reserved_inventory", 0)
+            if item.quantity > available:
+                return Response({"detail": f"Insufficient stock for product {product.product_name}."}, status=400)
+
             subtotal += product.price * item.quantity
             order_items.append({
-                "product_name": product.name,
+                "product_name": getattr(product, "product_name", getattr(product, "name", "")),
                 "quantity": item.quantity,
                 "unit_price": product.price,
             })
+            product_updates.append((product, item.quantity))
 
         # Shipping, tax, discounts (simplified)
         shipping_cost = 5.0
@@ -134,6 +141,11 @@ class OrderViewSet(viewsets.ViewSet):
         OrderItem.objects.bulk_create([
             OrderItem(order=order, **item) for item in order_items
         ])
+
+        # Reserve inventory for ordered items
+        for product, qty in product_updates:
+            product.reserved_inventory = getattr(product, "reserved_inventory", 0) + qty
+            product.save()
 
         # Optional: Increment discount times_used
         if getattr(cart, "discount", None):
