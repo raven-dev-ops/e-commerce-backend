@@ -35,7 +35,18 @@ This repository contains a Django and MongoEngine based backend for an example e
    INSTAGRAM_APP_ID=your-instagram-app-id
    INSTAGRAM_APP_SECRET=your-instagram-app-secret
    SECURE_SSL_REDIRECT=True
-   ```
+```
+
+## Docker Compose
+
+A `docker-compose.yml` file is provided to run the application with PostgreSQL, MongoDB, Redis and a Celery worker.
+Create a `.env` file as above and then start the stack:
+
+```bash
+docker compose up --build
+```
+
+The API will be available at `http://localhost:8000/`.
 
 ## Running the Server
 
