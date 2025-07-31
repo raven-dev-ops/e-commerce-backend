@@ -53,5 +53,6 @@ CI=1 python manage.py test
 ```
 Tests require the same environment variables as the development server. Setting
 `CI=1` tells the settings to use the local MongoDB instance defined in
-`MONGO_URI` instead of any remote value. When running locally, using SQLite and a
-local MongoDB instance is sufficient.
+`MONGO_URI` instead of any remote value. Ensure `DATABASE_URL` is unset or
+points to a local SQLite database so SSL is not required. When running locally,
+using SQLite and a local MongoDB instance is sufficient.
