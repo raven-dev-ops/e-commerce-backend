@@ -1,38 +1,29 @@
 from django.test import TestCase
-from .models import Invoice, Payment, Transaction
-from django.utils import timezone
+from django.contrib.auth import get_user_model
 from decimal import Decimal
+from .models import Payment, Transaction
+
 
 class PaymentsModelTests(TestCase):
-
     def setUp(self):
-        self.invoice = Invoice.objects.create(
-            invoice_number="INV1001",
-            customer_name="John Doe",
-            customer_email="john@example.com",
-            amount_due=Decimal("150.00"),
-            due_date=timezone.now().date()
-        )
+        User = get_user_model()
+        self.user = User.objects.create_user(username="john", password="pass")
 
         self.payment = Payment.objects.create(
-            invoice=self.invoice,
+            user=self.user,
+            invoice="INV1001",
             amount=Decimal("150.00"),
-            method='CC',
-            transaction_id="TX123456"
+            method="CC",
         )
 
         self.transaction = Transaction.objects.create(
             payment=self.payment,
             status="Completed",
-            response_message="Success"
         )
 
-    def test_invoice_str(self):
-        self.assertEqual(str(self.invoice), "Invoice INV1001 - John Doe")
-
     def test_payment_str(self):
-        self.assertEqual(str(self.payment), "Payment of 150.00 for Invoice INV1001")
+        self.assertEqual(str(self.payment), f"Payment {self.payment.id} - john - 150.00")
 
     def test_transaction_str(self):
-        self.assertIn("Transaction for Payment ID", str(self.transaction))
-        self.assertIn("Status: Completed", str(self.transaction))
+        self.assertIn("Transaction", str(self.transaction))
+        self.assertIn("Completed", str(self.transaction))

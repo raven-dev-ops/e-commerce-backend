@@ -151,10 +151,15 @@ if not DATABASE_URL:
     }
 
 MONGO_URI = os.getenv('MONGO_URI')
+if os.getenv('CI') or os.getenv('TESTING'):
+    # Use a local Mongo URI during automated tests to avoid network lookups
+    MONGO_URI = 'mongodb://localhost'
+
 MONGODB_DATABASES = {
     "default": {
         "name": "website",
         "host": MONGO_URI,
+        "connect": False,
     }
 }
 
