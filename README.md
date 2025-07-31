@@ -56,6 +56,15 @@ celery -A backend worker -l info
 Celery uses Redis by default. Configure `CELERY_BROKER_URL` and
 `CELERY_RESULT_BACKEND` in your `.env` file if you need to adjust the connection.
 
+### Caching
+
+The application uses Redis for caching frequently accessed data. Set `CACHE_URL`
+in your `.env` file to point to your Redis instance:
+
+```env
+CACHE_URL=redis://localhost:6379/1
+```
+
 ## Running Tests
 
 Execute the Django test suite with:

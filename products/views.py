@@ -7,6 +7,7 @@ from products.serializers import ProductSerializer
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from django.http import Http404
+from django.core.cache import cache
 import logging
 
 class CustomProductPagination(PageNumberPagination):
@@ -29,9 +30,14 @@ class ProductViewSet(
     def get_object(self):
         pk = self.kwargs.get(self.lookup_field)
         logging.info(f"[ProductViewSet] Attempting to serve detail for Product _id: {pk}")
+        cache_key = f"product:{pk}"
+        product = cache.get(cache_key)
+        if product:
+            return product
         try:
-            # Always query by string _id, NOT id (which might try to coerce to ObjectId)
-            return Product.objects.get(_id=str(pk))
+            product = Product.objects.get(_id=str(pk))
+            cache.set(cache_key, product, 300)
+            return product
         except Product.DoesNotExist:
             logging.error(f"[ProductViewSet] Product with _id {pk} not found")
             raise Http404
@@ -47,7 +53,13 @@ class ProductViewSet(
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save()
+        product = serializer.save()
+        cache.set(f"product:{product._id}", product, 300)
 
     def perform_update(self, serializer):
-        serializer.save()
+        product = serializer.save()
+        cache.set(f"product:{product._id}", product, 300)
+
+    def perform_destroy(self, instance):
+        cache.delete(f"product:{instance._id}")
+        instance.delete()
