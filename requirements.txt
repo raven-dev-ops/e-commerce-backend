@@ -40,3 +40,4 @@ setuptools==80.9.0
 sentry-sdk==2.1.1
 celery==5.3.6
 redis==5.0.4
+django-redis==5.4.0
