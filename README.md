@@ -49,6 +49,9 @@ The API will be available at `http://127.0.0.1:8000/`.
 
 Execute the Django test suite with:
 ```bash
-python manage.py test
+CI=1 python manage.py test
 ```
-Tests require the same environment variables as the development server. When running locally, using SQLite and a local MongoDB instance is sufficient.
+Tests require the same environment variables as the development server. Setting
+`CI=1` tells the settings to use the local MongoDB instance defined in
+`MONGO_URI` instead of any remote value. When running locally, using SQLite and a
+local MongoDB instance is sufficient.
