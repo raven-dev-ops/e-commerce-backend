@@ -41,7 +41,7 @@ def stripe_webhook_view(request):
         payment_intent = event['data']['object']
         try:
             order = Order.objects.get(payment_intent_id=payment_intent['id'])
-            order.status = 'Processing'  # Or 'Completed'
+            order.status = Order.Status.PROCESSING
             order.save()
             logger.info('Order %s status updated to Processing', order.id)
         except Order.DoesNotExist:
@@ -53,7 +53,7 @@ def stripe_webhook_view(request):
         payment_intent = event['data']['object']
         try:
             order = Order.objects.get(payment_intent_id=payment_intent['id'])
-            order.status = 'Payment Failed'
+            order.status = Order.Status.FAILED
             order.save()
             logger.info('Order %s status updated to Payment Failed', order.id)
         except Order.DoesNotExist:
