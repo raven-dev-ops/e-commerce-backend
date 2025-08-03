@@ -20,7 +20,7 @@ def stripe_webhook_view(request):
         if not webhook_secret:
             missing.append("STRIPE_WEBHOOK_SECRET")
         logger.error("Missing Stripe configuration: %s", ", ".join(missing))
-        return HttpResponse(status=500)
+        return HttpResponse(status=503)
 
     stripe.api_key = stripe_secret
 

@@ -112,7 +112,7 @@ class OrderViewSet(viewsets.ViewSet):
             logger.error("STRIPE_SECRET_KEY is not configured")
             return Response(
                 {"detail": "Stripe configuration error."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         stripe.api_key = stripe_secret_key
 
