@@ -36,7 +36,7 @@ class CartModelTest(TestCase):
         self.assertEqual(str(self.cart), f"Cart {self.cart.id} for user {self.user.id}")
 
     def test_cart_item_creation(self):
-        item = CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
-        self.assertEqual(str(item), f"2 x {self.product.product_name}")
+        item = CartItem.objects.create(cart=self.cart, product_id=str(self.product.id), quantity=2)
+        self.assertEqual(str(item), f"2 x {self.product.id}")
         self.assertEqual(item.cart, self.cart)
-        self.assertEqual(item.product, self.product)
+        self.assertEqual(item.product_id, str(self.product.id))
