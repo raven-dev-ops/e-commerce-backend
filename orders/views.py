@@ -9,7 +9,7 @@ from django.utils import timezone
 import stripe, os
 from .tasks import send_order_confirmation_email
 
-from cart.models import Cart  # MongoEngine
+from cart.models import Cart, CartItem  # MongoEngine
 from orders.models import Order, OrderItem  # Django ORM
 from products.models import Product  # Django ORM
 from authentication.models import Address  # Django ORM
@@ -57,14 +57,15 @@ class OrderViewSet(viewsets.ViewSet):
 
         # MongoEngine Cart
         cart = Cart.objects(user_id=str(user.id)).first()
-        if not cart or not getattr(cart, "items", []):
+        cart_items = CartItem.objects(cart=cart) if cart else []
+        if not cart or not cart_items:
             return Response({"detail": "Cart is empty."}, status=400)
 
         subtotal = 0
         order_items = []
         product_updates = []
 
-        for item in cart.items:
+        for item in cart_items:
             try:
                 product = Product.objects.get(id=item.product_id)
             except Product.DoesNotExist:
@@ -155,8 +156,7 @@ class OrderViewSet(viewsets.ViewSet):
                 cart.discount.save()
 
         # Clear cart
-        cart.items = []
-        cart.discount = None
+        CartItem.objects(cart=cart).delete()
         cart.save()
 
         serializer = OrderSerializer(order)

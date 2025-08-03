@@ -10,12 +10,14 @@ class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get_cart(self, user):
-        cart, created = Cart.objects.get_or_create(user=user)
+        cart = Cart.objects(user_id=str(user.id)).first()
+        if not cart:
+            cart = Cart.objects.create(user_id=str(user.id))
         return cart
 
     def get(self, request):
         cart = self.get_cart(request.user)
-        items = cart.items.all()
+        items = CartItem.objects(cart=cart)
         serializer = CartItemSerializer(items, many=True)
         return Response(serializer.data)
 
