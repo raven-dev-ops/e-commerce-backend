@@ -147,16 +147,22 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+# Force a lightweight SQLite database during CI or explicit test runs to avoid
+# network calls to external Postgres instances. The CI environment typically
+# sets `CI=true`, while developers can use `TESTING=1` when running tests
+# locally.
+if os.getenv('CI') or os.getenv('TESTING'):
+    DATABASE_URL = 'sqlite:///db.sqlite3'
+
 if DATABASE_URL and DATABASE_URL.startswith('sqlite'):
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
-else:
+elif DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
     }
-
-if not DATABASE_URL:
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
