@@ -73,6 +73,11 @@ class OrderViewSet(viewsets.ViewSet):
                     cart_items = []
             else:
                 cart_items = []
+        else:
+            try:
+                cart_items = list(cart_items)
+            except Exception:
+                cart_items = []
         if not cart_items:
             return Response({"detail": "Cart is empty."}, status=400)
 
@@ -181,14 +186,19 @@ class OrderViewSet(viewsets.ViewSet):
 
         # Clear cart
         try:
-            CartItem.objects(cart=cart).delete()
+            cart_id = getattr(cart, "id", None)
+            if cart_id and ObjectId.is_valid(str(cart_id)):
+                CartItem.objects(cart=cart_id).delete()
         except Exception:
             pass
         if hasattr(cart, "items"):
             cart.items = []
         if hasattr(cart, "discount"):
             cart.discount = None
-        cart.save()
+        try:
+            cart.save()
+        except Exception:
+            pass
 
         serializer = OrderSerializer(order)
         send_order_confirmation_email.delay(order.id, user.email)
