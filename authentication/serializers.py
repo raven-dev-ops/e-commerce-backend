@@ -1,7 +1,7 @@
 # src/authentication/serializers.py
 
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from authentication.models import Address
 from rest_framework_mongoengine.serializers import DocumentSerializer
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
@@ -23,6 +23,9 @@ class AddressSerializer(DocumentSerializer):
             "is_default_billing",
         )
         read_only_fields = ("user",)
+
+
+User = get_user_model()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

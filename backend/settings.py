@@ -20,6 +20,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 )
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 if SENTRY_DSN:

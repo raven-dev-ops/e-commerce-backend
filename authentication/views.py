@@ -1,10 +1,11 @@
-from django.contrib.auth import authenticate
-from rest_framework import status, viewsets
+from django.contrib.auth import get_user_model
+from rest_framework import status, viewsets, permissions
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
+from django.shortcuts import get_object_or_404
 from .throttles import LoginRateThrottle
 import logging
 
@@ -14,6 +15,7 @@ from authentication.serializers import (
     AddressSerializer,
 )
 from authentication.models import Address
+from users.tasks import send_verification_email
 
 # Social login imports
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -28,7 +30,8 @@ class UserRegistrationView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+        send_verification_email.delay(user.id)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -39,15 +42,25 @@ class LoginView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-        user = authenticate(request, username=email, password=password)
+        User = get_user_model()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user = None
 
-        if user is not None:
+        if user and user.check_password(password) and user.email_verified:
             token, _ = Token.objects.get_or_create(user=user)
             user_serializer = UserProfileSerializer(user)
             logging.info(f"User '{user.email}' logged in.")
             return Response(
                 {"user": user_serializer.data, "tokens": {"access": token.key}},
                 status=status.HTTP_200_OK,
+            )
+
+        if user and user.check_password(password) and not user.email_verified:
+            return Response(
+                {"detail": "Email not verified."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         logging.warning(f"Failed login attempt for email: {email}")
@@ -122,3 +135,15 @@ class AddressViewSet(viewsets.ModelViewSet):
         if instance.is_default_billing:
             logging.info(f"Removing default billing status for address {instance.id}")
         instance.delete()
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, token, *args, **kwargs):
+        User = get_user_model()
+        user = get_object_or_404(User, verification_token=token)
+        user.email_verified = True
+        user.verification_token = None
+        user.save(update_fields=["email_verified", "verification_token"])
+        return Response({"detail": "Email verified."}, status=status.HTTP_200_OK)

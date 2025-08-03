@@ -11,5 +11,5 @@
 - [x] Refactor order creation logic into a service layer to reduce complexity and ensure atomic inventory updates.
 - [x] Implement structured logging with configurable log levels and forward logs to external monitoring.
 - [x] Enforce code linting (e.g., flake8/black) and integrate checks into the CI pipeline.
-- [ ] Require email verification for new user signups and send verification emails asynchronously.
+- [x] Require email verification for new user signups and send verification emails asynchronously.
 - [x] Provide a `/health/` endpoint for basic application and database connectivity checks.
