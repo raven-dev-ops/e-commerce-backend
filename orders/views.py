@@ -63,7 +63,6 @@ class OrderViewSet(viewsets.ViewSet):
 
         # MongoEngine Cart
         cart = Cart.objects(user_id=str(user.id)).first()
-        if not cart or not getattr(cart, "items", []):
         if not cart:
             return Response({"detail": "Cart is empty."}, status=400)
 
@@ -91,7 +90,6 @@ class OrderViewSet(viewsets.ViewSet):
         order_items = []
         product_updates = []
 
-        for item in cart.items:
         for item in cart_items:
             try:
                 product = Product.objects.get(id=item.product_id)

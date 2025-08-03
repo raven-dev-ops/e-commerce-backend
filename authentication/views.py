@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
+from .throttles import LoginRateThrottle
 import logging
 
 from authentication.serializers import (
@@ -32,6 +33,8 @@ class UserRegistrationView(APIView):
 
 
 class LoginView(APIView):
+    throttle_classes = [LoginRateThrottle]
+
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')

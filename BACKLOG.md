@@ -5,3 +5,4 @@
 - [x] Optimize product list endpoint by reducing verbose logging and adding caching to the list query.
 - [x] Standardize MongoDB connection environment variables between settings and connection helper.
 - [x] Trigger asynchronous order confirmation emails after order creation using Celery.
+- [x] Introduce rate limiting on the login endpoint to mitigate brute-force attacks.
