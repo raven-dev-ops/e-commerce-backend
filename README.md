@@ -22,9 +22,9 @@ This repository contains a Django and MongoEngine based backend for an example e
    Then define the following variables (replace placeholder values with your own):
    ```env
    SECRET_KEY=your-django-secret-key
+   DEBUG=True
    ALLOWED_HOSTS=localhost,127.0.0.1
    DATABASE_URL=postgres://user:pass@host:5432/dbname  # or sqlite:///db.sqlite3
-   MONGO_URI=mongodb://localhost:27017/dbname
    MONGODB_URI=mongodb://localhost:27017/dbname
    STRIPE_SECRET_KEY=sk_test_your_key
    STRIPE_WEBHOOK_SECRET=whsec_your_key
@@ -101,6 +101,6 @@ CI=1 python manage.py test
 ```
 Tests require the same environment variables as the development server. Setting
 `CI=1` tells the settings to use the local MongoDB instance defined in
-`MONGO_URI` instead of any remote value. Ensure `DATABASE_URL` is unset or
+`MONGODB_URI` instead of any remote value. Ensure `DATABASE_URL` is unset or
 points to a local SQLite database so SSL is not required. When running locally,
 using SQLite and a local MongoDB instance is sufficient.

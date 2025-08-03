@@ -9,7 +9,6 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
-      MONGO_URI: mongodb://mongo:27017/website
       MONGODB_URI: mongodb://mongo:27017/website
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
@@ -29,7 +28,6 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
-      MONGO_URI: mongodb://mongo:27017/website
       MONGODB_URI: mongodb://mongo:27017/website
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0

@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 import stripe, os
+from .tasks import send_order_confirmation_email
 
 from cart.models import Cart  # MongoEngine
 from orders.models import Order, OrderItem  # Django ORM
@@ -159,4 +160,5 @@ class OrderViewSet(viewsets.ViewSet):
         cart.save()
 
         serializer = OrderSerializer(order)
+        send_order_confirmation_email.delay(order.id, user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

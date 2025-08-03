@@ -1,8 +1,10 @@
 # orders/tests.py
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from orders.models import Order, OrderItem
+from unittest.mock import patch
+from orders.tasks import send_order_confirmation_email
 
 class OrderModelTestCase(TestCase):
     
@@ -28,3 +30,17 @@ class OrderModelTestCase(TestCase):
         self.assertEqual(self.order.items.count(), 1)
         self.assertEqual(self.order.items.first().product_name, "Widget")
         self.assertEqual(self.order.status, 'pending')
+
+
+class OrderTasksTestCase(TestCase):
+
+    @override_settings(DEFAULT_FROM_EMAIL='from@example.com')
+    @patch('orders.tasks.send_mail')
+    def test_send_order_confirmation_email(self, mock_send_mail):
+        send_order_confirmation_email(1, 'user@example.com')
+        mock_send_mail.assert_called_once()
+        args = mock_send_mail.call_args[0]
+        self.assertIn('Order Confirmation #1', args[0])
+        self.assertIn('Thank you for your order', args[1])
+        self.assertEqual(args[2], 'from@example.com')
+        self.assertEqual(args[3], ['user@example.com'])

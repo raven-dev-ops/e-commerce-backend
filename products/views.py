@@ -47,19 +47,29 @@ class ProductViewSet(
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        # Log all product IDs
-        ids = [str(prod._id) for prod in queryset]
-        logging.info(f"[ProductViewSet] Serving {len(ids)} products. Product IDs: {ids}")
+        logging.info(f"[ProductViewSet] Serving {queryset.count()} products.")
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        cache_key = "product_list"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached)
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, 300)
+        return response
 
     def perform_create(self, serializer):
         product = serializer.save()
         cache.set(f"product:{product._id}", product, 300)
+        cache.delete("product_list")
 
     def perform_update(self, serializer):
         product = serializer.save()
         cache.set(f"product:{product._id}", product, 300)
+        cache.delete("product_list")
 
     def perform_destroy(self, instance):
         cache.delete(f"product:{instance._id}")
+        cache.delete("product_list")
         instance.delete()

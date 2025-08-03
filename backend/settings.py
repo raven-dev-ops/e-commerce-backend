@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-...')
-DEBUG = False
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
@@ -122,7 +122,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'backend.middleware.PermissionsPolicyMiddleware',
+    'backend.middleware.SecurityHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -164,15 +164,15 @@ if not DATABASE_URL:
         }
     }
 
-MONGO_URI = os.getenv('MONGO_URI')
+MONGODB_URI = os.getenv('MONGODB_URI', os.getenv('MONGO_URI'))
 if os.getenv('CI') or os.getenv('TESTING'):
     # Use a local Mongo URI during automated tests to avoid network lookups
-    MONGO_URI = 'mongodb://localhost'
+    MONGODB_URI = 'mongodb://localhost'
 
 MONGODB_DATABASES = {
     "default": {
         "name": "website",
-        "host": MONGO_URI,
+        "host": MONGODB_URI,
         "connect": False,
     }
 }
