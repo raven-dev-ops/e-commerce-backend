@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from rest_framework import status, generics, mixins, viewsets
+from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -36,8 +36,8 @@ class LoginView(APIView):
     throttle_classes = [LoginRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        password = request.data.get('password')
+        email = request.data.get("email")
+        password = request.data.get("password")
 
         user = authenticate(request, username=email, password=password)
 
@@ -45,13 +45,15 @@ class LoginView(APIView):
             token, _ = Token.objects.get_or_create(user=user)
             user_serializer = UserProfileSerializer(user)
             logging.info(f"User '{user.email}' logged in.")
-            return Response({
-                "user": user_serializer.data,
-                "tokens": {"access": token.key}
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {"user": user_serializer.data, "tokens": {"access": token.key}},
+                status=status.HTTP_200_OK,
+            )
 
         logging.warning(f"Failed login attempt for email: {email}")
-        return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            {"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED
+        )
 
 
 class UserProfileView(APIView):
@@ -63,7 +65,9 @@ class UserProfileView(APIView):
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
-        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        serializer = UserProfileSerializer(
+            request.user, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -78,17 +82,21 @@ class AddressViewSet(viewsets.ModelViewSet):
         return Address.objects.filter(user=self.request.user)
 
     def get_serializer_context(self):
-        return {'request': self.request}
+        return {"request": self.request}
 
     def perform_create(self, serializer):
         user = self.request.user
         data = self.request.data
 
-        if data.get('is_default_shipping'):
-            Address.objects.filter(user=user, is_default_shipping=True).update(is_default_shipping=False)
+        if data.get("is_default_shipping"):
+            Address.objects.filter(user=user, is_default_shipping=True).update(
+                is_default_shipping=False
+            )
 
-        if data.get('is_default_billing'):
-            Address.objects.filter(user=user, is_default_billing=True).update(is_default_billing=False)
+        if data.get("is_default_billing"):
+            Address.objects.filter(user=user, is_default_billing=True).update(
+                is_default_billing=False
+            )
 
         serializer.save(user=user)
 
@@ -96,11 +104,15 @@ class AddressViewSet(viewsets.ModelViewSet):
         user = self.request.user
         validated_data = serializer.validated_data
 
-        if validated_data.get('is_default_shipping'):
-            Address.objects.filter(user=user, is_default_shipping=True).exclude(id=serializer.instance.id).update(is_default_shipping=False)
+        if validated_data.get("is_default_shipping"):
+            Address.objects.filter(user=user, is_default_shipping=True).exclude(
+                id=serializer.instance.id
+            ).update(is_default_shipping=False)
 
-        if validated_data.get('is_default_billing'):
-            Address.objects.filter(user=user, is_default_billing=True).exclude(id=serializer.instance.id).update(is_default_billing=False)
+        if validated_data.get("is_default_billing"):
+            Address.objects.filter(user=user, is_default_billing=True).exclude(
+                id=serializer.instance.id
+            ).update(is_default_billing=False)
 
         serializer.save()
 

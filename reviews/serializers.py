@@ -5,9 +5,14 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Review
 
+
 class ReviewSerializer(DocumentSerializer):
-    user_id = serializers.IntegerField(write_only=True)  # Accept user_id when creating/updating
-    user = serializers.SerializerMethodField(read_only=True)  # Show username when reading
+    user_id = serializers.IntegerField(
+        write_only=True
+    )  # Accept user_id when creating/updating
+    user = serializers.SerializerMethodField(
+        read_only=True
+    )  # Show username when reading
 
     def get_user(self, obj):
         User = get_user_model()
@@ -20,12 +25,12 @@ class ReviewSerializer(DocumentSerializer):
     class Meta:
         model = Review
         fields = [
-            'id',
-            'user_id',
-            'user',
-            'product',
-            'rating',
-            'comment',
-            'status',
-            'created_at',
+            "id",
+            "user_id",
+            "user",
+            "product",
+            "rating",
+            "comment",
+            "status",
+            "created_at",
         ]

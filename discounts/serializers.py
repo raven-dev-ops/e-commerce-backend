@@ -6,10 +6,12 @@ from products.models import Product, Category
 from discounts.models import Discount
 from reviews.models import Review
 
+
 class ProductSerializer(DocumentSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = "__all__"
+
 
 class ReviewSerializer(DocumentSerializer):
     product = ProductSerializer(read_only=True)
@@ -17,14 +19,16 @@ class ReviewSerializer(DocumentSerializer):
 
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = "__all__"
+
 
 class DiscountSerializer(DocumentSerializer):
     class Meta:
         model = Discount
-        fields = '__all__'
+        fields = "__all__"
+
 
 class CategorySerializer(DocumentSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = "__all__"

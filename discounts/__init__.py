@@ -1,1 +1,1 @@
-
+"""Discounts package."""

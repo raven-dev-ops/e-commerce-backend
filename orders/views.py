@@ -15,17 +15,19 @@ from .serializers import OrderSerializer
 
 logger = logging.getLogger(__name__)
 
+
 class OrderViewSet(viewsets.ViewSet):
     """
     Order endpoints (list, retrieve, create) using Django ORM.
     Cart is always read from MongoDB via MongoEngine.
     """
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
         """List all orders for current user."""
-        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        orders = Order.objects.filter(user=request.user).order_by("-created_at")
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 

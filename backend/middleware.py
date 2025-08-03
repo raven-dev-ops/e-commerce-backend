@@ -18,4 +18,3 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
             "max-age=63072000; includeSubDomains; preload",
         )
         return response
-

@@ -6,9 +6,9 @@ from .views import ReviewViewSet
 
 # Create a router and register the ReviewViewSet with the 'reviews' prefix
 router = DefaultRouter()
-router.register(r'reviews', ReviewViewSet, basename='review')
+router.register(r"reviews", ReviewViewSet, basename="review")
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

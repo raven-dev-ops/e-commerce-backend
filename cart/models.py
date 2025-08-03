@@ -1,9 +1,15 @@
 # cart/models.py
 
 from mongoengine import (
-    Document, ReferenceField, IntField, DateTimeField, CASCADE, StringField
+    Document,
+    ReferenceField,
+    IntField,
+    DateTimeField,
+    CASCADE,
+    StringField,
 )
 from datetime import datetime
+
 
 class Cart(Document):
     user_id = StringField(required=True)  # Store user PK as string for portability
@@ -16,6 +22,7 @@ class Cart(Document):
     def save(self, *args, **kwargs):
         self.updated_at = datetime.utcnow()
         return super().save(*args, **kwargs)
+
 
 class CartItem(Document):
     cart = ReferenceField(Cart, reverse_delete_rule=CASCADE)

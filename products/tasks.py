@@ -2,6 +2,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 
+
 @shared_task
 def send_low_stock_email(product_name, product_id, current_stock):
     """Send low stock notification email."""

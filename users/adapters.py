@@ -1,10 +1,8 @@
 # users/adapters.py
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from allauth.account.utils import user_email, user_username
-from allauth.account import app_settings
-from allauth.account.adapter import get_adapter
 from django.contrib.auth import get_user_model
+
 
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):

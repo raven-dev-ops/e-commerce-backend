@@ -1,6 +1,6 @@
 # products/views.py
 
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 from products.models import Product
 from products.serializers import ProductSerializer
@@ -10,8 +10,10 @@ from django.http import Http404
 from django.core.cache import cache
 import logging
 
+
 class CustomProductPagination(PageNumberPagination):
     page_size = 100
+
 
 class ProductViewSet(
     mixins.ListModelMixin,
@@ -19,17 +21,19 @@ class ProductViewSet(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet,
 ):
     serializer_class = ProductSerializer
     filter_backends = [SearchFilter]
-    search_fields = ['product_name', 'description', 'tags', 'category']
+    search_fields = ["product_name", "description", "tags", "category"]
     pagination_class = CustomProductPagination
-    lookup_field = '_id'  # Use '_id' for MongoDB string primary key
+    lookup_field = "_id"  # Use '_id' for MongoDB string primary key
 
     def get_object(self):
         pk = self.kwargs.get(self.lookup_field)
-        logging.info(f"[ProductViewSet] Attempting to serve detail for Product _id: {pk}")
+        logging.info(
+            f"[ProductViewSet] Attempting to serve detail for Product _id: {pk}"
+        )
         cache_key = f"product:{pk}"
         product = cache.get(cache_key)
         if product:

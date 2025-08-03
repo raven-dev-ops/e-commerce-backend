@@ -6,6 +6,7 @@ from rest_framework import status
 from .models import Cart, CartItem
 from .serializers import CartItemSerializer
 
+
 class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -31,18 +32,26 @@ class CartView(APIView):
         }
         """
         cart = self.get_cart(request.user)
-        product_id = request.data.get('product_id')
-        quantity = request.data.get('quantity', 1)
+        product_id = request.data.get("product_id")
+        quantity = request.data.get("quantity", 1)
 
         if not product_id:
-            return Response({"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             quantity = int(quantity)
             if quantity < 1:
-                return Response({"detail": "quantity must be >= 1"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"detail": "quantity must be >= 1"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         except ValueError:
-            return Response({"detail": "quantity must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "quantity must be an integer"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         item, created = CartItem.objects.get_or_create(cart=cart, product_id=product_id)
         if not created:
@@ -52,7 +61,10 @@ class CartView(APIView):
         item.save()
 
         serializer = CartItemSerializer(item)
-        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
     def put(self, request):
         """
@@ -64,23 +76,34 @@ class CartView(APIView):
         }
         """
         cart = self.get_cart(request.user)
-        product_id = request.data.get('product_id')
-        quantity = request.data.get('quantity')
+        product_id = request.data.get("product_id")
+        quantity = request.data.get("quantity")
 
         if not product_id or quantity is None:
-            return Response({"detail": "product_id and quantity are required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "product_id and quantity are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             quantity = int(quantity)
             if quantity < 1:
-                return Response({"detail": "quantity must be >= 1"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"detail": "quantity must be >= 1"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         except ValueError:
-            return Response({"detail": "quantity must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "quantity must be an integer"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             item = CartItem.objects.get(cart=cart, product_id=product_id)
         except CartItem.DoesNotExist:
-            return Response({"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         item.quantity = quantity
         item.save()
@@ -96,15 +119,19 @@ class CartView(APIView):
         }
         """
         cart = self.get_cart(request.user)
-        product_id = request.data.get('product_id')
+        product_id = request.data.get("product_id")
 
         if not product_id:
-            return Response({"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             item = CartItem.objects.get(cart=cart, product_id=product_id)
         except CartItem.DoesNotExist:
-            return Response({"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         item.delete()
         return Response({"detail": "Item removed"}, status=status.HTTP_204_NO_CONTENT)

@@ -26,7 +26,9 @@ class PaymentsModelTests(TestCase):
         )
 
     def test_payment_str(self):
-        self.assertEqual(str(self.payment), f"Payment {self.payment.id} - john - 150.00")
+        self.assertEqual(
+            str(self.payment), f"Payment {self.payment.id} - john - 150.00"
+        )
 
     def test_transaction_str(self):
         self.assertIn("Transaction", str(self.transaction))

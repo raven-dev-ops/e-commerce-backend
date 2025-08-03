@@ -6,9 +6,10 @@ import os
 
 logger = logging.getLogger(__name__)
 
+
 def connect_mongodb():
     logger.info("Attempting to connect to MongoDB...")
-    mongodb_uri = os.environ.get('MONGODB_URI')
+    mongodb_uri = os.environ.get("MONGODB_URI")
 
     if mongodb_uri:
         try:
@@ -23,7 +24,8 @@ def connect_mongodb():
         # Raise an error as this is a critical configuration issue
         raise EnvironmentError("MONGODB_URI environment variable not set.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # This block is for testing the connection
     connect_mongodb()
     logger.info("MongoDB connection established successfully.")

@@ -56,12 +56,12 @@ def create_order_from_cart(user, data) -> Order:
     shipping_address_id = data.get("shipping_address_id")
     billing_address_id = data.get("billing_address_id")
 
-    shipping_address: Optional[Address] = (
-        Address.objects.filter(user=user, is_default_shipping=True).first()
-    )
-    billing_address: Optional[Address] = (
-        Address.objects.filter(user=user, is_default_billing=True).first()
-    )
+    shipping_address: Optional[Address] = Address.objects.filter(
+        user=user, is_default_shipping=True
+    ).first()
+    billing_address: Optional[Address] = Address.objects.filter(
+        user=user, is_default_billing=True
+    ).first()
     if shipping_address_id:
         shipping_address = get_object_or_404(Address, id=shipping_address_id, user=user)
     if billing_address_id:
@@ -92,9 +92,7 @@ def create_order_from_cart(user, data) -> Order:
         quantity = data_item.quantity
         available = product.inventory - getattr(product, "reserved_inventory", 0)
         if quantity > available:
-            raise ValueError(
-                f"Insufficient stock for product {product.product_name}."
-            )
+            raise ValueError(f"Insufficient stock for product {product.product_name}.")
         subtotal += product.price * quantity
         order_items.append(
             {
@@ -189,4 +187,3 @@ def create_order_from_cart(user, data) -> Order:
             pass
 
     return order
-

@@ -1,5 +1,3 @@
-# discounts/tests.py
+"""Tests for discounts app."""
 
-from django.test import TestCase
-
-# Create your tests here.
+# TODO: implement tests

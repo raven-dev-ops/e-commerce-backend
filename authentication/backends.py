@@ -1,8 +1,11 @@
 from django.contrib.auth.backends import BaseBackend
 
+
 def get_user_model_ref():
     from django.contrib.auth import get_user_model
+
     return get_user_model()
+
 
 class MongoEngineBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):

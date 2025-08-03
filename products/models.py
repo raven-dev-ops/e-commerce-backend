@@ -1,9 +1,15 @@
 # products/models.py
 
 from mongoengine import (
-    Document, StringField, FloatField, ListField, DictField,
-    BooleanField, IntField
+    Document,
+    StringField,
+    FloatField,
+    ListField,
+    DictField,
+    BooleanField,
+    IntField,
 )
+
 
 class Product(Document):
     _id = StringField(primary_key=True)  # Always a string
@@ -27,10 +33,10 @@ class Product(Document):
     review_count = IntField(default=0)
 
     meta = {
-        'indexes': [
-            'category',
-            'tags',
-            'product_name',
+        "indexes": [
+            "category",
+            "tags",
+            "product_name",
         ]
     }
 
@@ -40,6 +46,7 @@ class Product(Document):
     @property
     def id_str(self):
         return str(self._id)
+
 
 class Category(Document):
     name = StringField(max_length=100, required=True, unique=True)

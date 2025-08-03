@@ -11,11 +11,16 @@ from datetime import datetime
 
 User = get_user_model()
 
+
 class ReviewModelSerializerTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        connect('mongoenginetest', host='mongodb://localhost', mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -26,7 +31,7 @@ class ReviewModelSerializerTest(TestCase):
         Product.drop_collection()
         Review.drop_collection()
         # Create a test user
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username="testuser", password="password")
         # Create a test product
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439013",
@@ -38,7 +43,7 @@ class ReviewModelSerializerTest(TestCase):
             benefits=[],
             tags=[],
             inventory=10,
-            reserved_inventory=0
+            reserved_inventory=0,
         )
         # Create a review instance
         self.review = Review.objects.create(
@@ -47,19 +52,19 @@ class ReviewModelSerializerTest(TestCase):
             rating=4,
             comment="Great product!",
             status="approved",
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
     def test_review_str(self):
         self.assertEqual(str(self.review.product), "Test Product")
 
     def test_review_user_property(self):
-        self.assertEqual(self.review.user.username, 'testuser')
+        self.assertEqual(self.review.user.username, "testuser")
 
     def test_review_serializer(self):
         serializer = ReviewSerializer(instance=self.review)
         data = serializer.data
-        self.assertEqual(data['user'], 'testuser')
-        self.assertEqual(data['rating'], 4)
-        self.assertEqual(data['comment'], "Great product!")
-        self.assertEqual(data['status'], "approved")
+        self.assertEqual(data["user"], "testuser")
+        self.assertEqual(data["rating"], 4)
+        self.assertEqual(data["comment"], "Great product!")
+        self.assertEqual(data["status"], "approved")

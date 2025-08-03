@@ -2,6 +2,7 @@ from rest_framework_mongoengine.serializers import DocumentSerializer
 from rest_framework import serializers
 from products.models import Product
 
+
 class ProductSerializer(DocumentSerializer):
     # Expose _id as a string for the frontend
     _id = serializers.CharField(read_only=True)
@@ -14,9 +15,13 @@ class ProductSerializer(DocumentSerializer):
     images = serializers.ListField(child=serializers.CharField(), required=False)
     variations = serializers.ListField(child=serializers.DictField(), required=False)
     weight = serializers.FloatField(required=False, allow_null=True)
-    dimensions = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
+    dimensions = serializers.CharField(
+        max_length=255, required=False, allow_null=True, allow_blank=True
+    )
     benefits = serializers.ListField(child=serializers.CharField())
-    scent_profile = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
+    scent_profile = serializers.CharField(
+        max_length=255, required=False, allow_null=True, allow_blank=True
+    )
     variants = serializers.ListField(child=serializers.DictField(), required=False)
     tags = serializers.ListField(child=serializers.CharField(), required=False)
     availability = serializers.BooleanField(default=True)
@@ -28,23 +33,23 @@ class ProductSerializer(DocumentSerializer):
     class Meta:
         model = Product
         fields = [
-            '_id',
-            'product_name',
-            'category',
-            'description',
-            'price',
-            'ingredients',
-            'images',
-            'variations',
-            'weight',
-            'dimensions',
-            'benefits',
-            'scent_profile',
-            'variants',
-            'tags',
-            'availability',
-            'inventory',
-            'reserved_inventory',
-            'average_rating',
-            'review_count',
+            "_id",
+            "product_name",
+            "category",
+            "description",
+            "price",
+            "ingredients",
+            "images",
+            "variations",
+            "weight",
+            "dimensions",
+            "benefits",
+            "scent_profile",
+            "variants",
+            "tags",
+            "availability",
+            "inventory",
+            "reserved_inventory",
+            "average_rating",
+            "review_count",
         ]

@@ -7,17 +7,17 @@ from authentication.models import Address  # Adjust import if Address is elsewhe
 
 class Order(models.Model):
     class Status(models.TextChoices):
-        PENDING = 'pending', 'Pending Payment'
-        PROCESSING = 'processing', 'Processing'
-        SHIPPED = 'shipped', 'Shipped'
-        DELIVERED = 'delivered', 'Delivered'
-        CANCELED = 'canceled', 'Canceled'
-        FAILED = 'failed', 'Payment Failed'
+        PENDING = "pending", "Pending Payment"
+        PROCESSING = "processing", "Processing"
+        SHIPPED = "shipped", "Shipped"
+        DELIVERED = "delivered", "Delivered"
+        CANCELED = "canceled", "Canceled"
+        FAILED = "failed", "Payment Failed"
 
     STATUS_CHOICES = Status.choices
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders'
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -28,10 +28,18 @@ class Order(models.Model):
         max_length=20, choices=STATUS_CHOICES, default=Status.PENDING
     )
     shipping_address = models.ForeignKey(
-        Address, related_name='shipping_orders', null=True, blank=True, on_delete=models.SET_NULL
+        Address,
+        related_name="shipping_orders",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     billing_address = models.ForeignKey(
-        Address, related_name='billing_orders', null=True, blank=True, on_delete=models.SET_NULL
+        Address,
+        related_name="billing_orders",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     discount_code = models.CharField(max_length=50, blank=True, null=True)
     shipped_date = models.DateTimeField(null=True, blank=True)
@@ -39,7 +47,7 @@ class Order(models.Model):
         max_length=20,
         blank=True,
         null=True,
-        choices=[('percentage', 'Percentage'), ('fixed', 'Fixed')],
+        choices=[("percentage", "Percentage"), ("fixed", "Fixed")],
     )
     discount_value = models.FloatField(blank=True, null=True)
     discount_amount = models.FloatField(blank=True, null=True)
@@ -47,9 +55,12 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
 
+
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product_name = models.CharField(max_length=255)  # Or ForeignKey to a Product model if using Django ORM
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product_name = models.CharField(
+        max_length=255
+    )  # Or ForeignKey to a Product model if using Django ORM
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
