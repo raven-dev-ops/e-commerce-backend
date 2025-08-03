@@ -7,7 +7,7 @@
 - [x] Trigger asynchronous order confirmation emails after order creation using Celery.
 - [x] Introduce rate limiting on the login endpoint to mitigate brute-force attacks.
 
-- [ ] Add unit tests for `SecurityHeadersMiddleware` to verify required HTTP headers are present.
+- [x] Add unit tests for `SecurityHeadersMiddleware` to verify required HTTP headers are present.
 - [ ] Refactor order creation logic into a service layer to reduce complexity and ensure atomic inventory updates.
 - [ ] Implement structured logging with configurable log levels and forward logs to external monitoring.
 - [ ] Enforce code linting (e.g., flake8/black) and integrate checks into the CI pipeline.
