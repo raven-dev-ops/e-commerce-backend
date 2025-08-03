@@ -45,3 +45,4 @@ django-redis==5.4.0
 drf-yasg==1.21.7
 flake8==7.1.0
 black==24.4.2
+pre-commit==3.7.0

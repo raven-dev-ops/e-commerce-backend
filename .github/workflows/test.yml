@@ -29,8 +29,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run linters
-        run: |
-          black --check .
-          flake8 .
+        run: pre-commit run --all-files
       - name: Run tests
         run: python manage.py test
