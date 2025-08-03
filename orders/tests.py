@@ -104,7 +104,7 @@ class OrderIntegrationTestCase(TestCase):
         self.client.force_authenticate(self.user)
 
     @patch('orders.views.send_order_confirmation_email.delay')
-    @patch('orders.views.stripe.PaymentIntent.create')
+    @patch('orders.services.stripe.PaymentIntent.create')
     def test_create_order_success(self, mock_intent, mock_email):
         mock_intent.return_value = SimpleNamespace(id='pi_123')
         cart = DummyCart(items=[SimpleNamespace(product_id=str(self.product._id), quantity=2)])
@@ -114,8 +114,8 @@ class OrderIntegrationTestCase(TestCase):
         product_qs.get.return_value = self.product
         serializer_mock = MagicMock()
         serializer_mock.return_value.data = {}
-        with patch('orders.views.Cart.objects', return_value=cart_qs), \
-             patch('orders.views.Product.objects', product_qs), \
+        with patch('orders.services.Cart.objects', return_value=cart_qs), \
+             patch('orders.services.Product.objects', product_qs), \
              patch('orders.views.OrderSerializer', serializer_mock):
             url = reverse('order-list')
             response = self.client.post(url, {'payment_method_id': 'pm_1'}, format='json')
@@ -126,7 +126,7 @@ class OrderIntegrationTestCase(TestCase):
         self.assertAlmostEqual(float(order.total_price), 26.6, places=2)
 
     @patch('orders.views.send_order_confirmation_email.delay')
-    @patch('orders.views.stripe.PaymentIntent.create')
+    @patch('orders.services.stripe.PaymentIntent.create')
     def test_create_order_with_discount(self, mock_intent, mock_email):
         mock_intent.return_value = SimpleNamespace(id='pi_123')
         discount = Discount.objects.create(code='SAVE10', discount_type='percentage', value=10)
@@ -137,8 +137,8 @@ class OrderIntegrationTestCase(TestCase):
         product_qs.get.return_value = self.product
         serializer_mock = MagicMock()
         serializer_mock.return_value.data = {}
-        with patch('orders.views.Cart.objects', return_value=cart_qs), \
-             patch('orders.views.Product.objects', product_qs), \
+        with patch('orders.services.Cart.objects', return_value=cart_qs), \
+             patch('orders.services.Product.objects', product_qs), \
              patch('orders.views.OrderSerializer', serializer_mock):
             url = reverse('order-list')
             response = self.client.post(url, {'payment_method_id': 'pm_1'}, format='json')
@@ -147,7 +147,7 @@ class OrderIntegrationTestCase(TestCase):
         self.assertEqual(order.discount_code, 'SAVE10')
         self.assertAlmostEqual(order.discount_amount, 2.0, places=2)
 
-    @patch('orders.views.stripe.PaymentIntent.create')
+    @patch('orders.services.stripe.PaymentIntent.create')
     def test_create_order_out_of_stock(self, mock_intent):
         cart = DummyCart(items=[SimpleNamespace(product_id=str(self.product._id), quantity=10)])
         cart_qs = MagicMock()
@@ -156,8 +156,8 @@ class OrderIntegrationTestCase(TestCase):
         product_qs.get.return_value = self.product
         serializer_mock = MagicMock()
         serializer_mock.return_value.data = {}
-        with patch('orders.views.Cart.objects', return_value=cart_qs), \
-             patch('orders.views.Product.objects', product_qs), \
+        with patch('orders.services.Cart.objects', return_value=cart_qs), \
+             patch('orders.services.Product.objects', product_qs), \
              patch('orders.views.OrderSerializer', serializer_mock):
             url = reverse('order-list')
             response = self.client.post(url, {'payment_method_id': 'pm_1'}, format='json')
@@ -165,7 +165,7 @@ class OrderIntegrationTestCase(TestCase):
         mock_intent.assert_not_called()
 
     @patch('orders.views.send_order_confirmation_email.delay')
-    @patch('orders.views.stripe.PaymentIntent.create')
+    @patch('orders.services.stripe.PaymentIntent.create')
     def test_create_order_payment_failure(self, mock_intent, mock_email):
         mock_intent.side_effect = stripe.error.CardError(message="declined", param=None, code="card_declined")
         cart = DummyCart(items=[SimpleNamespace(product_id=str(self.product._id), quantity=1)])
@@ -175,8 +175,8 @@ class OrderIntegrationTestCase(TestCase):
         product_qs.get.return_value = self.product
         serializer_mock = MagicMock()
         serializer_mock.return_value.data = {}
-        with patch('orders.views.Cart.objects', return_value=cart_qs), \
-             patch('orders.views.Product.objects', product_qs), \
+        with patch('orders.services.Cart.objects', return_value=cart_qs), \
+             patch('orders.services.Product.objects', product_qs), \
              patch('orders.views.OrderSerializer', serializer_mock):
             url = reverse('order-list')
             response = self.client.post(url, {'payment_method_id': 'pm_1'}, format='json')

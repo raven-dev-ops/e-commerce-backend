@@ -5,22 +5,14 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-import stripe, os
-from django.conf import settings
 import logging
-import stripe
-from bson import ObjectId
-from .tasks import send_order_confirmation_email
 
-from cart.models import Cart  # MongoEngine
-from cart.models import Cart, CartItem  # MongoEngine
-from orders.models import Order, OrderItem  # Django ORM
-from products.models import Product  # Django ORM
-from authentication.models import Address  # Django ORM
+from .tasks import send_order_confirmation_email
+from .services import create_order_from_cart
+
+from orders.models import Order  # Django ORM
 from .serializers import OrderSerializer
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 logger = logging.getLogger(__name__)
 
 class OrderViewSet(viewsets.ViewSet):
@@ -45,170 +37,11 @@ class OrderViewSet(viewsets.ViewSet):
 
     def create(self, request):
         """Checkout: Create an order from user's cart."""
-        user = request.user
-
-        # Addresses
-        shipping_address_id = request.data.get('shipping_address_id')
-        billing_address_id = request.data.get('billing_address_id')
-        shipping_address = Address.objects.filter(user=user, is_default_shipping=True).first()
-        billing_address = Address.objects.filter(user=user, is_default_billing=True).first()
-        if shipping_address_id:
-            shipping_address = get_object_or_404(Address, id=shipping_address_id, user=user)
-        if billing_address_id:
-            billing_address = get_object_or_404(Address, id=billing_address_id, user=user)
-        if not shipping_address:
-            return Response({"detail": "Shipping address required."}, status=400)
-        if not billing_address:
-            return Response({"detail": "Billing address required."}, status=400)
-
-        # MongoEngine Cart
-        cart = Cart.objects(user_id=str(user.id)).first()
-        if not cart:
-            return Response({"detail": "Cart is empty."}, status=400)
-
-        cart_items = getattr(cart, "items", None)
-        if cart_items is None:
-            # When tests provide a mock cart object, ensure its identifier
-            # resembles a real MongoDB ObjectId before querying
-            cart_id = getattr(cart, "id", None)
-            if cart_id and ObjectId.is_valid(str(cart_id)):
-                try:
-                    cart_items = list(CartItem.objects(cart=cart_id))
-                except Exception:
-                    cart_items = []
-            else:
-                cart_items = []
-        else:
-            try:
-                cart_items = list(cart_items)
-            except Exception:
-                cart_items = []
-        if not cart_items:
-            return Response({"detail": "Cart is empty."}, status=400)
-
-        subtotal = 0
-        order_items = []
-        product_updates = []
-
-        for item in cart_items:
-            try:
-                product = Product.objects.get(id=item.product_id)
-            except Product.DoesNotExist:
-                return Response({"detail": f"Product ID {item.product_id} not found."}, status=404)
-
-            available = product.inventory - getattr(product, "reserved_inventory", 0)
-            if item.quantity > available:
-                return Response({"detail": f"Insufficient stock for product {product.product_name}."}, status=400)
-
-            subtotal += product.price * item.quantity
-            order_items.append({
-                "product_name": getattr(product, "product_name", getattr(product, "name", "")),
-                "quantity": item.quantity,
-                "unit_price": product.price,
-            })
-            product_updates.append((product, item.quantity))
-
-        # Shipping, tax, discounts (simplified)
-        shipping_cost = 5.0
-        tax_amount = round(subtotal * 0.08, 2)
-        total_price = subtotal + shipping_cost + tax_amount
-        discount_code = None
-        discount_type = None
-        discount_value = None
-        discount_amount = 0
-
-        # Apply discount if present
-        if getattr(cart, "discount", None):
-            discount = cart.discount
-            discount_code = discount.code
-            discount_type = discount.discount_type
-            discount_value = discount.value
-            if discount.discount_type == 'percentage':
-                discount_amount = round(subtotal * discount.value / 100, 2)
-            elif discount.discount_type == 'fixed':
-                discount_amount = min(discount.value, subtotal)
-            subtotal -= discount_amount
-            total_price = subtotal + shipping_cost + tax_amount
-
-        # Stripe Payment
-        stripe_secret_key = getattr(settings, "STRIPE_SECRET_KEY", None)
-        if not stripe_secret_key:
-            logger.error("STRIPE_SECRET_KEY is not configured")
-            return Response(
-                {"detail": "Stripe configuration error."},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-        stripe.api_key = stripe_secret_key
-
-        payment_method_id = request.data.get('payment_method_id')
-        if not payment_method_id:
-            return Response({"detail": "Payment method required."}, status=400)
         try:
-            intent = stripe.PaymentIntent.create(
-                amount=int(total_price * 100),  # cents
-                currency='usd',
-                payment_method=payment_method_id,
-                confirmation_method='manual',
-                confirm=True,
-                metadata={'user_id': str(user.id)}
-            )
-        except stripe.error.CardError as e:
-            return Response({"detail": f"Payment failed: {str(e)}"}, status=400)
-        except Exception as e:
-            return Response({"detail": f"Payment error: {str(e)}"}, status=500)
-
-        # Create order (Django ORM)
-        order = Order.objects.create(
-            user=user,
-            created_at=timezone.now(),
-            shipping_address=shipping_address,
-            billing_address=billing_address,
-            shipping_cost=shipping_cost,
-            tax_amount=tax_amount,
-            total_price=total_price,
-            payment_intent_id=intent.id,
-            status='processing',
-            discount_code=discount_code,
-            discount_type=discount_type,
-            discount_value=discount_value,
-            discount_amount=discount_amount,
-        )
-        # Save OrderItems
-        OrderItem.objects.bulk_create([
-            OrderItem(order=order, **item) for item in order_items
-        ])
-
-        # Reserve inventory for ordered items
-        for product, qty in product_updates:
-            product.reserved_inventory = getattr(product, "reserved_inventory", 0) + qty
-            product.save()
-
-        # Optional: Increment discount times_used
-        if getattr(cart, "discount", None):
-            if hasattr(cart.discount, "times_used"):
-                cart.discount.times_used += 1
-                cart.discount.save()
-
-        # Clear cart
-        cart.items = []
-        cart.discount = None
-        cart.save()
-        try:
-            cart_id = getattr(cart, "id", None)
-            # Only attempt deletion if the identifier is a valid ObjectId
-            if cart_id and ObjectId.is_valid(str(cart_id)):
-                CartItem.objects(cart=cart_id).delete()
-        except Exception:
-            pass
-        if hasattr(cart, "items"):
-            cart.items = []
-        if hasattr(cart, "discount"):
-            cart.discount = None
-        try:
-            cart.save()
-        except Exception:
-            pass
+            order = create_order_from_cart(request.user, request.data)
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = OrderSerializer(order)
-        send_order_confirmation_email.delay(order.id, user.email)
+        send_order_confirmation_email.delay(order.id, request.user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
