@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.conf import settings
 import logging
 import stripe
+from bson import ObjectId
 from .tasks import send_order_confirmation_email
 
 from cart.models import Cart, CartItem  # MongoEngine
@@ -64,9 +65,13 @@ class OrderViewSet(viewsets.ViewSet):
 
         cart_items = getattr(cart, "items", None)
         if cart_items is None:
-            try:
-                cart_items = list(CartItem.objects(cart=cart))
-            except Exception:
+            cart_id = getattr(cart, "id", None)
+            if cart_id and ObjectId.is_valid(str(cart_id)):
+                try:
+                    cart_items = list(CartItem.objects(cart=cart_id))
+                except Exception:
+                    cart_items = []
+            else:
                 cart_items = []
         if not cart_items:
             return Response({"detail": "Cart is empty."}, status=400)
