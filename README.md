@@ -37,6 +37,15 @@ This repository contains a Django and MongoEngine based backend for an example e
    SECURE_SSL_REDIRECT=True
 ```
 
+### Stripe
+
+Stripe integration requires two environment variables:
+
+- `STRIPE_SECRET_KEY` – used for server-side Stripe API calls.
+- `STRIPE_WEBHOOK_SECRET` – used to verify incoming webhooks.
+
+Without these values, checkout and webhook endpoints will return server errors.
+
 ## Docker Compose
 
 A `docker-compose.yml` file is provided to run the application with PostgreSQL, MongoDB, Redis and a Celery worker.
