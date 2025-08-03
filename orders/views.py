@@ -11,7 +11,7 @@ import logging
 import stripe
 from .tasks import send_order_confirmation_email
 
-from cart.models import Cart  # MongoEngine
+from cart.models import Cart, CartItem  # MongoEngine
 from orders.models import Order, OrderItem  # Django ORM
 from products.models import Product  # Django ORM
 from authentication.models import Address  # Django ORM
@@ -59,14 +59,23 @@ class OrderViewSet(viewsets.ViewSet):
 
         # MongoEngine Cart
         cart = Cart.objects(user_id=str(user.id)).first()
-        if not cart or not getattr(cart, "items", []):
+        if not cart:
+            return Response({"detail": "Cart is empty."}, status=400)
+
+        cart_items = getattr(cart, "items", None)
+        if cart_items is None:
+            try:
+                cart_items = list(CartItem.objects(cart=cart))
+            except Exception:
+                cart_items = []
+        if not cart_items:
             return Response({"detail": "Cart is empty."}, status=400)
 
         subtotal = 0
         order_items = []
         product_updates = []
 
-        for item in cart.items:
+        for item in cart_items:
             try:
                 product = Product.objects.get(id=item.product_id)
             except Product.DoesNotExist:
@@ -166,8 +175,14 @@ class OrderViewSet(viewsets.ViewSet):
                 cart.discount.save()
 
         # Clear cart
-        cart.items = []
-        cart.discount = None
+        try:
+            CartItem.objects(cart=cart).delete()
+        except Exception:
+            pass
+        if hasattr(cart, "items"):
+            cart.items = []
+        if hasattr(cart, "discount"):
+            cart.discount = None
         cart.save()
 
         serializer = OrderSerializer(order)
