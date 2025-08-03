@@ -5,8 +5,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 import warnings
+import logging
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -15,11 +17,17 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-...')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
+
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 if SENTRY_DSN:
+    logging_integration = LoggingIntegration(
+        level=getattr(logging, LOG_LEVEL, logging.INFO),
+        event_level=logging.ERROR,
+    )
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[DjangoIntegration(), logging_integration],
         traces_sample_rate=1.0,
         send_default_pii=True,
     )
@@ -215,27 +223,35 @@ CSRF_TRUSTED_ORIGINS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+        },
+    },
     'handlers': {
-        'console': {'class': 'logging.StreamHandler'},
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': LOG_LEVEL,
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'products.views': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'mongoengine': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': False,
         },
     },
