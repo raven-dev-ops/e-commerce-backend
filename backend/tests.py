@@ -1,4 +1,5 @@
 from django.test import TestCase
+from unittest.mock import patch
 
 
 class SecurityHeadersMiddlewareTest(TestCase):
@@ -20,4 +21,14 @@ class HealthEndpointTest(TestCase):
     def test_health_returns_ok(self):
         response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().get("status"), "ok")
+        data = response.json()
+        self.assertEqual(data.get("status"), "ok")
+        self.assertEqual(data.get("database"), "ok")
+
+    @patch("backend.urls.connection.ensure_connection", side_effect=Exception)
+    def test_health_reports_database_unavailable(self, mocked_ensure):
+        response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data.get("status"), "ok")
+        self.assertEqual(data.get("database"), "unavailable")
