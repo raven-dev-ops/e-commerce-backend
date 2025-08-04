@@ -41,3 +41,11 @@ class APIDocumentationTest(SimpleTestCase):
         self.assertEqual(reverse("schema-swagger-ui"), "/api/docs/")
         resolver = resolve("/api/docs/")
         self.assertEqual(resolver.url_name, "schema-swagger-ui")
+
+
+class RobotsTxtTest(SimpleTestCase):
+    def test_robots_txt_served(self):
+        response = self.client.get("/robots.txt", secure=True, HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/plain")
+        self.assertIn("User-agent: *", response.content.decode())

@@ -26,6 +26,11 @@ def health(request):
     return JsonResponse({"status": "ok", "database": db_status})
 
 
+def robots_txt(request):
+    content = "User-agent: *\nDisallow: /admin/\n"
+    return HttpResponse(content, content_type="text/plain")
+
+
 schema_view = get_schema_view(
     openapi.Info(
         title="E-Commerce API",
@@ -40,6 +45,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home),
     path("health/", health),
+    path("robots.txt", robots_txt),
     path("users/", include("users.urls")),
     path("products/", include("products.urls")),
     path("orders/", include("orders.urls")),
