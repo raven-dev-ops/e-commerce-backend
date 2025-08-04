@@ -2,7 +2,7 @@
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 import logging
@@ -22,7 +22,7 @@ class OrderViewSet(viewsets.ViewSet):
     Cart is always read from MongoDB via MongoEngine.
     """
 
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def list(self, request):

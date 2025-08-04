@@ -18,7 +18,7 @@
 - [x] Generate API documentation (e.g., OpenAPI/Swagger) for easier client integration.
 - [x] Serve a minimal `robots.txt` for basic SEO directives.
 - [x] Add Django `AUTH_PASSWORD_VALIDATORS` to enforce strong password rules.
-- [ ] Replace `TokenAuthentication` with `JWTAuthentication` in order and review viewsets.
+- [x] Replace `TokenAuthentication` with `JWTAuthentication` in order and review viewsets.
 - [ ] Introduce pagination to the review list endpoint to prevent unbounded result sets.
 - [ ] Apply rate throttling to review creation to mitigate spam submissions.
 - [ ] Move review rating and count updates into model methods or a service layer.
