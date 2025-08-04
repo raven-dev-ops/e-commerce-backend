@@ -16,6 +16,7 @@ class ProductModelSerializerTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        disconnect()
         connect(
             "mongoenginetest",
             host="mongodb://localhost",
@@ -72,6 +73,7 @@ class ProductAPITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        disconnect()
         connect(
             "mongoenginetest",
             host="mongodb://localhost",

@@ -16,6 +16,7 @@ class ReviewModelSerializerTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        disconnect()
         connect(
             "mongoenginetest",
             host="mongodb://localhost",

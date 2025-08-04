@@ -7,24 +7,32 @@ from .serializers import DiscountSerializer, CategorySerializer
 
 
 class DiscountListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Discount.objects.all()
     serializer_class = DiscountSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Discount.objects.all()
 
 
 class DiscountRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Discount.objects.all()
     serializer_class = DiscountSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        return Discount.objects.all()
+
 
 class CategoryListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Category.objects.all()
 
 
 class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Category.objects.all()

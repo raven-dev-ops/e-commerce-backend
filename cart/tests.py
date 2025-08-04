@@ -17,6 +17,7 @@ class CartModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        disconnect()
         connect(
             "mongoenginetest",
             host="mongodb://localhost",
@@ -57,6 +58,7 @@ class CartAPITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        disconnect()
         connect(
             "mongoenginetest",
             host="mongodb://localhost",
