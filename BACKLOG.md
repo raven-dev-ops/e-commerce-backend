@@ -19,7 +19,7 @@
 - [x] Serve a minimal `robots.txt` for basic SEO directives.
 - [x] Add Django `AUTH_PASSWORD_VALIDATORS` to enforce strong password rules.
 - [x] Replace `TokenAuthentication` with `JWTAuthentication` in order and review viewsets.
-- [ ] Introduce pagination to the review list endpoint to prevent unbounded result sets.
+- [x] Introduce pagination to the review list endpoint to prevent unbounded result sets.
 - [ ] Apply rate throttling to review creation to mitigate spam submissions.
 - [ ] Move review rating and count updates into model methods or a service layer.
 - [ ] Add tests covering review creation, update, and deletion with rating recalculation.

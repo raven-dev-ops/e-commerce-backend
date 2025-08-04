@@ -1,10 +1,11 @@
 # reviews/views.py
 
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 
 from .models import Review
@@ -12,10 +13,15 @@ from products.models import Product
 from .serializers import ReviewSerializer
 
 
-class ReviewViewSet(ViewSet):
+class ReviewPagination(PageNumberPagination):
+    page_size = 10
+
+
+class ReviewViewSet(GenericViewSet):
     serializer_class = ReviewSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = ReviewPagination
 
     def create(self, request):
         user = request.user
@@ -40,7 +46,7 @@ class ReviewViewSet(ViewSet):
             )
 
         try:
-            product = Product.objects.get(id=product_id)
+            product = Product.objects.get(pk=product_id)
         except Product.DoesNotExist:
             return Response(
                 {"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND
@@ -78,7 +84,7 @@ class ReviewViewSet(ViewSet):
             )
 
         try:
-            Product.objects.get(id=product_id)
+            Product.objects.get(pk=product_id)
         except Product.DoesNotExist:
             return Response(
                 {"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND
@@ -88,8 +94,13 @@ class ReviewViewSet(ViewSet):
         if not is_admin:
             reviews_queryset = reviews_queryset.filter(status="approved")
 
-        reviews = reviews_queryset.order_by("-created_at")
-        serializer = ReviewSerializer(reviews, many=True)
+        reviews_queryset = reviews_queryset.order_by("-created_at")
+        page = self.paginate_queryset(reviews_queryset)
+        if page is not None:
+            serializer = ReviewSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ReviewSerializer(reviews_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
