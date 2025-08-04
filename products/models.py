@@ -49,6 +49,7 @@ class Product(Document):
 
 
 class Category(Document):
+    _id = StringField(primary_key=True)  # Use string primary key for references
     name = StringField(max_length=100, required=True, unique=True)
     description = StringField(null=True, blank=True)
 
