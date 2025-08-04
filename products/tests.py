@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from unittest.mock import patch
 from products.utils import send_low_stock_notification
 from products.tasks import send_low_stock_email
+from django.core.cache import cache
 
 
 class ProductModelSerializerTest(TestCase):
@@ -88,6 +89,7 @@ class ProductAPITestCase(TestCase):
 
     def setUp(self):
         Product.drop_collection()
+        cache.clear()
         self.client = APIClient()
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439099",
@@ -115,6 +117,45 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(response.data["results"][0]["product_name"], "API Soap")
+
+    def test_client_defined_page_size(self):
+        for i in range(15):
+            Product.objects.create(
+                _id=f"507f1f77bcf86cd7994391{i:02}",
+                product_name=f"API Soap {i}",
+                category="Bath",
+                description="A soap via API",
+                price=5.00,
+                ingredients=[],
+                benefits=[],
+                tags=[],
+                inventory=10,
+                reserved_inventory=0,
+            )
+        url = reverse("product-list")
+        response = self.client.get(url, {"page_size": 5})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 5)
+
+    def test_page_size_has_upper_bound(self):
+        for i in range(110):
+            Product.objects.create(
+                _id=f"bulk{i}",
+                product_name=f"Bulk {i}",
+                category="Bath",
+                description="desc",
+                price=1.00,
+                ingredients=[],
+                benefits=[],
+                tags=[],
+                inventory=1,
+                reserved_inventory=0,
+            )
+        url = reverse("product-list")
+        response = self.client.get(url, {"page_size": 200})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 111)
+        self.assertEqual(len(response.data["results"]), 100)
 
     def test_retrieve_product_endpoint(self):
         url = reverse("product-detail", args=[self.product._id])
