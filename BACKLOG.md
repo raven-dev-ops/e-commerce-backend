@@ -16,3 +16,4 @@
 - [x] Replace stubbed `Discount` and `Category` classes in the discounts API with real model integration and remove temporary placeholders.
 - [x] Implement unit tests for the discounts app covering models and API endpoints.
 - [x] Generate API documentation (e.g., OpenAPI/Swagger) for easier client integration.
+- [x] Serve a minimal `robots.txt` for basic SEO directives.
