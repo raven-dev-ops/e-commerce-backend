@@ -6,6 +6,7 @@ from products.models import Product
 from products.serializers import ProductSerializer
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAdminUser
 from django.http import Http404
 from django.core.cache import cache
 import logging
@@ -28,6 +29,12 @@ class ProductViewSet(
     search_fields = ["product_name", "description", "tags", "category"]
     pagination_class = CustomProductPagination
     lookup_field = "_id"  # Use '_id' for MongoDB string primary key
+    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdminUser()]
+        return [permission() for permission in self.permission_classes]
 
     def get_object(self):
         pk = self.kwargs.get(self.lookup_field)

@@ -1,6 +1,7 @@
 from rest_framework_mongoengine.serializers import DocumentSerializer
 from rest_framework import serializers
 from products.models import Product
+from bson import ObjectId
 
 
 class ProductSerializer(DocumentSerializer):
@@ -53,3 +54,7 @@ class ProductSerializer(DocumentSerializer):
             "average_rating",
             "review_count",
         ]
+
+    def create(self, validated_data):
+        validated_data["_id"] = str(ObjectId())
+        return super().create(validated_data)

@@ -1,6 +1,7 @@
 # products/tests.py
 
 from django.test import TestCase, override_settings
+from django.contrib.auth import get_user_model
 from mongoengine import connect, disconnect
 import mongomock
 from products.models import Product
@@ -100,6 +101,13 @@ class ProductAPITestCase(TestCase):
             inventory=10,
             reserved_inventory=0,
         )
+        User = get_user_model()
+        self.regular_user = User.objects.create_user(
+            username="regular", password="pass"
+        )
+        self.staff_user = User.objects.create_user(
+            username="staff", password="pass", is_staff=True
+        )
 
     def test_list_products_endpoint(self):
         url = reverse("product-list")
@@ -114,6 +122,62 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["_id"], self.product._id)
         self.assertEqual(response.data["product_name"], "API Soap")
+
+    def test_non_staff_cannot_create_product(self):
+        url = reverse("product-list")
+        payload = {
+            "product_name": "New Soap",
+            "category": "Bath",
+            "description": "Nice",
+            "price": "3.00",
+            "ingredients": ["Water"],
+            "benefits": ["Clean"],
+            "inventory": 5,
+            "reserved_inventory": 0,
+        }
+        self.client.force_authenticate(user=self.regular_user)
+        response = self.client.post(url, payload, format="json")
+        self.assertEqual(response.status_code, 403)
+
+    def test_staff_can_create_product(self):
+        url = reverse("product-list")
+        payload = {
+            "product_name": "Staff Soap",
+            "category": "Bath",
+            "description": "Nice",
+            "price": "3.00",
+            "ingredients": ["Water"],
+            "benefits": ["Clean"],
+            "inventory": 5,
+            "reserved_inventory": 0,
+        }
+        self.client.force_authenticate(user=self.staff_user)
+        response = self.client.post(url, payload, format="json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_non_staff_cannot_update_product(self):
+        url = reverse("product-detail", args=[self.product._id])
+        self.client.force_authenticate(user=self.regular_user)
+        response = self.client.patch(url, {"product_name": "Nope"}, format="json")
+        self.assertEqual(response.status_code, 403)
+
+    def test_staff_can_update_product(self):
+        url = reverse("product-detail", args=[self.product._id])
+        self.client.force_authenticate(user=self.staff_user)
+        response = self.client.patch(url, {"product_name": "Updated"}, format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_non_staff_cannot_delete_product(self):
+        url = reverse("product-detail", args=[self.product._id])
+        self.client.force_authenticate(user=self.regular_user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_staff_can_delete_product(self):
+        url = reverse("product-detail", args=[self.product._id])
+        self.client.force_authenticate(user=self.staff_user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
 
 
 class ProductTasksTestCase(TestCase):

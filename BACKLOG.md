@@ -24,7 +24,7 @@
 - [ ] Move review rating and count updates into model methods or a service layer.
 - [ ] Add tests covering review creation, update, and deletion with rating recalculation.
 - [ ] Allow client-defined page size with an upper bound in `CustomProductPagination`.
-- [ ] Restrict product creation, update, and deletion endpoints to staff users.
+- [x] Restrict product creation, update, and deletion endpoints to staff users.
 - [ ] Add a unique `slug` field to `Product` for SEO-friendly URLs.
 - [ ] Support filtering products by category and price range using query parameters.
 - [ ] Write tests verifying caching behavior for product list and detail views.
