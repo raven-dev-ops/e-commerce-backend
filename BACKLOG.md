@@ -17,7 +17,7 @@
 - [x] Implement unit tests for the discounts app covering models and API endpoints.
 - [x] Generate API documentation (e.g., OpenAPI/Swagger) for easier client integration.
 - [x] Serve a minimal `robots.txt` for basic SEO directives.
-- [ ] Add Django `AUTH_PASSWORD_VALIDATORS` to enforce strong password rules.
+- [x] Add Django `AUTH_PASSWORD_VALIDATORS` to enforce strong password rules.
 - [ ] Replace `TokenAuthentication` with `JWTAuthentication` in order and review viewsets.
 - [ ] Introduce pagination to the review list endpoint to prevent unbounded result sets.
 - [ ] Apply rate throttling to review creation to mitigate spam submissions.
