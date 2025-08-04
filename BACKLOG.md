@@ -17,3 +17,28 @@
 - [x] Implement unit tests for the discounts app covering models and API endpoints.
 - [x] Generate API documentation (e.g., OpenAPI/Swagger) for easier client integration.
 - [x] Serve a minimal `robots.txt` for basic SEO directives.
+- [ ] Add Django `AUTH_PASSWORD_VALIDATORS` to enforce strong password rules.
+- [ ] Replace `TokenAuthentication` with `JWTAuthentication` in order and review viewsets.
+- [ ] Introduce pagination to the review list endpoint to prevent unbounded result sets.
+- [ ] Apply rate throttling to review creation to mitigate spam submissions.
+- [ ] Move review rating and count updates into model methods or a service layer.
+- [ ] Add tests covering review creation, update, and deletion with rating recalculation.
+- [ ] Allow client-defined page size with an upper bound in `CustomProductPagination`.
+- [ ] Restrict product creation, update, and deletion endpoints to staff users.
+- [ ] Add a unique `slug` field to `Product` for SEO-friendly URLs.
+- [ ] Support filtering products by category and price range using query parameters.
+- [ ] Write tests verifying caching behavior for product list and detail views.
+- [ ] Release reserved inventory when orders are canceled or payments fail.
+- [ ] Add unit tests for `create_order_from_cart` covering discounts and inventory changes.
+- [ ] Implement an order cancellation endpoint that restores inventory.
+- [ ] Schedule a periodic Celery task to purge inactive carts.
+- [ ] Provide a management command to remove expired email verification tokens.
+- [ ] Integrate Bandit security scanning into the CI workflow.
+- [ ] Add a `pre-commit` configuration to enforce formatting and linting before commits.
+- [ ] Introduce static type checking with mypy and add type hints across the codebase.
+- [ ] Replace string `user_id` fields in Mongo documents with `ReferenceField` to the `User` model.
+- [ ] Cache category list responses and invalidate cache on updates.
+- [ ] Internationalize user-facing error messages via Django's translation framework.
+- [ ] Document authentication requirements and examples in the README.
+- [ ] Normalize discount codes to enforce case-insensitive uniqueness.
+- [ ] Log unhandled Stripe webhook event types for easier debugging.
