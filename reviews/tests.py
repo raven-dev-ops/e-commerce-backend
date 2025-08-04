@@ -201,3 +201,114 @@ class ReviewCreationThrottleTest(TestCase):
             url, {"product_id": product.id, "rating": 5}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+)
+class ReviewRatingRecalculationTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        Review.drop_collection()
+        cache.clear()
+        self.user = User.objects.create_user(username="ratinguser", password="password")
+        self.admin = User.objects.create_user(
+            username="admin", password="password", is_staff=True
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        self.admin_client = APIClient()
+        self.admin_client.force_authenticate(user=self.admin)
+        self.product = Product.objects.create(
+            _id="prod-rating",
+            product_name="Rating Product",
+            category="Test Category",
+            description="Test description",
+            price=9.99,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=10,
+            reserved_inventory=0,
+        )
+
+    def test_review_creation_updates_product_rating(self):
+        url = reverse("review-list")
+        response = self.client.post(
+            url, {"product_id": str(self.product.id), "rating": 5}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.product.reload()
+        self.assertEqual(self.product.review_count, 1)
+        self.assertEqual(self.product.approved_review_count, 0)
+        self.assertEqual(self.product.average_rating, 0)
+
+        review_id = response.data["id"]
+        moderate_url = reverse("review-moderate", args=[review_id])
+        response = self.admin_client.post(
+            moderate_url, {"status": "approved"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.product.reload()
+        self.assertEqual(self.product.review_count, 1)
+        self.assertEqual(self.product.approved_review_count, 1)
+        self.assertEqual(self.product.average_rating, 5)
+
+    def test_review_update_recalculates_product_rating(self):
+        url = reverse("review-list")
+        response = self.client.post(
+            url, {"product_id": str(self.product.id), "rating": 4}, format="json"
+        )
+        review_id = response.data["id"]
+        self.admin_client.post(
+            reverse("review-moderate", args=[review_id]),
+            {"status": "approved"},
+            format="json",
+        )
+        self.product.reload()
+        self.assertEqual(self.product.average_rating, 4)
+
+        update_url = reverse("review-detail", args=[review_id])
+        response = self.client.put(update_url, {"rating": 2}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.product.reload()
+        self.assertEqual(self.product.average_rating, 2)
+        self.assertEqual(self.product.approved_review_count, 1)
+        self.assertEqual(self.product.review_count, 1)
+
+    def test_review_deletion_updates_product_rating(self):
+        url = reverse("review-list")
+        response = self.client.post(
+            url, {"product_id": str(self.product.id), "rating": 3}, format="json"
+        )
+        review_id = response.data["id"]
+        self.admin_client.post(
+            reverse("review-moderate", args=[review_id]),
+            {"status": "approved"},
+            format="json",
+        )
+        self.product.reload()
+        self.assertEqual(self.product.average_rating, 3)
+        delete_url = reverse("review-detail", args=[review_id])
+        response = self.client.delete(delete_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.product.reload()
+        self.assertEqual(self.product.review_count, 0)
+        self.assertEqual(self.product.approved_review_count, 0)
+        self.assertEqual(self.product.average_rating, 0)
