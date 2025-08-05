@@ -209,3 +209,52 @@ class OrderIntegrationTestCase(TestCase):
             )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Order.objects.count(), 0)
+
+
+class OrderCancelReleaseInventoryTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        User = get_user_model()
+        self.user = User.objects.create_user(username="canceluser", password="pass")
+        self.product = Product.objects.create(
+            _id="507f1f77bcf86cd799439200",
+            product_name="Cancel Soap",
+            category="Bath",
+            price=5.0,
+            inventory=5,
+            reserved_inventory=2,
+        )
+        self.order = Order.objects.create(
+            user=self.user,
+            total_price=10.0,
+            shipping_cost=0,
+            tax_amount=0,
+            status=Order.Status.PROCESSING,
+        )
+        OrderItem.objects.create(
+            order=self.order,
+            product_name=self.product.product_name,
+            quantity=2,
+            unit_price=5.0,
+        )
+
+    def test_cancel_order_releases_inventory(self):
+        self.order.status = Order.Status.CANCELED
+        self.order.save()
+        product = Product.objects.get(pk=self.product.id)
+        self.assertEqual(product.reserved_inventory, 0)

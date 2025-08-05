@@ -187,3 +187,18 @@ def create_order_from_cart(user, data) -> Order:
             pass
 
     return order
+
+
+def release_reserved_inventory(order: Order) -> None:
+    """Return reserved stock to inventory when an order is not completed."""
+
+    for item in order.items.all():
+        product = Product.objects.filter(product_name=item.product_name).first()
+        if not product:
+            logger.warning(
+                "Product %s not found when releasing inventory", item.product_name
+            )
+            continue
+        current_reserved = getattr(product, "reserved_inventory", 0)
+        new_reserved = max(current_reserved - item.quantity, 0)
+        Product.objects(pk=product.id).update(set__reserved_inventory=new_reserved)

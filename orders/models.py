@@ -55,6 +55,21 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
 
+    def save(self, *args, **kwargs):  # pragma: no cover - exercised via tests
+        release = False
+        if self.pk:
+            previous = Order.objects.get(pk=self.pk)
+            if previous.status not in {Order.Status.CANCELED, Order.Status.FAILED} and self.status in {
+                Order.Status.CANCELED,
+                Order.Status.FAILED,
+            }:
+                release = True
+        super().save(*args, **kwargs)
+        if release:
+            from orders.services import release_reserved_inventory
+
+            release_reserved_inventory(self)
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
