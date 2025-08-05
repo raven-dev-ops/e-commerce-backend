@@ -6,6 +6,8 @@ from mongoengine import connect, disconnect
 import mongomock
 from products.models import Product
 from .models import Cart, CartItem
+from .tasks import purge_inactive_carts
+from datetime import datetime, timedelta
 from rest_framework.test import APIClient
 from django.urls import reverse
 from unittest.mock import patch
@@ -153,3 +155,50 @@ class CartAPITestCase(TestCase):
         url = reverse("cart")
         response = self.client.delete(url, {"product_id": "bad"}, format="json")
         self.assertEqual(response.status_code, 404)
+
+
+class PurgeInactiveCartsTaskTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Cart.drop_collection()
+        CartItem.drop_collection()
+        Product.drop_collection()
+        self.user = User.objects.create_user(username="taskuser", password="pass123")
+        self.product = Product.objects.create(
+            _id="507f1f77bcf86cd799439098",
+            product_name="Task Product",
+            category="Test",
+            price=5.00,
+        )
+        self.old_cart = Cart.objects.create(user_id=str(self.user.id))
+        self.old_cart.update(set__updated_at=datetime.utcnow() - timedelta(days=31))
+        self.old_cart.reload()
+        CartItem.objects.create(
+            cart=self.old_cart, product_id=str(self.product.id), quantity=1
+        )
+        self.new_cart = Cart.objects.create(user_id=str(self.user.id))
+        CartItem.objects.create(
+            cart=self.new_cart, product_id=str(self.product.id), quantity=2
+        )
+
+    @override_settings(CART_INACTIVITY_DAYS=30)
+    def test_purge_inactive_carts(self):
+        purge_inactive_carts()
+        self.assertEqual(Cart.objects.count(), 1)
+        self.assertEqual(CartItem.objects.count(), 1)
+        remaining_cart = Cart.objects.first()
+        self.assertEqual(remaining_cart.id, self.new_cart.id)

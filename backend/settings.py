@@ -9,6 +9,7 @@ import logging
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -305,6 +306,15 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_BEAT_SCHEDULE = {
+    "purge-inactive-carts": {
+        "task": "cart.tasks.purge_inactive_carts",
+        "schedule": crontab(hour=0, minute=0),
+    }
+}
+
+CART_INACTIVITY_DAYS = int(os.getenv("CART_INACTIVITY_DAYS", "30"))
 
 # Cache configuration
 CACHE_URL = os.getenv("CACHE_URL", "redis://localhost:6379/1")
