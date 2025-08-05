@@ -5,6 +5,8 @@ from django.urls import reverse
 from mongoengine import connect, disconnect
 import mongomock
 from rest_framework.test import APIClient
+from django.core.cache import cache
+from django.contrib.auth import get_user_model
 
 from discounts.models import Discount
 from products.models import Product, Category
@@ -132,10 +134,13 @@ class CategoryAPITestCase(TestCase):
 
     def setUp(self):
         Category.drop_collection()
+        cache.clear()
         self.client = APIClient()
         self.category = Category.objects.create(
             _id="507f1f77bcf86cd799439014", name="Bath", description="Bath"
         )
+        User = get_user_model()
+        self.user = User.objects.create_user("tester", "test@example.com", "pass1234")
 
     def test_list_categories_endpoint(self):
         url = reverse("category-list-create")
@@ -149,3 +154,32 @@ class CategoryAPITestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["name"], "Bath")
+
+    def test_category_list_is_cached(self):
+        url = reverse("category-list-create")
+        cache_key = "category_list"
+        self.assertIsNone(cache.get(cache_key))
+        first = self.client.get(url)
+        self.assertEqual(first.status_code, 200)
+        self.assertIsNotNone(cache.get(cache_key))
+        Category.drop_collection()
+        second = self.client.get(url)
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(len(second.data), 1)
+
+    def test_category_cache_invalidated_on_update(self):
+        list_url = reverse("category-list-create")
+        cache_key = "category_list"
+        self.client.get(list_url)
+        self.assertIsNotNone(cache.get(cache_key))
+        detail_url = reverse("category-detail", args=[self.category.id])
+        self.client.force_authenticate(user=self.user)
+        update_response = self.client.patch(
+            detail_url, {"name": "Updated"}, format="json"
+        )
+        self.client.force_authenticate(user=None)
+        self.assertEqual(update_response.status_code, 200)
+        self.assertIsNone(cache.get(cache_key))
+        list_response = self.client.get(list_url)
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(list_response.data[0]["name"], "Updated")

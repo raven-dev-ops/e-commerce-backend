@@ -37,7 +37,7 @@
 - [x] Add a `pre-commit` configuration to enforce formatting and linting before commits.
 - [x] Introduce static type checking with mypy and add type hints across the codebase.
 - [ ] Replace string `user_id` fields in Mongo documents with `ReferenceField` to the `User` model.
-- [ ] Cache category list responses and invalidate cache on updates.
+- [x] Cache category list responses and invalidate cache on updates.
 - [ ] Internationalize user-facing error messages via Django's translation framework.
 - [x] Document authentication requirements and examples in the README.
 - [ ] Normalize discount codes to enforce case-insensitive uniqueness.
