@@ -1,11 +1,5 @@
 from rest_framework import serializers
-from .models import Invoice, Payment, Transaction
-
-
-class InvoiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Invoice
-        fields = "__all__"
+from .models import Payment, Transaction
 
 
 class PaymentSerializer(serializers.ModelSerializer):

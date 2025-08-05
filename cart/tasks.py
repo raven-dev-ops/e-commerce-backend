@@ -6,7 +6,7 @@ from .models import Cart, CartItem
 
 
 @shared_task
-def purge_inactive_carts():
+def purge_inactive_carts() -> None:
     """Delete carts and items inactive for a configurable number of days."""
     cutoff = datetime.utcnow() - timedelta(
         days=getattr(settings, "CART_INACTIVITY_DAYS", 30)

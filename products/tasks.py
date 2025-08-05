@@ -4,7 +4,9 @@ from django.conf import settings
 
 
 @shared_task
-def send_low_stock_email(product_name, product_id, current_stock):
+def send_low_stock_email(
+    product_name: str, product_id: str, current_stock: int
+) -> None:
     """Send low stock notification email."""
     subject = f"Low Stock Alert: {product_name}"
     message = (
