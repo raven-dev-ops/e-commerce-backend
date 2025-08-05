@@ -113,3 +113,18 @@ Tests require the same environment variables as the development server. Setting
 `MONGODB_URI` instead of any remote value. Ensure `DATABASE_URL` is unset or
 points to a local SQLite database so SSL is not required. When running locally,
 using SQLite and a local MongoDB instance is sufficient.
+
+## Code Style
+
+This project uses [pre-commit](https://pre-commit.com/) to run formatters and
+linters before each commit. Install the hooks with:
+
+```bash
+pre-commit install
+```
+
+Run the checks against all files whenever needed:
+
+```bash
+pre-commit run --all-files
+```
