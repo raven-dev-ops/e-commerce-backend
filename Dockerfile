@@ -14,5 +14,3 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 5000
 
 CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:5000"]
-
-
