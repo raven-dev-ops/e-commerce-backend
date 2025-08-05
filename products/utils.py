@@ -6,7 +6,9 @@ from .tasks import send_low_stock_email
 logger = logging.getLogger(__name__)
 
 
-def send_low_stock_notification(product_name, product_id, current_stock):
+def send_low_stock_notification(
+    product_name: str, product_id: str, current_stock: int
+) -> None:
     """
     Sends an email notification to administrators about low stock levels.
     """
