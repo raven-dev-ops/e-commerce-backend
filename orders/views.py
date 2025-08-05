@@ -2,6 +2,7 @@
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
@@ -47,3 +48,17 @@ class OrderViewSet(viewsets.ViewSet):
         serializer = OrderSerializer(order)
         send_order_confirmation_email.delay(order.id, request.user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="cancel")
+    def cancel(self, request, pk=None):
+        """Cancel an order and restore reserved inventory."""
+        order = get_object_or_404(Order, pk=pk, user=request.user)
+        if order.status not in {Order.Status.PENDING, Order.Status.PROCESSING}:
+            return Response(
+                {"detail": "Only pending or processing orders can be canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        order.status = Order.Status.CANCELED
+        order.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)

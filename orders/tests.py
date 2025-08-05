@@ -301,6 +301,7 @@ class OrderIntegrationTestCase(TestCase):
         self.assertEqual(Order.objects.count(), 0)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False)
 class OrderCancelReleaseInventoryTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -321,6 +322,8 @@ class OrderCancelReleaseInventoryTestCase(TestCase):
         Product.drop_collection()
         User = get_user_model()
         self.user = User.objects.create_user(username="canceluser", password="pass")
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439200",
             product_name="Cancel Soap",
@@ -348,3 +351,12 @@ class OrderCancelReleaseInventoryTestCase(TestCase):
         self.order.save()
         product = Product.objects.get(pk=self.product.id)
         self.assertEqual(product.reserved_inventory, 0)
+
+    def test_cancel_endpoint_releases_inventory(self):
+        url = reverse("order-cancel", args=[self.order.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        product = Product.objects.get(pk=self.product.id)
+        self.assertEqual(product.reserved_inventory, 0)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELED)

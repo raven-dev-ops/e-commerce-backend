@@ -30,7 +30,7 @@
 - [x] Write tests verifying caching behavior for product list and detail views.
 - [x] Release reserved inventory when orders are canceled or payments fail.
 - [x] Add unit tests for `create_order_from_cart` covering discounts and inventory changes.
-- [ ] Implement an order cancellation endpoint that restores inventory.
+- [x] Implement an order cancellation endpoint that restores inventory.
 - [ ] Schedule a periodic Celery task to purge inactive carts.
 - [ ] Provide a management command to remove expired email verification tokens.
 - [ ] Integrate Bandit security scanning into the CI workflow.
