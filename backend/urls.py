@@ -41,11 +41,7 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", home),
-    path("health/", health),
-    path("robots.txt", robots_txt),
+api_urlpatterns = [
     path("users/", include("users.urls")),
     path("products/", include("products.urls")),
     path("orders/", include("orders.urls")),
@@ -57,6 +53,14 @@ urlpatterns = [
     path("auth/", include("dj_rest_auth.urls")),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
     path("auth/social/", include("allauth.socialaccount.urls")),
+]
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", home),
+    path("health/", health),
+    path("robots.txt", robots_txt),
+    path("api/v1/", include(api_urlpatterns)),
     path("api/schema/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path(
         "api/docs/",

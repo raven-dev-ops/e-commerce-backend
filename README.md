@@ -58,7 +58,7 @@ Create a `.env` file as above and then start the stack:
 docker compose up --build
 ```
 
-The API will be available at `http://localhost:8000/`.
+The API will be available at `http://localhost:8000/`, with versioned endpoints under `/api/v1/`.
 
 ## Running the Server
 
@@ -67,7 +67,7 @@ Apply migrations and start the development server:
 python manage.py migrate
 python manage.py runserver
 ```
-The API will be available at `http://127.0.0.1:8000/`.
+The API will be available at `http://127.0.0.1:8000/`, with versioned endpoints under `/api/v1/`.
 
 ## API Documentation
 
@@ -91,7 +91,7 @@ Most API endpoints require an authenticated user. Obtain an access token by
 sending a `POST` request to the login endpoint:
 
 ```bash
-curl -X POST http://localhost:8000/authentication/login/ \
+curl -X POST http://localhost:8000/api/v1/authentication/login/ \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "your-password"}'
 ```

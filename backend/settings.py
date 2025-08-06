@@ -288,6 +288,10 @@ REST_FRAMEWORK = {
         "login": "5/min",
         "review-create": "5/min",
     },
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+    "DEFAULT_VERSION": "v1",
+    "ALLOWED_VERSIONS": ["v1"],
+    "VERSION_PARAM": "version",
 }
 
 REST_USE_JWT = True
