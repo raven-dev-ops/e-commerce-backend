@@ -42,3 +42,29 @@
 - [x] Document authentication requirements and examples in the README.
 - [x] Normalize discount codes to enforce case-insensitive uniqueness.
 - [x] Log unhandled Stripe webhook event types for easier debugging.
+
+- [ ] Integrate Sentry for centralized error monitoring.
+- [ ] Implement API versioning to support backward-compatible changes.
+- [ ] Add a GraphQL endpoint to enable flexible client queries.
+- [ ] Introduce soft-delete functionality for products, orders, and carts with restoration options.
+- [ ] Add database indexes on frequently queried fields to improve performance.
+- [ ] Enforce global API rate limiting to protect against abusive traffic.
+- [ ] Optimize queryset performance using `select_related` and `prefetch_related` where appropriate.
+- [ ] Implement background SMS notifications for order status updates.
+- [ ] Provide bulk product import and export via CSV files.
+- [ ] Implement WebSocket-based real-time order status notifications.
+- [ ] Add a feature flag framework to allow gradual feature rollouts.
+- [ ] Support distributed caching with a Redis cluster for scalability.
+- [ ] Implement audit logging for sensitive administrative actions.
+- [ ] Add integration tests validating Stripe webhook processing.
+- [ ] Introduce full-text search powered by Elasticsearch.
+- [ ] Monitor Celery tasks with metrics and alerts on failures.
+- [ ] Provide a management command to seed the database with sample data.
+- [ ] Offload product image uploads to asynchronous cloud storage such as S3.
+- [ ] Add an automated migration check in CI to catch potential issues early.
+- [ ] Support user profile avatars with size and format validation.
+- [ ] Configure dynamic CORS allowed origins per environment.
+- [ ] Schedule periodic cleanup of expired user sessions.
+- [ ] Publish an official Python API client SDK for external integrations.
+- [ ] Implement multi-factor authentication for administrative users.
+- [ ] Add a user data export endpoint to support GDPR requests.
