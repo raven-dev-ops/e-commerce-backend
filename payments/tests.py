@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from unittest.mock import patch
 from decimal import Decimal
+import logging
 
 from orders.models import Order, OrderItem
 from .models import Payment, Transaction
@@ -123,11 +124,12 @@ class StripeWebhookViewTests(TestCase):
     @patch("stripe.Webhook.construct_event")
     def test_unhandled_event_type_logged(self, mock_construct_event):
         mock_construct_event.return_value = {
+            "id": "evt_test",
             "type": "some.unhandled.event",
             "data": {"object": {}},
         }
 
-        with self.assertLogs("payments.views", level="INFO") as log:
+        with self.assertLogs("payments.views", level="WARNING") as log:
             response = self.client.post(
                 reverse("stripe-webhook"), data={}, content_type="application/json"
             )
@@ -139,3 +141,7 @@ class StripeWebhookViewTests(TestCase):
                 for message in log.output
             )
         )
+        self.assertTrue(
+            any("ID evt_test" in message for message in log.output),
+        )
+        self.assertEqual(log.records[0].levelno, logging.WARNING)

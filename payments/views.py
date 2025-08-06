@@ -62,6 +62,10 @@ def stripe_webhook_view(request):
                 "Order with payment_intent_id %s not found", payment_intent["id"]
             )
     else:
-        logger.info("Unhandled Stripe webhook event type: %s", event["type"])
+        logger.warning(
+            "Unhandled Stripe webhook event type: %s (ID %s)",
+            event.get("type"),
+            event.get("id"),
+        )
 
     return HttpResponse(status=200)
