@@ -1,5 +1,8 @@
+import os
+
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.utils.crypto import get_random_string
 
 from products.models import Category, Product
 
@@ -13,12 +16,16 @@ class Command(BaseCommand):
         User = get_user_model()
 
         if not User.objects.filter(username="demo").exists():
+            password = os.environ.get("DEMO_USER_PASSWORD") or get_random_string()
             User.objects.create_user(
                 username="demo",
                 email="demo@example.com",
-                password="demo1234",
+                password=password,
             )
-            self.stdout.write(self.style.SUCCESS("Created demo user."))
+            message = "Created demo user."
+            if "DEMO_USER_PASSWORD" not in os.environ:
+                message += f" Generated password: {password}"
+            self.stdout.write(self.style.SUCCESS(message))
         else:
             self.stdout.write("Demo user already exists.")
 
