@@ -7,6 +7,7 @@ import mongomock
 from rest_framework.test import APIClient
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
+from mongoengine.errors import NotUniqueError
 
 from discounts.models import Discount
 from products.models import Product, Category
@@ -65,6 +66,17 @@ class DiscountModelTest(TestCase):
         self.assertEqual(discount.times_used, 0)
         self.assertFalse(discount.is_automatic)
         self.assertFalse(discount.is_free_shipping)
+
+    def test_code_is_normalized_to_uppercase(self):
+        discount = Discount.objects.create(
+            code="testcode", discount_type="fixed", value=5
+        )
+        self.assertEqual(discount.code, "TESTCODE")
+
+    def test_code_is_case_insensitive_unique(self):
+        Discount.objects.create(code="SAVE10", discount_type="fixed", value=5)
+        with self.assertRaises(NotUniqueError):
+            Discount.objects.create(code="save10", discount_type="percentage", value=10)
 
 
 @override_settings(

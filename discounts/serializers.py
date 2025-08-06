@@ -23,6 +23,15 @@ class ReviewSerializer(DocumentSerializer):
 
 
 class DiscountSerializer(DocumentSerializer):
+    def validate_code(self, value):
+        normalized = value.upper()
+        qs = Discount.objects(code=normalized)
+        if self.instance:
+            qs = qs.filter(id__ne=self.instance.id)
+        if qs.first():
+            raise serializers.ValidationError("Discount code must be unique.")
+        return normalized
+
     class Meta:
         model = Discount
         fields = "__all__"

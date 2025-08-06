@@ -29,5 +29,9 @@ class Discount(Document):
     is_free_shipping = BooleanField(default=False)
     category = ReferenceField(Category, null=True)
 
+    def clean(self):
+        if self.code:
+            self.code = self.code.upper()
+
     def __str__(self):
         return f"{self.code} ({self.discount_type})"
