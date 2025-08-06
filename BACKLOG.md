@@ -38,7 +38,7 @@
 - [x] Introduce static type checking with mypy and add type hints across the codebase.
 - [ ] Replace string `user_id` fields in Mongo documents with `ReferenceField` to the `User` model.
 - [x] Cache category list responses and invalidate cache on updates.
-- [ ] Internationalize user-facing error messages via Django's translation framework.
+- [x] Internationalize user-facing error messages via Django's translation framework.
 - [x] Document authentication requirements and examples in the README.
 - [ ] Normalize discount codes to enforce case-insensitive uniqueness.
 - [ ] Log unhandled Stripe webhook event types for easier debugging.

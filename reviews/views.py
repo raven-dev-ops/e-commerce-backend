@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
+from django.utils.translation import gettext as _
 
 from .throttles import ReviewCreateThrottle
 
@@ -39,7 +40,7 @@ class ReviewViewSet(GenericViewSet):
 
         if not product_id or rating is None:
             return Response(
-                {"detail": "product_id and rating are required."},
+                {"detail": _("product_id and rating are required.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -49,7 +50,7 @@ class ReviewViewSet(GenericViewSet):
                 raise ValueError
         except (ValueError, TypeError):
             return Response(
-                {"detail": "Rating must be an integer between 1 and 5."},
+                {"detail": _("Rating must be an integer between 1 and 5.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -57,7 +58,7 @@ class ReviewViewSet(GenericViewSet):
             product = Product.objects.get(pk=product_id)
         except Product.DoesNotExist:
             return Response(
-                {"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Product not found.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         existing_review = Review.objects.filter(
@@ -65,7 +66,7 @@ class ReviewViewSet(GenericViewSet):
         ).first()
         if existing_review:
             return Response(
-                {"detail": "You have already reviewed this product."},
+                {"detail": _("You have already reviewed this product.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -85,7 +86,7 @@ class ReviewViewSet(GenericViewSet):
 
         if not product_id:
             return Response(
-                {"detail": "product_id query parameter is required."},
+                {"detail": _("product_id query parameter is required.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -93,7 +94,7 @@ class ReviewViewSet(GenericViewSet):
             Product.objects.get(pk=product_id)
         except Product.DoesNotExist:
             return Response(
-                {"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Product not found.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         reviews_queryset = Review.objects.filter(product=product_id)
@@ -117,12 +118,12 @@ class ReviewViewSet(GenericViewSet):
             review = Review.objects.get(id=pk)
         except Review.DoesNotExist:
             return Response(
-                {"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Review not found.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         if review.user_id != user.id and not is_admin:
             return Response(
-                {"detail": "You do not have permission to edit this review."},
+                {"detail": _("You do not have permission to edit this review.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -140,7 +141,7 @@ class ReviewViewSet(GenericViewSet):
                 review.rating = rating
             except (ValueError, TypeError):
                 return Response(
-                    {"detail": "Rating must be an integer between 1 and 5."},
+                    {"detail": _("Rating must be an integer between 1 and 5.")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -162,12 +163,12 @@ class ReviewViewSet(GenericViewSet):
             review = Review.objects.get(id=pk)
         except Review.DoesNotExist:
             return Response(
-                {"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Review not found.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         if review.user_id != user.id and not is_admin:
             return Response(
-                {"detail": "You do not have permission to delete this review."},
+                {"detail": _("You do not have permission to delete this review.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -182,7 +183,7 @@ class ReviewViewSet(GenericViewSet):
         is_admin = request.user.is_staff if hasattr(request.user, "is_staff") else False
         if not is_admin:
             return Response(
-                {"detail": "You do not have permission to moderate reviews."},
+                {"detail": _("You do not have permission to moderate reviews.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -190,13 +191,13 @@ class ReviewViewSet(GenericViewSet):
             review = Review.objects.get(id=pk)
         except Review.DoesNotExist:
             return Response(
-                {"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Review not found.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         new_status = request.data.get("status")
         if new_status not in ["approved", "rejected"]:
             return Response(
-                {"detail": "Invalid status. Status must be 'approved' or 'rejected'."},
+                {"detail": _("Invalid status. Status must be 'approved' or 'rejected'.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

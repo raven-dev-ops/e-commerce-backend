@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.utils.translation import gettext as _
 
 from .models import Cart, CartItem
 from .serializers import CartItemSerializer
@@ -37,19 +38,19 @@ class CartView(APIView):
 
         if not product_id:
             return Response(
-                {"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("product_id is required")}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
             quantity = int(quantity)
             if quantity < 1:
                 return Response(
-                    {"detail": "quantity must be >= 1"},
+                    {"detail": _("quantity must be >= 1")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValueError:
             return Response(
-                {"detail": "quantity must be an integer"},
+                {"detail": _("quantity must be an integer")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -81,7 +82,7 @@ class CartView(APIView):
 
         if not product_id or quantity is None:
             return Response(
-                {"detail": "product_id and quantity are required"},
+                {"detail": _("product_id and quantity are required")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -89,12 +90,12 @@ class CartView(APIView):
             quantity = int(quantity)
             if quantity < 1:
                 return Response(
-                    {"detail": "quantity must be >= 1"},
+                    {"detail": _("quantity must be >= 1")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValueError:
             return Response(
-                {"detail": "quantity must be an integer"},
+                {"detail": _("quantity must be an integer")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -102,7 +103,7 @@ class CartView(APIView):
             item = CartItem.objects.get(cart=cart, product_id=product_id)
         except CartItem.DoesNotExist:
             return Response(
-                {"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Item not found in cart")}, status=status.HTTP_404_NOT_FOUND
             )
 
         item.quantity = quantity
@@ -123,15 +124,15 @@ class CartView(APIView):
 
         if not product_id:
             return Response(
-                {"detail": "product_id is required"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("product_id is required")}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
             item = CartItem.objects.get(cart=cart, product_id=product_id)
         except CartItem.DoesNotExist:
             return Response(
-                {"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND
+                {"detail": _("Item not found in cart")}, status=status.HTTP_404_NOT_FOUND
             )
 
         item.delete()
-        return Response({"detail": "Item removed"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": _("Item removed")}, status=status.HTTP_204_NO_CONTENT)
