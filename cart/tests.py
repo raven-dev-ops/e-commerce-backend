@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from mongoengine import connect, disconnect
 import mongomock
 from products.models import Product
-from .models import Cart, CartItem
+from .models import Cart, CartItem, UserRef, get_or_create_user_ref
 from .tasks import purge_inactive_carts
 from datetime import datetime, timedelta
 from rest_framework.test import APIClient
@@ -34,16 +34,18 @@ class CartModelTest(TestCase):
     def setUp(self):
         Cart.drop_collection()
         Product.drop_collection()
+        UserRef.drop_collection()
         self.user = User.objects.create_user(
             username="testuser", password="pass123"
         )  # nosec B106
+        self.user_ref = get_or_create_user_ref(self.user)
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439012",
             product_name="Test Product",
             category="Test",
             price=10.00,
         )
-        self.cart = Cart.objects.create(user_id=str(self.user.id))
+        self.cart = Cart.objects.create(user=self.user_ref)
 
     def test_cart_creation(self):
         self.assertEqual(str(self.cart), f"Cart {self.cart.id} for user {self.user.id}")
@@ -78,16 +80,18 @@ class CartAPITestCase(TestCase):
         Cart.drop_collection()
         CartItem.drop_collection()
         Product.drop_collection()
+        UserRef.drop_collection()
         self.user = User.objects.create_user(
             username="apiuser", password="pass123"
         )  # nosec B106
+        self.user_ref = get_or_create_user_ref(self.user)
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439099",
             product_name="API Product",
             category="Test",
             price=5.00,
         )
-        self.cart = Cart.objects.create(user_id=str(self.user.id))
+        self.cart = Cart.objects.create(user=self.user_ref)
         self.client = APIClient()
         self.client.force_authenticate(self.user)
 
@@ -181,22 +185,24 @@ class PurgeInactiveCartsTaskTest(TestCase):
         Cart.drop_collection()
         CartItem.drop_collection()
         Product.drop_collection()
+        UserRef.drop_collection()
         self.user = User.objects.create_user(
             username="taskuser", password="pass123"
         )  # nosec B106
+        self.user_ref = get_or_create_user_ref(self.user)
         self.product = Product.objects.create(
             _id="507f1f77bcf86cd799439098",
             product_name="Task Product",
             category="Test",
             price=5.00,
         )
-        self.old_cart = Cart.objects.create(user_id=str(self.user.id))
+        self.old_cart = Cart.objects.create(user=self.user_ref)
         self.old_cart.update(set__updated_at=datetime.utcnow() - timedelta(days=31))
         self.old_cart.reload()
         CartItem.objects.create(
             cart=self.old_cart, product_id=str(self.product.id), quantity=1
         )
-        self.new_cart = Cart.objects.create(user_id=str(self.user.id))
+        self.new_cart = Cart.objects.create(user=self.user_ref)
         CartItem.objects.create(
             cart=self.new_cart, product_id=str(self.product.id), quantity=2
         )

@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from authentication.models import Address
-from cart.models import Cart, CartItem
+from cart.models import Cart, CartItem, get_or_create_user_ref
 from orders.models import Order, OrderItem
 from products.models import Product
 
@@ -71,7 +71,8 @@ def create_order_from_cart(user, data) -> Order:
     if not billing_address:
         raise ValueError("Billing address required.")
 
-    cart = Cart.objects(user_id=str(user.id)).first()
+    user_ref = get_or_create_user_ref(user)
+    cart = Cart.objects(user=user_ref).first()
     if not cart:
         raise ValueError("Cart is empty.")
 

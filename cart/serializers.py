@@ -14,4 +14,4 @@ class CartItemSerializer(DocumentSerializer):
 class CartSerializer(DocumentSerializer):
     class Meta:
         model = Cart
-        fields = ("id", "user_id")
+        fields = ("id", "user")

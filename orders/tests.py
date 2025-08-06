@@ -132,6 +132,10 @@ class CreateOrderFromCartTestCase(TestCase):
             patch("orders.services.Cart.objects", return_value=cart_qs),
             patch("orders.services.Product.objects", self.product_qs),
             patch(
+                "orders.services.get_or_create_user_ref",
+                return_value=SimpleNamespace(id=self.user.id),
+            ),
+            patch(
                 "orders.services.stripe.PaymentIntent.create",
                 return_value=SimpleNamespace(id="pi_123"),
             ),
@@ -149,6 +153,10 @@ class CreateOrderFromCartTestCase(TestCase):
         with (
             patch("orders.services.Cart.objects", return_value=cart_qs),
             patch("orders.services.Product.objects", self.product_qs),
+            patch(
+                "orders.services.get_or_create_user_ref",
+                return_value=SimpleNamespace(id=self.user.id),
+            ),
             patch(
                 "orders.services.stripe.PaymentIntent.create",
                 return_value=SimpleNamespace(id="pi_123"),

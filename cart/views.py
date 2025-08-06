@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.utils.translation import gettext as _
 
-from .models import Cart, CartItem
+from .models import Cart, CartItem, get_or_create_user_ref
 from .serializers import CartItemSerializer
 
 
@@ -12,9 +12,10 @@ class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get_cart(self, user):
-        cart = Cart.objects(user_id=str(user.id)).first()
+        user_ref = get_or_create_user_ref(user)
+        cart = Cart.objects(user=user_ref).first()
         if not cart:
-            cart = Cart.objects.create(user_id=str(user.id))
+            cart = Cart.objects.create(user=user_ref)
         return cart
 
     def get(self, request):
