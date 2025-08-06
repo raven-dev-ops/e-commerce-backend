@@ -150,3 +150,15 @@ Tests require the same environment variables as the development server. Setting
 `MONGODB_URI` instead of any remote value. Ensure `DATABASE_URL` is unset or
 points to a local SQLite database so SSL is not required. When running locally,
 using SQLite and a local MongoDB instance is sufficient.
+
+## Sample Data
+
+Populate the database with a demo user and sample products for development:
+
+```bash
+python manage.py seed_sample_data
+```
+
+By default, the command generates a random password for the `demo` user and
+prints it to the console. To use a custom password, set the
+`DEMO_USER_PASSWORD` environment variable before running the command.

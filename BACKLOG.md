@@ -59,7 +59,7 @@
 - [ ] Add integration tests validating Stripe webhook processing.
 - [ ] Introduce full-text search powered by Elasticsearch.
 - [ ] Monitor Celery tasks with metrics and alerts on failures.
-- [ ] Provide a management command to seed the database with sample data.
+- [x] Provide a management command to seed the database with sample data.
 - [ ] Offload product image uploads to asynchronous cloud storage such as S3.
 - [ ] Add an automated migration check in CI to catch potential issues early.
 - [ ] Support user profile avatars with size and format validation.
