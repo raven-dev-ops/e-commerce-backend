@@ -53,7 +53,7 @@
 - [x] Implement background SMS notifications for order status updates.
 - [x] Provide bulk product import and export via CSV files.
 - [x] Implement WebSocket-based real-time order status notifications.
-- [ ] Add a feature flag framework to allow gradual feature rollouts.
+- [x] Add a feature flag framework to allow gradual feature rollouts.
 - [ ] Support distributed caching with a Redis cluster for scalability.
 - [ ] Implement audit logging for sensitive administrative actions.
 - [ ] Add integration tests validating Stripe webhook processing.

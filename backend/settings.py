@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "django_mongoengine.mongo_admin",
     "drf_yasg",
     "graphene_django",
+    "waffle",
     # Local apps
     "users",
     "products",
@@ -156,6 +157,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "waffle.middleware.WaffleMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "backend.middleware.SecurityHeadersMiddleware",
