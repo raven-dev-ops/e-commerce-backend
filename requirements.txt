@@ -49,3 +49,4 @@ black==24.4.2
 mypy==1.11.1
 pre-commit==3.7.0
 bandit==1.8.6
+twilio==9.7.0

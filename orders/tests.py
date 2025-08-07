@@ -69,6 +69,29 @@ class OrderTasksTestCase(TestCase):
         self.assertEqual(args[3], ["user@example.com"])
 
 
+class OrderStatusSMSTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="smsuser", password="pass", phone_number="+1234567890"
+        )  # nosec B106
+        self.order = Order.objects.create(
+            user=self.user,
+            total_price=10.0,
+            shipping_cost=0,
+            tax_amount=0,
+            status=Order.Status.PENDING,
+        )
+
+    @patch("orders.tasks.send_order_status_sms.delay")
+    def test_status_change_triggers_sms(self, mock_delay):
+        self.order.status = Order.Status.SHIPPED
+        self.order.save()
+        mock_delay.assert_called_once_with(
+            self.order.id, Order.Status.SHIPPED, "+1234567890"
+        )
+
+
 class DummyCart:
     def __init__(self, items, discount=None):
         self.items = items

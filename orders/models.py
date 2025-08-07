@@ -75,6 +75,7 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):  # pragma: no cover - exercised via tests
         release = False
+        notify = False
         if self.pk:
             previous = Order.all_objects.get(pk=self.pk)
             if previous.status not in {
@@ -85,11 +86,17 @@ class Order(models.Model):
                 Order.Status.FAILED,
             }:
                 release = True
+            if previous.status != self.status:
+                notify = True
         super().save(*args, **kwargs)
         if release:
             from orders.services import release_reserved_inventory
 
             release_reserved_inventory(self)
+        if notify and self.user.phone_number:
+            from orders.tasks import send_order_status_sms
+
+            send_order_status_sms.delay(self.id, self.status, self.user.phone_number)
 
     def delete(self, using=None, keep_parents=False):
         self.is_deleted = True
