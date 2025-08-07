@@ -47,7 +47,7 @@
 - [x] Implement API versioning to support backward-compatible changes.
 - [x] Add a GraphQL endpoint to enable flexible client queries.
 - [x] Introduce soft-delete functionality for products, orders, and carts with restoration options.
-- [ ] Add database indexes on frequently queried fields to improve performance.
+- [x] Add database indexes on frequently queried fields to improve performance.
 - [ ] Enforce global API rate limiting to protect against abusive traffic.
 - [ ] Optimize queryset performance using `select_related` and `prefetch_related` where appropriate.
 - [ ] Implement background SMS notifications for order status updates.

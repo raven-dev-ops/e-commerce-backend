@@ -34,6 +34,13 @@ class Cart(Document):
     updated_at = DateTimeField(default=datetime.utcnow)
     is_deleted = BooleanField(default=False)
 
+    meta = {
+        "indexes": [
+            "user",
+            "updated_at",
+        ]
+    }
+
     @queryset_manager
     def objects(doc_cls, queryset):
         return queryset.filter(is_deleted=False)
@@ -62,6 +69,13 @@ class CartItem(Document):
     cart = ReferenceField(Cart, reverse_delete_rule=CASCADE)
     product_id = StringField(required=True)
     quantity = IntField(default=1, min_value=1)
+
+    meta = {
+        "indexes": [
+            "cart",
+            "product_id",
+        ]
+    }
 
     def __str__(self):
         return f"{self.quantity} x {self.product_id}"

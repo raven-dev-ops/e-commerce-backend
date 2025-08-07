@@ -24,13 +24,15 @@ class Order(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_cost = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
+    payment_intent_id = models.CharField(
+        max_length=255, blank=True, null=True, db_index=True
+    )
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default=Status.PENDING
+        max_length=20, choices=STATUS_CHOICES, default=Status.PENDING, db_index=True
     )
     shipping_address = models.ForeignKey(
         Address,
@@ -60,6 +62,13 @@ class Order(models.Model):
 
     objects = ActiveOrderManager()
     all_objects = models.Manager()
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["user", "-created_at"], name="idx_order_user_created_at"
+            )
+        ]
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
