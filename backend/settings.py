@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import dj_database_url
 import warnings
 import logging
+from typing import Any
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -23,6 +24,10 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+# Global API throttle rates
+ANON_THROTTLE_RATE = os.getenv("GLOBAL_ANON_THROTTLE_RATE", "100/day")
+USER_THROTTLE_RATE = os.getenv("GLOBAL_USER_THROTTLE_RATE", "1000/day")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 if SENTRY_DSN:
@@ -285,7 +290,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
     "DEFAULT_THROTTLE_RATES": {
+        "anon": ANON_THROTTLE_RATE,
+        "user": USER_THROTTLE_RATE,
         "login": "5/min",
         "review-create": "5/min",
     },
@@ -325,16 +336,23 @@ CELERY_BEAT_SCHEDULE = {
 CART_INACTIVITY_DAYS = int(os.getenv("CART_INACTIVITY_DAYS", "30"))
 
 # Cache configuration
-CACHE_URL = os.getenv("CACHE_URL", "redis://localhost:6379/1")
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": CACHE_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+if os.getenv("CI") or os.getenv("TESTING"):
+    CACHES: dict[str, dict[str, Any]] = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
+else:
+    CACHE_URL = os.getenv("CACHE_URL", "redis://localhost:6379/1")
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": CACHE_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+        }
+    }
 
 # Security settings
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
