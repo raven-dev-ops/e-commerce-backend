@@ -50,3 +50,4 @@ mypy==1.11.1
 pre-commit==3.7.0
 bandit==1.8.6
 twilio==9.7.0
+Pillow==10.4.0

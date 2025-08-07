@@ -62,7 +62,7 @@
 - [x] Provide a management command to seed the database with sample data.
 - [ ] Offload product image uploads to asynchronous cloud storage such as S3.
 - [x] Add an automated migration check in CI to catch potential issues early.
-- [ ] Support user profile avatars with size and format validation.
+- [x] Support user profile avatars with size and format validation.
 - [x] Configure dynamic CORS allowed origins per environment.
 - [x] Schedule periodic cleanup of expired user sessions.
 - [ ] Publish an official Python API client SDK for external integrations.
