@@ -229,7 +229,7 @@ class OrderIntegrationTestCase(TestCase):
         with patch("orders.services.Cart.objects", return_value=cart_qs), patch(
             "orders.services.Product.objects", product_qs
         ), patch("orders.views.OrderSerializer", serializer_mock):
-            url = reverse("order-list")
+            url = reverse("order-list", kwargs={"version": "v1"})
             response = self.client.post(
                 url, {"payment_method_id": "pm_1"}, format="json"
             )
@@ -259,7 +259,7 @@ class OrderIntegrationTestCase(TestCase):
         with patch("orders.services.Cart.objects", return_value=cart_qs), patch(
             "orders.services.Product.objects", product_qs
         ), patch("orders.views.OrderSerializer", serializer_mock):
-            url = reverse("order-list")
+            url = reverse("order-list", kwargs={"version": "v1"})
             response = self.client.post(
                 url, {"payment_method_id": "pm_1"}, format="json"
             )
@@ -282,7 +282,7 @@ class OrderIntegrationTestCase(TestCase):
         with patch("orders.services.Cart.objects", return_value=cart_qs), patch(
             "orders.services.Product.objects", product_qs
         ), patch("orders.views.OrderSerializer", serializer_mock):
-            url = reverse("order-list")
+            url = reverse("order-list", kwargs={"version": "v1"})
             response = self.client.post(
                 url, {"payment_method_id": "pm_1"}, format="json"
             )
@@ -307,7 +307,7 @@ class OrderIntegrationTestCase(TestCase):
         with patch("orders.services.Cart.objects", return_value=cart_qs), patch(
             "orders.services.Product.objects", product_qs
         ), patch("orders.views.OrderSerializer", serializer_mock):
-            url = reverse("order-list")
+            url = reverse("order-list", kwargs={"version": "v1"})
             response = self.client.post(
                 url, {"payment_method_id": "pm_1"}, format="json"
             )
@@ -369,7 +369,7 @@ class OrderCancelReleaseInventoryTestCase(TestCase):
         self.assertEqual(product.reserved_inventory, 0)
 
     def test_cancel_endpoint_releases_inventory(self):
-        url = reverse("order-cancel", args=[self.order.id])
+        url = reverse("order-cancel", kwargs={"pk": self.order.id, "version": "v1"})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
         product = Product.objects.get(pk=self.product.id)

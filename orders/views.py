@@ -26,19 +26,19 @@ class OrderViewSet(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         """List all orders for current user."""
         orders = Order.objects.filter(user=request.user).order_by("-created_at")
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         """Get a specific order by ID (must belong to user)."""
         order = get_object_or_404(Order, pk=pk, user=request.user)
         serializer = OrderSerializer(order)
         return Response(serializer.data)
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         """Checkout: Create an order from user's cart."""
         try:
             order = create_order_from_cart(request.user, request.data)
@@ -50,7 +50,7 @@ class OrderViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post"], url_path="cancel")
-    def cancel(self, request, pk=None):
+    def cancel(self, request, pk=None, *args, **kwargs):
         """Cancel an order and restore reserved inventory."""
         order = get_object_or_404(Order, pk=pk, user=request.user)
         if order.status not in {Order.Status.PENDING, Order.Status.PROCESSING}:

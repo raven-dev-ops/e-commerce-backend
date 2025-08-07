@@ -103,7 +103,7 @@ class CartAPITestCase(TestCase):
             cart=self.cart, product_id=str(self.product.id), quantity=1
         )
         mock_objects.get_or_create.return_value = (cart_item, True)
-        url = reverse("cart")
+        url = reverse("cart", kwargs={"version": "v1"})
         response = self.client.post(
             url, {"product_id": str(self.product._id), "quantity": 1}, format="json"
         )
@@ -113,7 +113,7 @@ class CartAPITestCase(TestCase):
     @patch("cart.views.CartView.get_cart")
     def test_add_item_missing_product_id(self, mock_get_cart):
         mock_get_cart.return_value = self.cart
-        url = reverse("cart")
+        url = reverse("cart", kwargs={"version": "v1"})
         response = self.client.post(url, {"quantity": 1}, format="json")
         self.assertEqual(response.status_code, 400)
 
@@ -125,7 +125,7 @@ class CartAPITestCase(TestCase):
             cart=self.cart, product_id=str(self.product.id), quantity=1
         )
         mock_objects.get.return_value = cart_item
-        url = reverse("cart")
+        url = reverse("cart", kwargs={"version": "v1"})
         response = self.client.put(
             url, {"product_id": str(self.product._id), "quantity": 3}, format="json"
         )
@@ -135,7 +135,7 @@ class CartAPITestCase(TestCase):
     @patch("cart.views.CartView.get_cart")
     def test_update_item_invalid_quantity(self, mock_get_cart):
         mock_get_cart.return_value = self.cart
-        url = reverse("cart")
+        url = reverse("cart", kwargs={"version": "v1"})
         response = self.client.put(
             url, {"product_id": str(self.product._id), "quantity": 0}, format="json"
         )
@@ -149,7 +149,7 @@ class CartAPITestCase(TestCase):
             cart=self.cart, product_id=str(self.product.id), quantity=1
         )
         mock_objects.get.return_value = cart_item
-        url = reverse("cart")
+        url = reverse("cart", kwargs={"version": "v1"})
         response = self.client.delete(
             url, {"product_id": str(self.product._id)}, format="json"
         )
@@ -160,7 +160,7 @@ class CartAPITestCase(TestCase):
     def test_delete_nonexistent_item(self, mock_get_cart, mock_objects):
         mock_get_cart.return_value = self.cart
         mock_objects.get.side_effect = CartItem.DoesNotExist
-        url = reverse("cart")
+        url = reverse("cart", kwargs={"version": "v1"})
         response = self.client.delete(url, {"product_id": "bad"}, format="json")
         self.assertEqual(response.status_code, 404)
 

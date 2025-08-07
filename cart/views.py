@@ -18,13 +18,13 @@ class CartView(APIView):
             cart = Cart.objects.create(user=user_ref)
         return cart
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         cart = self.get_cart(request.user)
         items = CartItem.objects(cart=cart)
         serializer = CartItemSerializer(items, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         """
         Add item to cart or update quantity if already present.
         Expects JSON:
@@ -69,7 +69,7 @@ class CartView(APIView):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-    def put(self, request):
+    def put(self, request, *args, **kwargs):
         """
         Update quantity of a cart item.
         Expects JSON:
@@ -114,7 +114,7 @@ class CartView(APIView):
         serializer = CartItemSerializer(item)
         return Response(serializer.data)
 
-    def delete(self, request):
+    def delete(self, request, *args, **kwargs):
         """
         Remove item from cart.
         Expects JSON:

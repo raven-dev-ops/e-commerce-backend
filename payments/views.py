@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
-def stripe_webhook_view(request):
+def stripe_webhook_view(request, *args, **kwargs):
     stripe_secret = getattr(settings, "STRIPE_SECRET_KEY", None)
     webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
     if not stripe_secret or not webhook_secret:

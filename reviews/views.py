@@ -32,7 +32,7 @@ class ReviewViewSet(GenericViewSet):
             return [throttle() for throttle in self.throttle_classes]
         return []
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         user = request.user
         product_id = request.data.get("product_id")
         rating = request.data.get("rating")
@@ -80,7 +80,7 @@ class ReviewViewSet(GenericViewSet):
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         product_id = request.query_params.get("product_id")
         is_admin = request.user.is_staff if hasattr(request.user, "is_staff") else False
 
@@ -110,7 +110,7 @@ class ReviewViewSet(GenericViewSet):
         serializer = ReviewSerializer(reviews_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def update(self, request, pk=None):
+    def update(self, request, pk=None, *args, **kwargs):
         user = request.user
         is_admin = request.user.is_staff if hasattr(request.user, "is_staff") else False
 
@@ -155,7 +155,7 @@ class ReviewViewSet(GenericViewSet):
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def destroy(self, request, pk=None):
+    def destroy(self, request, pk=None, *args, **kwargs):
         user = request.user
         is_admin = request.user.is_staff if hasattr(request.user, "is_staff") else False
 
@@ -179,7 +179,7 @@ class ReviewViewSet(GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"])
-    def moderate(self, request, pk=None):
+    def moderate(self, request, pk=None, *args, **kwargs):
         is_admin = request.user.is_staff if hasattr(request.user, "is_staff") else False
         if not is_admin:
             return Response(

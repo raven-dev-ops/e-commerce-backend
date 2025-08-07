@@ -95,7 +95,9 @@ class StripeWebhookViewTests(TestCase):
         }
 
         response = self.client.post(
-            reverse("stripe-webhook"), data={}, content_type="application/json"
+            reverse("stripe-webhook", kwargs={"version": "v1"}),
+            data={},
+            content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -112,7 +114,9 @@ class StripeWebhookViewTests(TestCase):
         }
 
         response = self.client.post(
-            reverse("stripe-webhook"), data={}, content_type="application/json"
+            reverse("stripe-webhook", kwargs={"version": "v1"}),
+            data={},
+            content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -131,7 +135,9 @@ class StripeWebhookViewTests(TestCase):
 
         with self.assertLogs("payments.views", level="WARNING") as log:
             response = self.client.post(
-                reverse("stripe-webhook"), data={}, content_type="application/json"
+                reverse("stripe-webhook", kwargs={"version": "v1"}),
+                data={},
+                content_type="application/json",
             )
 
         self.assertEqual(response.status_code, 200)

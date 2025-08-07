@@ -49,3 +49,17 @@ class RobotsTxtTest(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "text/plain")
         self.assertIn("User-agent: *", response.content.decode())
+
+
+class APIVersioningTest(TestCase):
+    def test_supported_version_resolves(self):
+        response = self.client.get(
+            "/api/v1/users/profile/", secure=True, HTTP_HOST="localhost"
+        )
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_unsupported_version_returns_404(self):
+        response = self.client.get(
+            "/api/v2/users/profile/", secure=True, HTTP_HOST="localhost"
+        )
+        self.assertEqual(response.status_code, 404)

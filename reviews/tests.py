@@ -125,7 +125,7 @@ class ReviewAPIPaginationTest(TestCase):
             )
 
     def test_review_list_is_paginated(self):
-        url = reverse("review-list")
+        url = reverse("review-list", kwargs={"version": "v1"})
         response = self.client.get(url, {"product_id": str(self.product.id)})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 15)
@@ -169,7 +169,7 @@ class ReviewCreationThrottleTest(TestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_review_creation_is_throttled(self):
-        url = reverse("review-list")
+        url = reverse("review-list", kwargs={"version": "v1"})
 
         for i in range(5):
             product = Product.objects.create(
@@ -255,7 +255,7 @@ class ReviewRatingRecalculationTest(TestCase):
         )
 
     def test_review_creation_updates_product_rating(self):
-        url = reverse("review-list")
+        url = reverse("review-list", kwargs={"version": "v1"})
         response = self.client.post(
             url, {"product_id": str(self.product.id), "rating": 5}, format="json"
         )
@@ -266,7 +266,9 @@ class ReviewRatingRecalculationTest(TestCase):
         self.assertEqual(self.product.average_rating, 0)
 
         review_id = response.data["id"]
-        moderate_url = reverse("review-moderate", args=[review_id])
+        moderate_url = reverse(
+            "review-moderate", kwargs={"pk": review_id, "version": "v1"}
+        )
         response = self.admin_client.post(
             moderate_url, {"status": "approved"}, format="json"
         )
@@ -277,20 +279,20 @@ class ReviewRatingRecalculationTest(TestCase):
         self.assertEqual(self.product.average_rating, 5)
 
     def test_review_update_recalculates_product_rating(self):
-        url = reverse("review-list")
+        url = reverse("review-list", kwargs={"version": "v1"})
         response = self.client.post(
             url, {"product_id": str(self.product.id), "rating": 4}, format="json"
         )
         review_id = response.data["id"]
         self.admin_client.post(
-            reverse("review-moderate", args=[review_id]),
+            reverse("review-moderate", kwargs={"pk": review_id, "version": "v1"}),
             {"status": "approved"},
             format="json",
         )
         self.product.reload()
         self.assertEqual(self.product.average_rating, 4)
 
-        update_url = reverse("review-detail", args=[review_id])
+        update_url = reverse("review-detail", kwargs={"pk": review_id, "version": "v1"})
         response = self.client.put(update_url, {"rating": 2}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.product.reload()
@@ -299,19 +301,19 @@ class ReviewRatingRecalculationTest(TestCase):
         self.assertEqual(self.product.review_count, 1)
 
     def test_review_deletion_updates_product_rating(self):
-        url = reverse("review-list")
+        url = reverse("review-list", kwargs={"version": "v1"})
         response = self.client.post(
             url, {"product_id": str(self.product.id), "rating": 3}, format="json"
         )
         review_id = response.data["id"]
         self.admin_client.post(
-            reverse("review-moderate", args=[review_id]),
+            reverse("review-moderate", kwargs={"pk": review_id, "version": "v1"}),
             {"status": "approved"},
             format="json",
         )
         self.product.reload()
         self.assertEqual(self.product.average_rating, 3)
-        delete_url = reverse("review-detail", args=[review_id])
+        delete_url = reverse("review-detail", kwargs={"pk": review_id, "version": "v1"})
         response = self.client.delete(delete_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.product.reload()

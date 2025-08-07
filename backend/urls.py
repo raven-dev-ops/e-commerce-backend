@@ -60,7 +60,7 @@ urlpatterns = [
     path("", home),
     path("health/", health),
     path("robots.txt", robots_txt),
-    path("api/v1/", include(api_urlpatterns)),
+    path("api/<str:version>/", include(api_urlpatterns)),
     path("api/schema/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path(
         "api/docs/",

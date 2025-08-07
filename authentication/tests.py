@@ -27,7 +27,7 @@ class EmailVerificationTest(TestCase):
         import json
 
         response = self.client.post(
-            reverse("login"),
+            reverse("login", kwargs={"version": "v1"}),
             data=json.dumps({"email": "test@example.com", "password": "testpass123"}),
             content_type="application/json",
         )
@@ -36,7 +36,7 @@ class EmailVerificationTest(TestCase):
 
     def test_verify_email_endpoint(self):
         token = self.user.verification_token
-        url = reverse("verify-email", args=[token])
+        url = reverse("verify-email", kwargs={"token": token, "version": "v1"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()

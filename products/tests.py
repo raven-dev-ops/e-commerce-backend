@@ -128,7 +128,7 @@ class ProductAPITestCase(TestCase):
         )  # nosec B106
 
     def test_list_products_endpoint(self):
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 1)
@@ -149,7 +149,7 @@ class ProductAPITestCase(TestCase):
                 inventory=10,
                 reserved_inventory=0,
             )
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         response = self.client.get(url, {"page_size": 5})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["results"]), 5)
@@ -168,14 +168,17 @@ class ProductAPITestCase(TestCase):
                 inventory=1,
                 reserved_inventory=0,
             )
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         response = self.client.get(url, {"page_size": 200})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 111)
         self.assertEqual(len(response.data["results"]), 100)
 
     def test_retrieve_product_endpoint(self):
-        url = reverse("product-detail", args=[self.product.slug])
+        url = reverse(
+            "product-detail",
+            kwargs={"slug": self.product.slug, "version": "v1"},
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["_id"], self.product._id)
@@ -183,7 +186,10 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.data["slug"], self.product.slug)
 
     def test_product_detail_is_cached(self):
-        url = reverse("product-detail", args=[self.product.slug])
+        url = reverse(
+            "product-detail",
+            kwargs={"slug": self.product.slug, "version": "v1"},
+        )
         cache_key = f"product:{self.product.slug}"
         self.assertIsNone(cache.get(cache_key))
         first = self.client.get(url)
@@ -195,7 +201,7 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(second.data["_id"], self.product._id)
 
     def test_product_list_is_cached(self):
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         cache_key = "product_list"
         self.assertIsNone(cache.get(cache_key))
         first = self.client.get(url)
@@ -220,7 +226,7 @@ class ProductAPITestCase(TestCase):
             inventory=5,
             reserved_inventory=0,
         )
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         response = self.client.get(url, {"category": "Kitchen"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 1)
@@ -251,7 +257,7 @@ class ProductAPITestCase(TestCase):
             inventory=5,
             reserved_inventory=0,
         )
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         response = self.client.get(url, {"price__gte": 5, "price__lte": 15})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 2)
@@ -259,7 +265,7 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(prices, [5.0, 15.0])
 
     def test_non_staff_cannot_create_product(self):
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         payload = {
             "product_name": "New Soap",
             "category": "Bath",
@@ -275,7 +281,7 @@ class ProductAPITestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_staff_can_create_product(self):
-        url = reverse("product-list")
+        url = reverse("product-list", kwargs={"version": "v1"})
         payload = {
             "product_name": "Staff Soap",
             "category": "Bath",
@@ -292,25 +298,37 @@ class ProductAPITestCase(TestCase):
         self.assertIn("slug", response.data)
 
     def test_non_staff_cannot_update_product(self):
-        url = reverse("product-detail", args=[self.product.slug])
+        url = reverse(
+            "product-detail",
+            kwargs={"slug": self.product.slug, "version": "v1"},
+        )
         self.client.force_authenticate(user=self.regular_user)
         response = self.client.patch(url, {"product_name": "Nope"}, format="json")
         self.assertEqual(response.status_code, 403)
 
     def test_staff_can_update_product(self):
-        url = reverse("product-detail", args=[self.product.slug])
+        url = reverse(
+            "product-detail",
+            kwargs={"slug": self.product.slug, "version": "v1"},
+        )
         self.client.force_authenticate(user=self.staff_user)
         response = self.client.patch(url, {"product_name": "Updated"}, format="json")
         self.assertEqual(response.status_code, 200)
 
     def test_non_staff_cannot_delete_product(self):
-        url = reverse("product-detail", args=[self.product.slug])
+        url = reverse(
+            "product-detail",
+            kwargs={"slug": self.product.slug, "version": "v1"},
+        )
         self.client.force_authenticate(user=self.regular_user)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
 
     def test_staff_can_delete_product(self):
-        url = reverse("product-detail", args=[self.product.slug])
+        url = reverse(
+            "product-detail",
+            kwargs={"slug": self.product.slug, "version": "v1"},
+        )
         self.client.force_authenticate(user=self.staff_user)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)

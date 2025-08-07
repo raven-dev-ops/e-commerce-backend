@@ -44,7 +44,7 @@
 - [x] Log unhandled Stripe webhook event types for easier debugging.
 
  - [x] Integrate Sentry for centralized error monitoring.
-- [ ] Implement API versioning to support backward-compatible changes.
+- [x] Implement API versioning to support backward-compatible changes.
 - [ ] Add a GraphQL endpoint to enable flexible client queries.
 - [ ] Introduce soft-delete functionality for products, orders, and carts with restoration options.
 - [ ] Add database indexes on frequently queried fields to improve performance.

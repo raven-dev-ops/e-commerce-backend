@@ -109,14 +109,17 @@ class DiscountAPITestCase(TestCase):
         )
 
     def test_list_discounts_endpoint(self):
-        url = reverse("discount-list-create")
+        url = reverse("discount-list-create", kwargs={"version": "v1"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["code"], "API10")
 
     def test_retrieve_discount_endpoint(self):
-        url = reverse("discount-detail", args=[self.discount.id])
+        url = reverse(
+            "discount-detail",
+            kwargs={"pk": self.discount.id, "version": "v1"},
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["code"], "API10")
@@ -155,20 +158,23 @@ class CategoryAPITestCase(TestCase):
         self.user = User.objects.create_user("tester", "test@example.com", "pass1234")
 
     def test_list_categories_endpoint(self):
-        url = reverse("category-list-create")
+        url = reverse("category-list-create", kwargs={"version": "v1"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], "Bath")
 
     def test_retrieve_category_endpoint(self):
-        url = reverse("category-detail", args=[self.category.id])
+        url = reverse(
+            "category-detail",
+            kwargs={"pk": self.category.id, "version": "v1"},
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["name"], "Bath")
 
     def test_category_list_is_cached(self):
-        url = reverse("category-list-create")
+        url = reverse("category-list-create", kwargs={"version": "v1"})
         cache_key = "category_list"
         self.assertIsNone(cache.get(cache_key))
         first = self.client.get(url)
@@ -180,11 +186,14 @@ class CategoryAPITestCase(TestCase):
         self.assertEqual(len(second.data), 1)
 
     def test_category_cache_invalidated_on_update(self):
-        list_url = reverse("category-list-create")
+        list_url = reverse("category-list-create", kwargs={"version": "v1"})
         cache_key = "category_list"
         self.client.get(list_url)
         self.assertIsNotNone(cache.get(cache_key))
-        detail_url = reverse("category-detail", args=[self.category.id])
+        detail_url = reverse(
+            "category-detail",
+            kwargs={"pk": self.category.id, "version": "v1"},
+        )
         self.client.force_authenticate(user=self.user)
         update_response = self.client.patch(
             detail_url, {"name": "Updated"}, format="json"
