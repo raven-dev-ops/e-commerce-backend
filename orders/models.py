@@ -3,6 +3,8 @@
 from django.db import models
 from django.conf import settings
 from authentication.models import Address  # Adjust import if Address is elsewhere
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 
 class ActiveOrderManager(models.Manager):
@@ -97,6 +99,12 @@ class Order(models.Model):
             from orders.tasks import send_order_status_sms
 
             send_order_status_sms.delay(self.id, self.status, self.user.phone_number)
+        if notify:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"order_{self.id}",
+                {"type": "status.update", "status": self.status},
+            )
 
     def delete(self, using=None, keep_parents=False):
         self.is_deleted = True
