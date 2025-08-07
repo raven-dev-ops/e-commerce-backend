@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "django_mongoengine",
     "django_mongoengine.mongo_admin",
     "drf_yasg",
+    "graphene_django",
     # Local apps
     "users",
     "products",
@@ -299,6 +300,8 @@ REST_AUTH_TOKEN_MODEL = None
 REST_AUTH_SERIALIZERS = {
     "SOCIAL_LOGIN_SERIALIZER": "authentication.serializers.CustomSocialLoginSerializer",
 }
+
+GRAPHENE = {"SCHEMA": "backend.schema.schema"}
 
 warnings.filterwarnings(
     "ignore", message="app_settings.USERNAME_REQUIRED is deprecated"
