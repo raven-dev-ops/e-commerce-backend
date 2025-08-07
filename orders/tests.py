@@ -92,6 +92,40 @@ class OrderStatusSMSTestCase(TestCase):
         )
 
 
+class OrderStatusWebSocketTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="wsuser", password="pass"
+        )  # nosec B106
+        self.order = Order.objects.create(
+            user=self.user,
+            total_price=10.0,
+            shipping_cost=0,
+            tax_amount=0,
+            status=Order.Status.PENDING,
+        )
+
+    @patch("orders.models.async_to_sync")
+    @patch("orders.models.get_channel_layer")
+    def test_status_change_sends_ws_notification(
+        self, mock_get_channel_layer, mock_async_to_sync
+    ):
+        channel_layer = MagicMock()
+        mock_get_channel_layer.return_value = channel_layer
+        send_mock = MagicMock()
+        mock_async_to_sync.return_value = send_mock
+
+        self.order.status = Order.Status.SHIPPED
+        self.order.save()
+
+        mock_async_to_sync.assert_called_once_with(channel_layer.group_send)
+        send_mock.assert_called_once_with(
+            f"order_{self.order.id}",
+            {"type": "status.update", "status": Order.Status.SHIPPED},
+        )
+
+
 class DummyCart:
     def __init__(self, items, discount=None):
         self.items = items

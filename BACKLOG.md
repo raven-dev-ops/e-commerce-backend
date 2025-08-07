@@ -52,7 +52,7 @@
 - [x] Optimize queryset performance using `select_related` and `prefetch_related` where appropriate.
 - [x] Implement background SMS notifications for order status updates.
 - [x] Provide bulk product import and export via CSV files.
-- [ ] Implement WebSocket-based real-time order status notifications.
+- [x] Implement WebSocket-based real-time order status notifications.
 - [ ] Add a feature flag framework to allow gradual feature rollouts.
 - [ ] Support distributed caching with a Redis cluster for scalability.
 - [ ] Implement audit logging for sensitive administrative actions.
