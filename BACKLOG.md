@@ -63,7 +63,7 @@
 - [ ] Offload product image uploads to asynchronous cloud storage such as S3.
 - [x] Add an automated migration check in CI to catch potential issues early.
 - [ ] Support user profile avatars with size and format validation.
-- [ ] Configure dynamic CORS allowed origins per environment.
+- [x] Configure dynamic CORS allowed origins per environment.
 - [ ] Schedule periodic cleanup of expired user sessions.
 - [ ] Publish an official Python API client SDK for external integrations.
 - [ ] Implement multi-factor authentication for administrative users.

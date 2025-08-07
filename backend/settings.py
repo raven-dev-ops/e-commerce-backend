@@ -236,9 +236,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-CORS_ALLOWED_ORIGINS = [
+# Allow configurable CORS origins via environment variable. If not provided,
+# default to the deployed frontend and local development URLs.
+_default_cors = [
     "https://twiinz-beard-frontend.netlify.app",
-    "http://localhost:3000",
+    FRONTEND_URL,
+]
+CORS_ALLOWED_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", ",".join(_default_cors)).split(",")
+    if origin.strip()
 ]
 CORS_ALLOW_CREDENTIALS = True
 
