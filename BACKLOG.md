@@ -49,8 +49,8 @@
 - [x] Introduce soft-delete functionality for products, orders, and carts with restoration options.
 - [x] Add database indexes on frequently queried fields to improve performance.
 - [x] Enforce global API rate limiting to protect against abusive traffic.
- - [x] Optimize queryset performance using `select_related` and `prefetch_related` where appropriate.
-- [ ] Implement background SMS notifications for order status updates.
+- [x] Optimize queryset performance using `select_related` and `prefetch_related` where appropriate.
+- [x] Implement background SMS notifications for order status updates.
 - [x] Provide bulk product import and export via CSV files.
 - [ ] Implement WebSocket-based real-time order status notifications.
 - [ ] Add a feature flag framework to allow gradual feature rollouts.
@@ -64,7 +64,7 @@
 - [x] Add an automated migration check in CI to catch potential issues early.
 - [ ] Support user profile avatars with size and format validation.
 - [x] Configure dynamic CORS allowed origins per environment.
-- [ ] Schedule periodic cleanup of expired user sessions.
+- [x] Schedule periodic cleanup of expired user sessions.
 - [ ] Publish an official Python API client SDK for external integrations.
 - [ ] Implement multi-factor authentication for administrative users.
 - [ ] Add a user data export endpoint to support GDPR requests.

@@ -341,7 +341,11 @@ CELERY_BEAT_SCHEDULE = {
     "purge-inactive-carts": {
         "task": "cart.tasks.purge_inactive_carts",
         "schedule": crontab(hour=0, minute=0),
-    }
+    },
+    "cleanup-expired-sessions": {
+        "task": "users.tasks.cleanup_expired_sessions",
+        "schedule": crontab(hour=0, minute=0),
+    },
 }
 
 CART_INACTIVITY_DAYS = int(os.getenv("CART_INACTIVITY_DAYS", "30"))

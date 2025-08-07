@@ -1,10 +1,14 @@
 # users/tests.py
 
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.core.management import call_command
-from django.utils import timezone
 from datetime import timedelta
+
+from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
+from django.core.management import call_command
+from django.test import TestCase
+from django.utils import timezone
+
+from users.tasks import cleanup_expired_sessions
 
 User = get_user_model()
 
@@ -44,3 +48,18 @@ class RemoveExpiredTokensCommandTest(TestCase):
 
         self.assertIsNone(old_user.verification_token)
         self.assertIsNotNone(recent_user.verification_token)
+
+
+class CleanupExpiredSessionsTaskTest(TestCase):
+    def test_deletes_only_expired_sessions(self):
+        past = timezone.now() - timedelta(days=1)
+        future = timezone.now() + timedelta(days=1)
+        Session.objects.create(session_key="past", session_data="", expire_date=past)
+        Session.objects.create(
+            session_key="future", session_data="", expire_date=future
+        )
+
+        cleanup_expired_sessions.run()
+
+        self.assertFalse(Session.objects.filter(session_key="past").exists())
+        self.assertTrue(Session.objects.filter(session_key="future").exists())
