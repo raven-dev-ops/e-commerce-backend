@@ -24,6 +24,10 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
+# Global API throttle rates
+ANON_THROTTLE_RATE = os.getenv("GLOBAL_ANON_THROTTLE_RATE", "100/day")
+USER_THROTTLE_RATE = os.getenv("GLOBAL_USER_THROTTLE_RATE", "1000/day")
+
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 if SENTRY_DSN:
     logging_integration = LoggingIntegration(
@@ -285,7 +289,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
     "DEFAULT_THROTTLE_RATES": {
+        "anon": ANON_THROTTLE_RATE,
+        "user": USER_THROTTLE_RATE,
         "login": "5/min",
         "review-create": "5/min",
     },
