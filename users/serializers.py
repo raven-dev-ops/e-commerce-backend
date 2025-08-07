@@ -20,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "phone_number",
+            "avatar",
         ]
 
     def create(self, validated_data):

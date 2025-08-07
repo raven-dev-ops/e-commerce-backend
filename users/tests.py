@@ -7,6 +7,10 @@ from django.contrib.sessions.models import Session
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+from io import BytesIO
+from PIL import Image
 
 from users.tasks import cleanup_expired_sessions
 
@@ -63,3 +67,31 @@ class CleanupExpiredSessionsTaskTest(TestCase):
 
         self.assertFalse(Session.objects.filter(session_key="past").exists())
         self.assertTrue(Session.objects.filter(session_key="future").exists())
+
+
+class UserAvatarValidationTest(TestCase):
+    def test_rejects_invalid_format(self):
+        user = User.objects.create_user(username="a", password="pass")  # nosec B106
+        gif_bytes = (
+            b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!"
+            b"\xf9\x04\x00\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00"
+            b"\x00\x02\x02L\x01\x00;"
+        )
+        user.avatar = SimpleUploadedFile(
+            "avatar.gif", gif_bytes, content_type="image/gif"
+        )
+        with self.assertRaises(ValidationError):
+            user.full_clean()
+
+    def test_rejects_large_file(self):
+        user = User.objects.create_user(username="b", password="pass")  # nosec B106
+        file_obj = BytesIO()
+        Image.effect_noise((3000, 3000), 100).convert("RGB").save(
+            file_obj, format="JPEG", quality=100
+        )
+        file_obj.seek(0)
+        user.avatar = SimpleUploadedFile(
+            "large.jpg", file_obj.read(), content_type="image/jpeg"
+        )
+        with self.assertRaises(ValidationError):
+            user.full_clean()

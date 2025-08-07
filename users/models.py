@@ -1,8 +1,16 @@
 # users/models.py
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 import uuid
+
+
+def validate_avatar_size(image):
+    max_size = 2 * 1024 * 1024  # 2MB
+    if image.size > max_size:
+        raise ValidationError("Avatar file size must be under 2MB.")
 
 
 class User(AbstractUser):
@@ -10,6 +18,15 @@ class User(AbstractUser):
     email_verified = models.BooleanField(default=False)
     verification_token = models.UUIDField(
         default=uuid.uuid4, null=True, blank=True, db_index=True
+    )
+    avatar = models.ImageField(
+        upload_to="avatars/",
+        null=True,
+        blank=True,
+        validators=[
+            FileExtensionValidator(["jpg", "jpeg", "png"]),
+            validate_avatar_size,
+        ],
     )
 
     def __str__(self):
