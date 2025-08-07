@@ -1,6 +1,9 @@
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse, resolve
 from unittest.mock import patch
+from mongoengine import connect, disconnect
+import mongomock
+from products.models import Product
 
 
 class SecurityHeadersMiddlewareTest(TestCase):
@@ -63,3 +66,48 @@ class APIVersioningTest(TestCase):
             "/api/v2/users/profile/", secure=True, HTTP_HOST="localhost"
         )
         self.assertEqual(response.status_code, 404)
+
+
+class GraphQLProductQueryTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        Product.objects.create(
+            _id="507f1f77bcf86cd799439033",
+            product_name="GraphQL Soap",
+            category="Bath",
+            description="Test product",
+            price=2.0,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=5,
+            reserved_inventory=0,
+        )
+
+    def test_products_query_returns_data(self):
+        query = "{ products { productName category } }"
+        response = self.client.post(
+            "/api/v1/graphql/",
+            data={"query": query},
+            content_type="application/json",
+            secure=True,
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["data"]["products"][0]["productName"], "GraphQL Soap")
