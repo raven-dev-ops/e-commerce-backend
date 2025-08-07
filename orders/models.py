@@ -5,6 +5,11 @@ from django.conf import settings
 from authentication.models import Address  # Adjust import if Address is elsewhere
 
 
+class ActiveOrderManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class Order(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending Payment"
@@ -51,6 +56,10 @@ class Order(models.Model):
     )
     discount_value = models.FloatField(blank=True, null=True)
     discount_amount = models.FloatField(blank=True, null=True)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = ActiveOrderManager()
+    all_objects = models.Manager()
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
@@ -58,7 +67,7 @@ class Order(models.Model):
     def save(self, *args, **kwargs):  # pragma: no cover - exercised via tests
         release = False
         if self.pk:
-            previous = Order.objects.get(pk=self.pk)
+            previous = Order.all_objects.get(pk=self.pk)
             if previous.status not in {
                 Order.Status.CANCELED,
                 Order.Status.FAILED,
@@ -72,6 +81,14 @@ class Order(models.Model):
             from orders.services import release_reserved_inventory
 
             release_reserved_inventory(self)
+
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.save(update_fields=["is_deleted"])
+
+    def restore(self):
+        self.is_deleted = False
+        self.save(update_fields=["is_deleted"])
 
 
 class OrderItem(models.Model):

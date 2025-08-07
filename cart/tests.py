@@ -58,6 +58,16 @@ class CartModelTest(TestCase):
         self.assertEqual(item.cart, self.cart)
         self.assertEqual(item.product_id, str(self.product.id))
 
+    def test_soft_delete_and_restore_cart(self):
+        cart_id = self.cart.id
+        self.cart.delete()
+        self.assertIsNone(Cart.objects(id=cart_id).first())
+        deleted = Cart.all_objects(id=cart_id).first()
+        self.assertIsNotNone(deleted)
+        self.assertTrue(deleted.is_deleted)
+        deleted.restore()
+        self.assertIsNotNone(Cart.objects(id=cart_id).first())
+
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class CartAPITestCase(TestCase):

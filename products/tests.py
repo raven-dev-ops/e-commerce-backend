@@ -82,6 +82,16 @@ class ProductModelSerializerTest(TestCase):
         )
         self.assertNotEqual(self.product.slug, second.slug)
 
+    def test_soft_delete_and_restore(self):
+        product_id = self.product._id
+        self.product.delete()
+        self.assertIsNone(Product.objects(_id=product_id).first())
+        deleted = Product.all_objects(_id=product_id).first()
+        self.assertIsNotNone(deleted)
+        self.assertTrue(deleted.is_deleted)
+        deleted.restore()
+        self.assertIsNotNone(Product.objects(_id=product_id).first())
+
 
 @override_settings(
     SECURE_SSL_REDIRECT=False,

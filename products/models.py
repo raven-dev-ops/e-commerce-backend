@@ -9,6 +9,7 @@ from mongoengine import (
     BooleanField,
     IntField,
 )
+from mongoengine.queryset.manager import queryset_manager
 from django.utils.text import slugify
 
 
@@ -34,6 +35,7 @@ class Product(Document):
     average_rating = FloatField(default=0.0)
     review_count = IntField(default=0)
     approved_review_count = IntField(default=0)
+    is_deleted = BooleanField(default=False)
 
     meta = {
         "indexes": [
@@ -43,6 +45,14 @@ class Product(Document):
             "slug",
         ]
     }
+
+    @queryset_manager
+    def objects(doc_cls, queryset):
+        return queryset.filter(is_deleted=False)
+
+    @queryset_manager
+    def all_objects(doc_cls, queryset):
+        return queryset
 
     def __str__(self):
         return self.product_name
@@ -119,6 +129,14 @@ class Product(Document):
                 self.average_rating = 0.0
             self.approved_review_count -= 1
         self.review_count -= 1
+        self.save()
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.save()
+
+    def restore(self):
+        self.is_deleted = False
         self.save()
 
 

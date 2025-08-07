@@ -45,6 +45,15 @@ class OrderModelTestCase(TestCase):
         self.assertEqual(self.order.items.first().product_name, "Widget")
         self.assertEqual(self.order.status, "pending")
 
+    def test_soft_delete_and_restore_order(self):
+        order_id = self.order.id
+        self.order.delete()
+        self.assertFalse(Order.objects.filter(id=order_id).exists())
+        deleted = Order.all_objects.get(id=order_id)
+        self.assertTrue(deleted.is_deleted)
+        deleted.restore()
+        self.assertTrue(Order.objects.filter(id=order_id).exists())
+
 
 class OrderTasksTestCase(TestCase):
 
