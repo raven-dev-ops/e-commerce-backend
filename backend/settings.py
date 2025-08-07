@@ -367,16 +367,30 @@ if os.getenv("CI") or os.getenv("TESTING"):
         }
     }
 else:
-    CACHE_URL = os.getenv("CACHE_URL", "redis://localhost:6379/1")
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": CACHE_URL,
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
+    cache_urls = os.getenv("CACHE_URLS")
+    if cache_urls:
+        CACHES = {
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": [url.strip() for url in cache_urls.split(",")],
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                    "REDIS_CLIENT_CLASS": "redis.cluster.RedisCluster",
+                    "CONNECTION_POOL_CLASS": "redis.cluster.ClusterConnectionPool",
+                },
+            }
         }
-    }
+    else:
+        CACHE_URL = os.getenv("CACHE_URL", "redis://localhost:6379/1")
+        CACHES = {
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": CACHE_URL,
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                },
+            }
+        }
 
 # Security settings
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"

@@ -54,7 +54,7 @@
 - [x] Provide bulk product import and export via CSV files.
 - [x] Implement WebSocket-based real-time order status notifications.
 - [x] Add a feature flag framework to allow gradual feature rollouts.
-- [ ] Support distributed caching with a Redis cluster for scalability.
+- [x] Support distributed caching with a Redis cluster for scalability.
 - [ ] Implement audit logging for sensitive administrative actions.
 - [ ] Add integration tests validating Stripe webhook processing.
 - [ ] Introduce full-text search powered by Elasticsearch.

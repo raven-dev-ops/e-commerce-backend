@@ -145,6 +145,13 @@ in your `.env` file to point to your Redis instance:
 CACHE_URL=redis://localhost:6379/1
 ```
 
+For deployments using a Redis cluster, provide a comma-separated list of node
+URLs via `CACHE_URLS`:
+
+```env
+CACHE_URLS=redis://cache1:6379/1,redis://cache2:6379/1,redis://cache3:6379/1
+```
+
 ### Feature Flags
 
 This project uses [django-waffle](https://waffle.readthedocs.io/) to manage feature flags for gradual rollouts. Create and toggle flags in the Django admin and check them in code with helpers like `waffle.flag_is_active(request, "my_flag")`.
