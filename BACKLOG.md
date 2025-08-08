@@ -65,6 +65,6 @@
 - [x] Support user profile avatars with size and format validation.
 - [x] Configure dynamic CORS allowed origins per environment.
 - [x] Schedule periodic cleanup of expired user sessions.
-- [ ] Publish an official Python API client SDK for external integrations.
+- [x] Publish an official Python API client SDK for external integrations.
 - [ ] Implement multi-factor authentication for administrative users.
 - [x] Add a user data export endpoint to support GDPR requests.
