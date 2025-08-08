@@ -133,8 +133,9 @@ class CeleryMonitoringTest(TestCase):
             raise Exception("boom")
 
         success_task.apply()
-        with patch("backend.celery_monitoring.capture_exception"):
+        with patch("backend.celery_monitoring.capture_exception") as mock_capture:
             fail_task.apply(throw=False)
+            mock_capture.assert_called_once()
 
         success_value = TASK_SUCCESSES.labels(
             task_name="tests.success_task"
