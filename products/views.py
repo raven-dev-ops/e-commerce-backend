@@ -11,6 +11,7 @@ from django.core.cache import cache
 from products.filters import ProductFilter
 from products.models import Product
 from products.serializers import ProductSerializer
+from products.tasks import upload_product_image_to_s3
 import csv
 from io import TextIOWrapper
 import logging
@@ -114,6 +115,20 @@ class ProductViewSet(
         cache.delete(f"product:{instance.slug}")
         cache.delete("product_list")
         instance.delete()
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        product_id = response.data.get("_id")
+        for image in request.FILES.getlist("uploaded_images"):
+            upload_product_image_to_s3.delay(product_id, image.name, image.read())
+        return response
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        product_id = response.data.get("_id")
+        for image in request.FILES.getlist("uploaded_images"):
+            upload_product_image_to_s3.delay(product_id, image.name, image.read())
+        return response
 
     @action(detail=False, methods=["post"], url_path="bulk-import")
     def bulk_import(self, request, *args, **kwargs):

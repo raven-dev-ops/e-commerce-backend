@@ -60,7 +60,7 @@
 - [x] Introduce full-text search powered by Elasticsearch.
 - [x] Monitor Celery tasks with metrics and alerts on failures.
 - [x] Provide a management command to seed the database with sample data.
-- [ ] Offload product image uploads to asynchronous cloud storage such as S3.
+- [x] Offload product image uploads to asynchronous cloud storage such as S3.
 - [x] Add an automated migration check in CI to catch potential issues early.
 - [x] Support user profile avatars with size and format validation.
 - [x] Configure dynamic CORS allowed origins per environment.

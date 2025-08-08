@@ -14,7 +14,12 @@ class ProductSerializer(DocumentSerializer):
     description = serializers.CharField()
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     ingredients = serializers.ListField(child=serializers.CharField())
-    images = serializers.ListField(child=serializers.CharField(), required=False)
+    images = serializers.ListField(
+        child=serializers.CharField(), required=False, read_only=True
+    )
+    uploaded_images = serializers.ListField(
+        child=serializers.ImageField(), write_only=True, required=False
+    )
     variations = serializers.ListField(child=serializers.DictField(), required=False)
     weight = serializers.FloatField(required=False, allow_null=True)
     dimensions = serializers.CharField(
@@ -55,8 +60,14 @@ class ProductSerializer(DocumentSerializer):
             "reserved_inventory",
             "average_rating",
             "review_count",
+            "uploaded_images",
         ]
 
     def create(self, validated_data):
         validated_data["_id"] = str(ObjectId())
+        validated_data.pop("uploaded_images", None)
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data.pop("uploaded_images", None)
+        return super().update(instance, validated_data)

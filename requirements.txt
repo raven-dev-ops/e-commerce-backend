@@ -55,3 +55,4 @@ twilio==9.7.0
 Pillow==10.4.0
 channels==4.1.0
 prometheus-client==0.21.0
+boto3==1.40.5

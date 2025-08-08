@@ -24,6 +24,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET", "")
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
