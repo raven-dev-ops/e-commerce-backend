@@ -161,8 +161,8 @@ class StripeWebhookViewTests(TestCase):
 
 @override_settings(
     SECURE_SSL_REDIRECT=False,
-    STRIPE_SECRET_KEY="sk_test",
-    STRIPE_WEBHOOK_SECRET="whsec_test",
+    STRIPE_SECRET_KEY="sk_test",  # nosec B106
+    STRIPE_WEBHOOK_SECRET="whsec_test",  # nosec B106
 )
 class StripeWebhookIntegrationTests(TestCase):
     @classmethod
