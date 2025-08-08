@@ -260,3 +260,25 @@ class StripeWebhookIntegrationTests(TestCase):
         self.assertEqual(self.order.status, Order.Status.FAILED)
         self.product.reload()
         self.assertEqual(self.product.reserved_inventory, 0)
+
+    def test_invalid_signature_returns_400(self):
+        event = {
+            "type": "payment_intent.succeeded",
+            "data": {"object": {"id": "pi_test"}},
+        }
+        payload = json.dumps(event)
+        timestamp = int(time.time())
+        sig_header = f"t={timestamp},v1=badsignature"
+
+        response = self.client.post(
+            reverse("stripe-webhook", kwargs={"version": "v1"}),
+            data=payload,
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE=sig_header,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PENDING)
+        self.product.reload()
+        self.assertEqual(self.product.reserved_inventory, 1)

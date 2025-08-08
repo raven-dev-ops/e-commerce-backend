@@ -56,7 +56,7 @@
 - [x] Add a feature flag framework to allow gradual feature rollouts.
 - [x] Support distributed caching with a Redis cluster for scalability.
 - [x] Implement audit logging for sensitive administrative actions.
-- [ ] Add integration tests validating Stripe webhook processing.
+- [x] Add integration tests validating Stripe webhook processing.
 - [ ] Introduce full-text search powered by Elasticsearch.
 - [ ] Monitor Celery tasks with metrics and alerts on failures.
 - [x] Provide a management command to seed the database with sample data.
