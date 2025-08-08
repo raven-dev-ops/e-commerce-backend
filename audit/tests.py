@@ -33,9 +33,7 @@ class AuditLogMiddlewareTest(TestCase):
         Product.drop_collection()
         self.client = APIClient()
         User = get_user_model()
-        self.staff_user = User.objects.create_user(
-            username="staff", password="pass", is_staff=True
-        )
+        self.staff_user = User.objects.create_user(username="staff", is_staff=True)
         self.client.force_authenticate(self.staff_user)
 
     def test_audit_log_created_for_staff_modification(self):
