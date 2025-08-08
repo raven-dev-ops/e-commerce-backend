@@ -4,6 +4,11 @@ from unittest.mock import patch
 from mongoengine import connect, disconnect
 import mongomock
 from products.models import Product
+from celery import shared_task
+from backend.celery_monitoring import (
+    TASK_FAILURES,
+    TASK_SUCCESSES,
+)
 
 
 class SecurityHeadersMiddlewareTest(TestCase):
@@ -111,3 +116,29 @@ class GraphQLProductQueryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["data"]["products"][0]["productName"], "GraphQL Soap")
+
+
+class CeleryMonitoringTest(TestCase):
+    def test_task_metrics_recorded(self):
+        """Ensure success and failure metrics are captured for tasks."""
+        TASK_SUCCESSES._metrics.clear()
+        TASK_FAILURES._metrics.clear()
+
+        @shared_task(name="tests.success_task")
+        def success_task():
+            return "ok"
+
+        @shared_task(name="tests.fail_task")
+        def fail_task():
+            raise Exception("boom")
+
+        success_task.apply()
+        with patch("backend.celery_monitoring.capture_exception"):
+            fail_task.apply(throw=False)
+
+        success_value = TASK_SUCCESSES.labels(
+            task_name="tests.success_task"
+        )._value.get()
+        failure_value = TASK_FAILURES.labels(task_name="tests.fail_task")._value.get()
+        self.assertEqual(success_value, 1)
+        self.assertEqual(failure_value, 1)
