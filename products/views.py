@@ -14,6 +14,7 @@ from products.serializers import ProductSerializer
 import csv
 from io import TextIOWrapper
 import logging
+from products.search import search_products
 
 
 class CustomProductPagination(PageNumberPagination):
@@ -89,6 +90,15 @@ class ProductViewSet(
         response = super().list(request, *args, **kwargs)
         cache.set(cache_key, response.data, 300)
         return response
+
+    @action(detail=False, methods=["get"], url_path="search")
+    def search(self, request, *args, **kwargs):
+        """Search products using Elasticsearch."""
+        query = request.query_params.get("q")
+        if not query:
+            return Response({"detail": "Missing query"}, status=400)
+        results = search_products(query)
+        return Response(results)
 
     def perform_create(self, serializer):
         product = serializer.save()

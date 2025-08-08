@@ -344,6 +344,17 @@ class ProductAPITestCase(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
 
+    @patch("products.search._es_client.search")
+    def test_search_products_endpoint(self, mock_search):
+        mock_search.return_value = {
+            "hits": {"hits": [{"_source": {"product_name": "API Soap"}}]}
+        }
+        url = reverse("product-search", kwargs={"version": "v1"})
+        response = self.client.get(url, {"q": "soap"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data[0]["product_name"], "API Soap")
+        mock_search.assert_called_once()
+
 
 @override_settings(
     SECURE_SSL_REDIRECT=False,
