@@ -1,4 +1,5 @@
 from celery import shared_task
+from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
@@ -21,3 +22,19 @@ def send_verification_email(user_id):
 def cleanup_expired_sessions():
     """Delete expired user sessions."""
     Session.objects.filter(expire_date__lt=timezone.now()).delete()
+
+
+def perform_user_purge() -> int:
+    """Remove inactive users beyond the retention window."""
+    User = get_user_model()
+    retention = getattr(settings, "PERSONAL_DATA_RETENTION_DAYS", 365)
+    cutoff = timezone.now() - timedelta(days=retention)
+    qs = User.objects.filter(is_active=False, last_login__lt=cutoff)
+    deleted, _ = qs.delete()
+    return deleted
+
+
+@shared_task
+def purge_inactive_users() -> None:
+    """Celery task wrapper for inactive user purge."""
+    perform_user_purge()
