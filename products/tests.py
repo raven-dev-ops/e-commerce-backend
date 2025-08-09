@@ -11,6 +11,8 @@ from rest_framework.test import APIClient
 from unittest.mock import patch
 from products.utils import send_low_stock_notification
 from products.tasks import send_low_stock_email, upload_product_image_to_s3
+from orders.models import Order, OrderItem
+from products.services import get_recommended_products
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -486,3 +488,72 @@ class ProductTasksTestCase(TestCase):
         updated = Product.objects.get(_id="img1")
         self.assertEqual(len(updated.images), 1)
         self.assertTrue(updated.images[0].endswith("test.jpg"))
+
+
+class ProductRecommendationServiceTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="recuser", password="pass"
+        )  # nosec B106
+        Product.objects.create(
+            _id="p1",
+            product_name="Soap A",
+            category="Bath",
+            description="desc",
+            price=1.0,
+            average_rating=4.0,
+        )
+        Product.objects.create(
+            _id="p2",
+            product_name="Soap B",
+            category="Bath",
+            description="desc",
+            price=1.0,
+            average_rating=5.0,
+        )
+        Product.objects.create(
+            _id="p3",
+            product_name="Lotion C",
+            category="Beauty",
+            description="desc",
+            price=1.0,
+        )
+        order = Order.objects.create(
+            user=self.user,
+            total_price=1.0,
+            shipping_cost=0,
+            tax_amount=0,
+            status=Order.Status.PENDING,
+        )
+        OrderItem.objects.create(
+            order=order, product_name="Soap A", quantity=1, unit_price=1.0
+        )
+
+    def test_recommend_products_from_purchase_history(self):
+        recommendations = get_recommended_products(self.user)
+        self.assertEqual(len(recommendations), 1)
+        self.assertEqual(recommendations[0].product_name, "Soap B")
+
+    def test_returns_empty_list_for_new_user(self):
+        User = get_user_model()
+        new_user = User.objects.create_user(
+            username="newuser", password="pass"
+        )  # nosec B106
+        self.assertEqual(get_recommended_products(new_user), [])
