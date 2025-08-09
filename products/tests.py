@@ -4,7 +4,7 @@ from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from mongoengine import connect, disconnect
 import mongomock
-from products.models import Product
+from products.models import Product, Category
 from products.serializers import ProductSerializer
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -15,6 +15,7 @@ from orders.models import Order, OrderItem
 from products.services import get_recommended_products
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 
 
 class ProductModelSerializerTest(TestCase):
@@ -557,3 +558,49 @@ class ProductRecommendationServiceTestCase(TestCase):
             username="newuser", password="pass"
         )  # nosec B106
         self.assertEqual(get_recommended_products(new_user), [])
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+)
+class PrewarmCachesCommandTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disconnect()
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost",
+            mongo_client_class=mongomock.MongoClient,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        disconnect()
+        super().tearDownClass()
+
+    def setUp(self):
+        Product.drop_collection()
+        Category.drop_collection()
+        self.product = Product.objects.create(
+            _id="507f1f77bcf86cd799439099",
+            product_name="Cache Soap",
+            category="Bath",
+            description="desc",
+            price=1.0,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=10,
+            reserved_inventory=0,
+        )
+        Category.objects.create(
+            _id="507f1f77bcf86cd799439098", name="Bath", description=""
+        )
+        cache.clear()
+
+    def test_command_warms_expected_caches(self):
+        call_command("prewarm_caches")
+        self.assertIsNotNone(cache.get("product_list"))
+        self.assertIsNotNone(cache.get(f"product:{self.product.slug}"))
+        self.assertIsNotNone(cache.get("category_list"))

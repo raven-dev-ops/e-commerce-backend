@@ -72,7 +72,7 @@
 - [x] Support multiple currency conversions with real-time exchange rates.
 - [x] Implement a recommended products service based on user behavior.
 - [x] Define data retention policies for personal data and automate purging.
-- [ ] Pre-warm caches during deployments to reduce cold-start latency.
+- [x] Pre-warm caches during deployments to reduce cold-start latency.
 - [ ] Collect metrics for database query performance and track slow queries.
 - [ ] Refactor settings to support hierarchical environment-specific overrides.
 - [ ] Integrate with an external ERP system for unified inventory management.
