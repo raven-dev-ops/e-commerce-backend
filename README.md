@@ -180,3 +180,14 @@ python manage.py seed_sample_data
 By default, the command generates a random password for the `demo` user and
 prints it to the console. To use a custom password, set the
 `DEMO_USER_PASSWORD` environment variable before running the command.
+
+## Python API Client
+
+A minimal Python SDK is available in the `sdk` package for interacting with the API.
+
+```python
+from sdk import ECommerceClient
+
+client = ECommerceClient("https://api.example.com", token="your-api-token")
+products = client.get_products()
+```
