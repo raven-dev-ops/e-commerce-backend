@@ -2,6 +2,7 @@
 
 from datetime import timedelta, datetime
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
@@ -19,7 +20,7 @@ from rest_framework.test import APIClient
 from orders.models import Order, OrderItem
 from products.models import Product
 from reviews.models import Review
-from users.tasks import cleanup_expired_sessions
+from users.tasks import cleanup_expired_sessions, purge_inactive_users
 
 User = get_user_model()
 
@@ -74,6 +75,29 @@ class CleanupExpiredSessionsTaskTest(TestCase):
 
         self.assertFalse(Session.objects.filter(session_key="past").exists())
         self.assertTrue(Session.objects.filter(session_key="future").exists())
+
+
+class PurgeInactiveUsersTaskTest(TestCase):
+    def test_deletes_only_inactive_users_past_retention(self):
+        retention = getattr(settings, "PERSONAL_DATA_RETENTION_DAYS", 365)
+        old_date = timezone.now() - timedelta(days=retention + 1)
+
+        inactive_old = User.objects.create_user(
+            username="oldinactive", password="pass", is_active=False
+        )  # nosec B106
+        inactive_old.last_login = old_date
+        inactive_old.save(update_fields=["last_login"])
+
+        inactive_recent = User.objects.create_user(
+            username="recentinactive", password="pass", is_active=False
+        )  # nosec B106
+        inactive_recent.last_login = timezone.now()
+        inactive_recent.save(update_fields=["last_login"])
+
+        purge_inactive_users.run()
+
+        self.assertFalse(User.objects.filter(id=inactive_old.id).exists())
+        self.assertTrue(User.objects.filter(id=inactive_recent.id).exists())
 
 
 class UserAvatarValidationTest(TestCase):

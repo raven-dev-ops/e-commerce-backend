@@ -360,9 +360,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "users.tasks.cleanup_expired_sessions",
         "schedule": crontab(hour=0, minute=0),
     },
+    "purge-inactive-users": {
+        "task": "users.tasks.purge_inactive_users",
+        "schedule": crontab(hour=0, minute=0),
+    },
 }
 
 CART_INACTIVITY_DAYS = int(os.getenv("CART_INACTIVITY_DAYS", "30"))
+PERSONAL_DATA_RETENTION_DAYS = int(os.getenv("PERSONAL_DATA_RETENTION_DAYS", "365"))
 
 # Cache configuration
 if os.getenv("CI") or os.getenv("TESTING"):

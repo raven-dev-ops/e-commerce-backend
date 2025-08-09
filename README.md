@@ -39,6 +39,7 @@ This repository contains a Django and MongoEngine based backend for an example e
    GLOBAL_ANON_THROTTLE_RATE=100/day
    GLOBAL_USER_THROTTLE_RATE=1000/day
    CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com,http://localhost:3000
+   PERSONAL_DATA_RETENTION_DAYS=365  # days to retain inactive user data before purging
 ```
 
 Setting `SENTRY_DSN` enables centralized error tracking with Sentry for both Django and Celery tasks.
