@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
 from .throttles import LoginRateThrottle
 import logging
+import pyotp
 
 from authentication.serializers import (
     UserRegistrationSerializer,
@@ -37,6 +38,7 @@ class UserRegistrationView(APIView):
 
 class LoginView(APIView):
     throttle_classes = [LoginRateThrottle]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -49,6 +51,19 @@ class LoginView(APIView):
             user = None
 
         if user and user.check_password(password) and user.email_verified:
+            if user.is_staff:
+                if not user.mfa_secret:
+                    return Response(
+                        {"detail": "Multi-factor authentication required."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                otp = request.data.get("otp")
+                totp = pyotp.TOTP(user.mfa_secret)
+                if not otp or not totp.verify(otp, valid_window=1):
+                    return Response(
+                        {"detail": "Invalid or missing OTP."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
             token, _ = Token.objects.get_or_create(user=user)
             user_serializer = UserProfileSerializer(user)
             logging.info(f"User '{user.email}' logged in.")
@@ -60,7 +75,7 @@ class LoginView(APIView):
         if user and user.check_password(password) and not user.email_verified:
             return Response(
                 {"detail": "Email not verified."},
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         logging.warning(f"Failed login attempt for email: {email}")

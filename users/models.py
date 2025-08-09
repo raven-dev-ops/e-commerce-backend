@@ -28,6 +28,7 @@ class User(AbstractUser):
             validate_avatar_size,
         ],
     )
+    mfa_secret = models.CharField(max_length=32, blank=True, null=True)
 
     def __str__(self):
         return self.username
