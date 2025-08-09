@@ -68,3 +68,104 @@
 - [x] Publish an official Python API client SDK for external integrations.
 - [x] Implement multi-factor authentication for administrative users.
 - [x] Add a user data export endpoint to support GDPR requests.
+
+- [ ] Support multiple currency conversions with real-time exchange rates.
+- [ ] Implement a recommended products service based on user behavior.
+- [ ] Define data retention policies for personal data and automate purging.
+- [ ] Pre-warm caches during deployments to reduce cold-start latency.
+- [ ] Collect metrics for database query performance and track slow queries.
+- [ ] Refactor settings to support hierarchical environment-specific overrides.
+- [ ] Integrate with an external ERP system for unified inventory management.
+- [ ] Expose a webhook for shipment tracking updates from carriers.
+- [ ] Provide an endpoint for customers to download order invoices in PDF.
+- [ ] Support purchasing and redeeming digital gift cards.
+- [ ] Implement referral codes with tracking for marketing campaigns.
+- [ ] Enable real-time notifications via Server-Sent Events.
+- [ ] Integrate DataDog APM for enhanced application monitoring.
+- [ ] Add OpenTelemetry distributed tracing across services.
+- [ ] Return structured validation error objects in API responses.
+- [ ] Cache GraphQL introspection queries to reduce overhead.
+- [ ] Enforce GraphQL query complexity limits to protect resources.
+- [ ] Use dataloaders in GraphQL resolvers to avoid N+1 queries.
+- [ ] Provide an admin interface for managing discount rules.
+- [ ] Allow scheduling of product publish and unpublish dates.
+- [ ] Add ability to temporarily pause and reactivate user accounts.
+- [ ] Revoke active sessions when a user changes their password.
+- [ ] Use partial indexes in PostgreSQL to optimize soft-delete lookups.
+- [ ] Implement multi-tenant support for enterprise clients.
+- [ ] Introduce a message queue to decouple event-driven workflows.
+- [ ] Add circuit breaker logic when calling external services.
+- [ ] Support idempotency keys for all POST endpoints.
+- [ ] Provide batch operations for updating multiple products at once.
+- [ ] Organize modules following domain-driven design principles.
+- [ ] Validate settings using Pydantic for type safety.
+- [ ] Add advanced analytics reporting endpoints for administrators.
+- [ ] Cache authentication tokens to reduce database hits.
+- [ ] Verify file uploads with checksum validation.
+- [ ] Support WebAuthn passwordless authentication.
+- [ ] Enable HTTP Strict Transport Security preloading.
+- [ ] Integrate a third-party tax calculation service.
+- [ ] Apply rate limiting to GraphQL queries.
+- [ ] Implement API key management for partner integrations.
+- [ ] Attach correlation IDs to logs and responses for traceability.
+- [ ] Log every admin action with user and timestamp metadata.
+- [ ] Provide a CLI tool to assist with complex data migrations.
+- [ ] Offer gRPC endpoints for internal service communication.
+- [ ] Deploy new versions via canary releases with automated rollback.
+- [ ] Add container health probes for Kubernetes readiness and liveness.
+- [ ] Configure autoscaling policies for Celery worker pools.
+- [ ] Spin up ephemeral review environments for pull requests.
+- [ ] Use GitHub Actions to automate continuous deployments.
+- [ ] Introduce property-based tests for critical business logic.
+- [ ] Run fuzz testing on API inputs to uncover edge cases.
+- [ ] Add behavior-driven tests using a tool like Behave.
+- [ ] Publish a Postman collection covering all API endpoints.
+- [ ] Generate large dataset fixtures for performance testing.
+- [ ] Document onboarding steps for new developers in the README.
+- [ ] Filter noisy log messages to reduce storage costs.
+- [ ] Compress API requests and responses using gzip.
+- [ ] Enable HTTP/2 support for faster client communication.
+- [ ] Implement a blue-green deployment workflow.
+- [ ] Provide predictive inventory analytics using machine learning.
+- [ ] Introduce an A/B testing framework for feature experiments.
+- [ ] Support SAML-based single sign-on for enterprise customers.
+- [ ] Add account deletion flow with email confirmation.
+- [ ] Allow marking orders as gifts with custom messages.
+- [ ] Encrypt sensitive data at rest using a KMS.
+- [ ] Offer per-user notification preference settings.
+- [ ] Expose an endpoint showing API rate usage and limits.
+- [ ] Support partial returns for individual order line items.
+- [ ] Define rules for stacking multiple coupons on one order.
+- [ ] Add subscription billing for recurring product purchases.
+- [ ] Provide personalized product recommendations via ML models.
+- [ ] Cache CORS pre-flight responses to reduce request overhead.
+- [ ] Supply a script to reset the staging database.
+- [ ] Enforce commit signature verification in the repository.
+- [ ] Customize logging formats per environment.
+- [ ] Integrate with a service mesh for resilient networking.
+- [ ] Report code coverage metrics in the CI pipeline.
+- [ ] Send Slack alerts when critical errors occur.
+- [ ] Allow users to revoke their own API keys.
+- [ ] Track user consent preferences for marketing emails.
+- [ ] Add an endpoint to check real-time inventory availability.
+- [ ] Calculate tax based on customer location automatically.
+- [ ] Provide a quickstart guide for new contributors in the README.
+- [ ] Build analytics charts for the admin dashboard.
+- [ ] Store feature toggle states in the database for runtime updates.
+- [ ] Offer an API sandbox environment for integrators.
+- [ ] Use UUIDs as primary keys across models.
+- [ ] Implement job retry policies with exponential backoff.
+- [ ] Manage translations through an external service like Transifex.
+- [ ] Separate access logs into a dedicated security log.
+- [ ] Publish API deprecation notices ahead of breaking changes.
+- [ ] Add a dark mode option to the admin interface.
+- [ ] Set proper caching headers on REST API responses.
+- [ ] Include a security.txt file for vulnerability disclosure.
+- [ ] Generate signed URLs for accessing private assets.
+- [ ] Retry failed webhooks with exponential backoff.
+- [ ] Monitor database replication lag and alert on thresholds.
+- [ ] Expose an admin endpoint to purge application caches.
+- [ ] Stream inventory updates using Server-Sent Events.
+- [ ] Provide gRPC client SDK code generation scripts.
+- [ ] Make audit logs queryable through an API endpoint.
+- [ ] Allow customers to schedule preferred delivery dates.
