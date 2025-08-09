@@ -25,6 +25,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "user",
             "created_at",
             "total_price",
+            "currency",
             "shipping_cost",
             "tax_amount",
             "payment_intent_id",
@@ -45,4 +46,5 @@ class OrderSerializer(serializers.ModelSerializer):
             "payment_intent_id",
             "status",
             "items",
+            "currency",
         ]

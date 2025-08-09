@@ -36,6 +36,7 @@ class Order(models.Model):
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=Status.PENDING, db_index=True
     )
+    currency = models.CharField(max_length=3, default="usd")
     shipping_address = models.ForeignKey(
         Address,
         related_name="shipping_orders",

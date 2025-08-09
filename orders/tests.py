@@ -380,6 +380,41 @@ class OrderIntegrationTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Order.objects.count(), 0)
 
+    @patch("backend.currency.requests.get")
+    @patch("orders.views.send_order_confirmation_email.delay")
+    @patch("orders.services.stripe.PaymentIntent.create")
+    def test_create_order_with_currency_conversion(
+        self, mock_intent, mock_email, mock_get
+    ):
+        mock_intent.return_value = SimpleNamespace(id="pi_123")
+        mock_get.return_value.raise_for_status = lambda: None
+        mock_get.return_value.json.return_value = {"rates": {"EUR": 2.0}}
+        cart = DummyCart(
+            items=[SimpleNamespace(product_id=str(self.product._id), quantity=2)]
+        )
+        cart_qs = MagicMock()
+        cart_qs.first.return_value = cart
+        product_qs = MagicMock()
+        product_qs.get.return_value = self.product
+        serializer_mock = MagicMock()
+        serializer_mock.return_value.data = {}
+        with patch("orders.services.Cart.objects", return_value=cart_qs), patch(
+            "orders.services.Product.objects", product_qs
+        ), patch("orders.views.OrderSerializer", serializer_mock):
+            url = reverse("order-list", kwargs={"version": "v1"})
+            response = self.client.post(
+                url,
+                {"payment_method_id": "pm_1", "currency": "eur"},
+                format="json",
+            )
+        self.assertEqual(response.status_code, 201)
+        order = Order.objects.first()
+        self.assertEqual(order.currency, "eur")
+        self.assertAlmostEqual(float(order.total_price), 53.2, places=2)
+        args, kwargs = mock_intent.call_args
+        self.assertEqual(kwargs["currency"], "eur")
+        self.assertEqual(kwargs["amount"], int(order.total_price * 100))
+
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class OrderCancelReleaseInventoryTestCase(TestCase):

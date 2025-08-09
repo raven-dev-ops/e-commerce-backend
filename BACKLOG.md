@@ -69,7 +69,7 @@
 - [x] Implement multi-factor authentication for administrative users.
 - [x] Add a user data export endpoint to support GDPR requests.
 
-- [ ] Support multiple currency conversions with real-time exchange rates.
+- [x] Support multiple currency conversions with real-time exchange rates.
 - [ ] Implement a recommended products service based on user behavior.
 - [ ] Define data retention policies for personal data and automate purging.
 - [ ] Pre-warm caches during deployments to reduce cold-start latency.

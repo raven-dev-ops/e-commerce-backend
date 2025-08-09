@@ -19,6 +19,7 @@ from authentication.models import Address
 from cart.models import Cart, CartItem, get_or_create_user_ref
 from orders.models import Order, OrderItem
 from products.models import Product
+from backend.currency import get_exchange_rate
 
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ def create_order_from_cart(user, data) -> Order:
     if not items:
         raise ValueError("Cart is empty.")
 
-    subtotal = 0
+    subtotal = 0.0
     order_items: List[dict] = []
     product_updates: List[Tuple[Product, int]] = []
 
@@ -110,7 +111,7 @@ def create_order_from_cart(user, data) -> Order:
     tax_amount = round(subtotal * 0.08, 2)
     total_price = subtotal + shipping_cost + tax_amount
     discount_code = discount_type = None
-    discount_value = discount_amount = 0
+    discount_value = discount_amount = 0.0
 
     if getattr(cart, "discount", None):
         discount = cart.discount
@@ -123,6 +124,24 @@ def create_order_from_cart(user, data) -> Order:
             discount_amount = min(discount.value, subtotal)
         subtotal -= discount_amount
         total_price = subtotal + shipping_cost + tax_amount
+
+    currency = data.get("currency", "usd").lower()
+    rate = 1.0
+    if currency != "usd":
+        try:
+            rate = get_exchange_rate("usd", currency)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.error("Currency conversion failed: %s", exc)
+            raise ValueError("Currency conversion failed.") from exc
+
+    if rate != 1.0:
+        subtotal = round(subtotal * rate, 2)
+        shipping_cost = round(shipping_cost * rate, 2)
+        tax_amount = round(tax_amount * rate, 2)
+        discount_amount = round(discount_amount * rate, 2)
+        total_price = round(total_price * rate, 2)
+        for item in order_items:
+            item["unit_price"] = round(item["unit_price"] * rate, 2)
 
     stripe_secret_key = getattr(settings, "STRIPE_SECRET_KEY", None)
     if not stripe_secret_key:
@@ -137,7 +156,7 @@ def create_order_from_cart(user, data) -> Order:
     try:
         intent = stripe.PaymentIntent.create(
             amount=int(total_price * 100),
-            currency="usd",
+            currency=currency,
             payment_method=payment_method_id,
             confirmation_method="manual",
             confirm=True,
@@ -157,6 +176,7 @@ def create_order_from_cart(user, data) -> Order:
             shipping_cost=shipping_cost,
             tax_amount=tax_amount,
             total_price=total_price,
+            currency=currency,
             payment_intent_id=intent.id,
             status="processing",
             discount_code=discount_code,
