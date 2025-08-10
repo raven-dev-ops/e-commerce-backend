@@ -160,7 +160,7 @@
 - [ ] Publish API deprecation notices ahead of breaking changes.
 - [ ] Add a dark mode option to the admin interface.
 - [ ] Set proper caching headers on REST API responses.
-- [ ] Include a security.txt file for vulnerability disclosure.
+- [x] Include a security.txt file for vulnerability disclosure.
 - [ ] Generate signed URLs for accessing private assets.
 - [ ] Retry failed webhooks with exponential backoff.
 - [ ] Monitor database replication lag and alert on thresholds.

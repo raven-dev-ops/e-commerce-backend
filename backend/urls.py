@@ -36,6 +36,11 @@ def robots_txt(request):
     return HttpResponse(content, content_type="text/plain")
 
 
+def security_txt(request):
+    content = "Contact: mailto:security@example.com\n"
+    return HttpResponse(content, content_type="text/plain")
+
+
 schema_view = get_schema_view(
     openapi.Info(
         title="E-Commerce API",
@@ -65,6 +70,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home),
     path("health/", health),
+    path(".well-known/security.txt", security_txt),
     path("robots.txt", robots_txt),
     path("api/<str:version>/", include(api_urlpatterns)),
     path("api/schema/", schema_view.without_ui(cache_timeout=0), name="schema-json"),

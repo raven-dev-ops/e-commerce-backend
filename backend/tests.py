@@ -59,6 +59,16 @@ class RobotsTxtTest(SimpleTestCase):
         self.assertIn("User-agent: *", response.content.decode())
 
 
+class SecurityTxtTest(SimpleTestCase):
+    def test_security_txt_served(self):
+        response = self.client.get(
+            "/.well-known/security.txt", secure=True, HTTP_HOST="localhost"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/plain")
+        self.assertIn("Contact: mailto:security@example.com", response.content.decode())
+
+
 class APIVersioningTest(TestCase):
     def test_supported_version_resolves(self):
         response = self.client.get(
