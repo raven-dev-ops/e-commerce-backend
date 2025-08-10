@@ -61,6 +61,7 @@ api_urlpatterns = [
     path("reviews/", include("reviews.urls")),
     path("giftcards/", include("giftcards.urls")),
     path("referrals/", include("referrals.urls")),
+    path("notifications/", include("notifications.urls")),
     path("authentication/", include("authentication.urls")),
     path("auth/", include("dj_rest_auth.urls")),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),

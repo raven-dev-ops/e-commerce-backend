@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     "audit",
     "giftcards",
     "referrals",
+    "notifications",
 ]
 
 SITE_ID = 2
