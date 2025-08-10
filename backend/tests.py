@@ -1,5 +1,6 @@
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse, resolve
+from django.core.cache import cache
 from unittest.mock import patch
 from mongoengine import connect, disconnect
 import mongomock
@@ -126,6 +127,37 @@ class GraphQLProductQueryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["data"]["products"][0]["productName"], "GraphQL Soap")
+
+
+class GraphQLIntrospectionCacheTest(TestCase):
+    def test_introspection_query_is_cached(self):
+        cache.clear()
+        introspection_query = (
+            "query IntrospectionQuery { __schema { queryType { name } } }"
+        )
+        url = "/api/v1/graphql/"
+        response = self.client.post(
+            url,
+            data={"query": introspection_query},
+            content_type="application/json",
+            secure=True,
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(response.status_code, 200)
+
+        with patch(
+            "graphene_django.views.GraphQLView.dispatch",
+            side_effect=Exception("cache miss"),
+        ):
+            cached_response = self.client.post(
+                url,
+                data={"query": introspection_query},
+                content_type="application/json",
+                secure=True,
+                HTTP_HOST="localhost",
+            )
+
+        self.assertEqual(cached_response.status_code, 200)
 
 
 class CeleryMonitoringTest(TestCase):

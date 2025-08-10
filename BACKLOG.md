@@ -84,7 +84,7 @@
 - [ ] Integrate DataDog APM for enhanced application monitoring.
 - [ ] Add OpenTelemetry distributed tracing across services.
 - [x] Return structured validation error objects in API responses.
-- [ ] Cache GraphQL introspection queries to reduce overhead.
+- [x] Cache GraphQL introspection queries to reduce overhead.
 - [ ] Enforce GraphQL query complexity limits to protect resources.
 - [ ] Use dataloaders in GraphQL resolvers to avoid N+1 queries.
 - [ ] Provide an admin interface for managing discount rules.

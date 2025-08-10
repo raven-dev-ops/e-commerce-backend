@@ -9,9 +9,9 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from backend.schema import schema
+from backend.graphql import CachedGraphQLView
 
 
 def home(request):
@@ -63,7 +63,9 @@ api_urlpatterns = [
     path("auth/", include("dj_rest_auth.urls")),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
     path("auth/social/", include("allauth.socialaccount.urls")),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(schema=schema, graphiql=True))),
+    path(
+        "graphql/", csrf_exempt(CachedGraphQLView.as_view(schema=schema, graphiql=True))
+    ),
 ]
 
 urlpatterns = [
