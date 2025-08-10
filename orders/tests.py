@@ -507,3 +507,50 @@ class OrderInvoiceDownloadTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
         self.assertTrue(response.content.startswith(b"%PDF"))
+
+
+class ShipmentWebhookTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="webhookuser", password="pass"
+        )  # nosec B106
+        self.order = Order.objects.create(
+            user=self.user,
+            total_price=10.0,
+            shipping_cost=0,
+            tax_amount=0,
+            status=Order.Status.PENDING,
+        )
+        self.client = APIClient()
+        self.url = reverse("shipment-webhook", kwargs={"version": "v1"})
+
+    @override_settings(
+        SHIPMENT_WEBHOOK_SECRET="secret",
+        SECURE_SSL_REDIRECT=False,
+        ALLOWED_HOSTS=["testserver"],
+    )
+    def test_updates_order_status(self):
+        response = self.client.post(
+            self.url,
+            {"order_id": self.order.id, "status": Order.Status.SHIPPED},
+            format="json",
+            HTTP_X_WEBHOOK_TOKEN="secret",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.SHIPPED)
+
+    @override_settings(
+        SHIPMENT_WEBHOOK_SECRET="secret",
+        SECURE_SSL_REDIRECT=False,
+        ALLOWED_HOSTS=["testserver"],
+    )
+    def test_rejects_invalid_token(self):
+        response = self.client.post(
+            self.url,
+            {"order_id": self.order.id, "status": Order.Status.SHIPPED},
+            format="json",
+            HTTP_X_WEBHOOK_TOKEN="wrong",
+        )
+        self.assertEqual(response.status_code, 401)
