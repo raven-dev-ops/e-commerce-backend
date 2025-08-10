@@ -1,4 +1,4 @@
-# backend/settings.py
+# backend/settings/base.py
 
 import os
 from pathlib import Path
@@ -13,7 +13,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from celery.schedules import crontab
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-...")
@@ -415,4 +415,4 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 
 # Ensure database monitoring signal handlers are registered
-from . import db_monitoring  # noqa: E402,F401
+from .. import db_monitoring  # noqa: E402,F401
