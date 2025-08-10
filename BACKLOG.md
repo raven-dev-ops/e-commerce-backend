@@ -77,7 +77,7 @@
 - [x] Refactor settings to support hierarchical environment-specific overrides.
 - [ ] Integrate with an external ERP system for unified inventory management.
 - [ ] Expose a webhook for shipment tracking updates from carriers.
-- [ ] Provide an endpoint for customers to download order invoices in PDF.
+- [x] Provide an endpoint for customers to download order invoices in PDF.
 - [ ] Support purchasing and redeeming digital gift cards.
 - [ ] Implement referral codes with tracking for marketing campaigns.
 - [ ] Enable real-time notifications via Server-Sent Events.

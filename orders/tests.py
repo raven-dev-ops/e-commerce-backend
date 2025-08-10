@@ -477,3 +477,33 @@ class OrderCancelReleaseInventoryTestCase(TestCase):
         self.assertEqual(product.reserved_inventory, 0)
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, Order.Status.CANCELED)
+
+
+class OrderInvoiceDownloadTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="pdfuser", password="pass"
+        )  # nosec B106
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+        self.order = Order.objects.create(
+            user=self.user,
+            total_price=20.0,
+            shipping_cost=0,
+            tax_amount=0,
+            status=Order.Status.PENDING,
+        )
+        OrderItem.objects.create(
+            order=self.order,
+            product_name="Widget",
+            quantity=1,
+            unit_price=20.0,
+        )
+
+    def test_invoice_endpoint_returns_pdf(self):
+        url = reverse("order-invoice", kwargs={"pk": self.order.id, "version": "v1"})
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertTrue(response.content.startswith(b"%PDF"))
