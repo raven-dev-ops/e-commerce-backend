@@ -74,7 +74,7 @@
 - [x] Define data retention policies for personal data and automate purging.
 - [x] Pre-warm caches during deployments to reduce cold-start latency.
 - [x] Collect metrics for database query performance and track slow queries.
-- [ ] Refactor settings to support hierarchical environment-specific overrides.
+- [x] Refactor settings to support hierarchical environment-specific overrides.
 - [ ] Integrate with an external ERP system for unified inventory management.
 - [ ] Expose a webhook for shipment tracking updates from carriers.
 - [ ] Provide an endpoint for customers to download order invoices in PDF.
