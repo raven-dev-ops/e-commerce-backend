@@ -79,7 +79,7 @@
 - [x] Expose a webhook for shipment tracking updates from carriers.
 - [x] Provide an endpoint for customers to download order invoices in PDF.
 - [x] Support purchasing and redeeming digital gift cards.
-- [ ] Implement referral codes with tracking for marketing campaigns.
+- [x] Implement referral codes with tracking for marketing campaigns.
 - [ ] Enable real-time notifications via Server-Sent Events.
 - [ ] Integrate DataDog APM for enhanced application monitoring.
 - [ ] Add OpenTelemetry distributed tracing across services.
