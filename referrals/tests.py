@@ -10,7 +10,7 @@ from .models import ReferralCode
 class ReferralCodeTests(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username="refuser", password="pass")
+        self.user = User.objects.create_user(username="refuser")
         self.client = APIClient()
         self.client.force_authenticate(self.user)
         self.list_url = reverse("referralcode-list", kwargs={"version": "v1"})
