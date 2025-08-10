@@ -6,10 +6,11 @@ from rest_framework.decorators import action
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 import logging
 
 from .tasks import send_order_confirmation_email
-from .services import create_order_from_cart
+from .services import create_order_from_cart, generate_invoice_pdf
 
 from orders.models import Order  # Django ORM
 from .serializers import OrderSerializer
@@ -48,6 +49,20 @@ class OrderViewSet(viewsets.ViewSet):
         )
         serializer = OrderSerializer(order)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="invoice")
+    def invoice(self, request, pk=None, *args, **kwargs):
+        """Download the invoice for the order as a PDF."""
+
+        order = get_object_or_404(
+            Order.objects.prefetch_related("items"), pk=pk, user=request.user
+        )
+        pdf_bytes = generate_invoice_pdf(order)
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            f'attachment; filename="invoice_{order.id}.pdf"'
+        )
+        return response
 
     def create(self, request, *args, **kwargs):
         """Checkout: Create an order from user's cart."""

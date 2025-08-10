@@ -6,8 +6,11 @@ from dataclasses import dataclass
 from typing import List, Tuple, Optional
 
 import logging
+from io import BytesIO
 
 import stripe
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from bson import ObjectId
 from django.conf import settings
 from django.db import transaction
@@ -223,3 +226,32 @@ def release_reserved_inventory(order: Order) -> None:
         current_reserved = getattr(product, "reserved_inventory", 0)
         new_reserved = max(current_reserved - item.quantity, 0)
         Product.objects(pk=product.id).update(set__reserved_inventory=new_reserved)
+
+
+def generate_invoice_pdf(order: Order) -> bytes:
+    """Generate a simple PDF invoice for the given order."""
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    y = 750
+    p.setFont("Helvetica", 12)
+    p.drawString(50, y, f"Invoice for Order #{order.id}")
+    y -= 25
+    p.drawString(50, y, f"Customer: {order.user.username}")
+    y -= 40
+    p.drawString(50, y, "Items:")
+    y -= 20
+    for item in order.items.all():
+        p.drawString(
+            60,
+            y,
+            f"{item.product_name} (x{item.quantity}) - ${item.unit_price}",
+        )
+        y -= 20
+    y -= 20
+    p.drawString(50, y, f"Total: ${order.total_price}")
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    return pdf
