@@ -76,7 +76,7 @@
 - [x] Collect metrics for database query performance and track slow queries.
 - [x] Refactor settings to support hierarchical environment-specific overrides.
 - [x] Integrate with an external ERP system for unified inventory management.
-- [ ] Expose a webhook for shipment tracking updates from carriers.
+- [x] Expose a webhook for shipment tracking updates from carriers.
 - [x] Provide an endpoint for customers to download order invoices in PDF.
 - [x] Support purchasing and redeeming digital gift cards.
 - [ ] Implement referral codes with tracking for marketing campaigns.
