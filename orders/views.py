@@ -2,12 +2,19 @@
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import (
+    action,
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 import logging
+from django.conf import settings
+from django.utils.dateparse import parse_datetime
 
 from .tasks import send_order_confirmation_email
 from .services import create_order_from_cart, generate_invoice_pdf
@@ -99,3 +106,47 @@ class OrderViewSet(viewsets.ViewSet):
         order.save()
         serializer = OrderSerializer(order)
         return Response(serializer.data)
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def shipment_tracking_webhook(request, version):
+    """Receive shipment tracking updates from external carriers."""
+    secret = request.headers.get("X-Webhook-Token", "")
+    expected = getattr(settings, "SHIPMENT_WEBHOOK_SECRET", "")
+    if expected and secret != expected:
+        return Response(
+            {"detail": "Invalid token."}, status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    order_id = request.data.get("order_id")
+    status_value = request.data.get("status")
+    if not order_id or not status_value:
+        return Response(
+            {"detail": "order_id and status are required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    try:
+        order = Order.all_objects.get(pk=order_id)
+    except Order.DoesNotExist:
+        return Response(
+            {"detail": "Order not found."}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    valid_statuses = {choice[0] for choice in Order.STATUS_CHOICES}
+    if status_value not in valid_statuses:
+        return Response(
+            {"detail": "Invalid status."}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    shipped_date = request.data.get("shipped_date")
+    update_fields = ["status"]
+    order.status = status_value
+    if shipped_date:
+        parsed = parse_datetime(shipped_date)
+        if parsed:
+            order.shipped_date = parsed
+            update_fields.append("shipped_date")
+    order.save(update_fields=update_fields)
+    return Response({"detail": "Shipment update received."})
