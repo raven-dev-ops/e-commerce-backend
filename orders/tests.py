@@ -16,6 +16,7 @@ from types import SimpleNamespace
 import stripe
 from mongoengine import connect, disconnect
 import mongomock
+from secrets import token_hex
 
 
 class OrderModelTestCase(TestCase):
@@ -509,7 +510,12 @@ class OrderInvoiceDownloadTestCase(TestCase):
         self.assertTrue(response.content.startswith(b"%PDF"))
 
 
+WEBHOOK_SECRET = token_hex(16)
+INVALID_WEBHOOK_SECRET = token_hex(16)
+
+
 class ShipmentWebhookTestCase(TestCase):
+
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user(
@@ -526,7 +532,7 @@ class ShipmentWebhookTestCase(TestCase):
         self.url = reverse("shipment-webhook", kwargs={"version": "v1"})
 
     @override_settings(
-        SHIPMENT_WEBHOOK_SECRET="secret",
+        SHIPMENT_WEBHOOK_SECRET=WEBHOOK_SECRET,
         SECURE_SSL_REDIRECT=False,
         ALLOWED_HOSTS=["testserver"],
     )
@@ -535,14 +541,14 @@ class ShipmentWebhookTestCase(TestCase):
             self.url,
             {"order_id": self.order.id, "status": Order.Status.SHIPPED},
             format="json",
-            HTTP_X_WEBHOOK_TOKEN="secret",
+            HTTP_X_WEBHOOK_TOKEN=WEBHOOK_SECRET,
         )
         self.assertEqual(response.status_code, 200)
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, Order.Status.SHIPPED)
 
     @override_settings(
-        SHIPMENT_WEBHOOK_SECRET="secret",
+        SHIPMENT_WEBHOOK_SECRET=WEBHOOK_SECRET,
         SECURE_SSL_REDIRECT=False,
         ALLOWED_HOSTS=["testserver"],
     )
@@ -551,6 +557,6 @@ class ShipmentWebhookTestCase(TestCase):
             self.url,
             {"order_id": self.order.id, "status": Order.Status.SHIPPED},
             format="json",
-            HTTP_X_WEBHOOK_TOKEN="wrong",
+            HTTP_X_WEBHOOK_TOKEN=INVALID_WEBHOOK_SECRET,
         )
         self.assertEqual(response.status_code, 401)
