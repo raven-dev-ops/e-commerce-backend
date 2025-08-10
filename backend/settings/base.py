@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "reviews",
     "authentication",
     "audit",
+    "giftcards",
 ]
 
 SITE_ID = 2
