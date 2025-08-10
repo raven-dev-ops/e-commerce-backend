@@ -51,6 +51,11 @@ class LoginView(APIView):
             user = None
 
         if user and user.check_password(password) and user.email_verified:
+            if user.is_paused:
+                return Response(
+                    {"detail": "Account is paused."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             if user.is_staff:
                 if not user.mfa_secret:
                     return Response(

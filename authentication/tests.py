@@ -84,3 +84,25 @@ class AdminMFATest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("tokens", response.json())
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class PausedUserLoginTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="pause@example.com",
+            email="pause@example.com",
+            password="testpass123",  # nosec B106
+        )
+        self.user.email_verified = True
+        self.user.is_paused = True
+        self.user.save()
+
+    def test_login_blocked_when_paused(self):
+        response = self.client.post(
+            reverse("login", kwargs={"version": "v1"}),
+            data=json.dumps({"email": "pause@example.com", "password": "testpass123"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["detail"], "Account is paused.")

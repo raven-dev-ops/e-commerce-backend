@@ -3,6 +3,7 @@ from rest_framework import generics, permissions
 from rest_framework.serializers import ModelSerializer, CharField
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
@@ -124,3 +125,23 @@ class UserDataExportView(APIView):
         response = Response(data)
         response["Content-Disposition"] = 'attachment; filename="user-data.json"'
         return response
+
+
+class PauseUserView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(get_user_model_ref(), id=user_id)
+        user.is_paused = True
+        user.save(update_fields=["is_paused"])
+        return Response({"detail": "User paused."})
+
+
+class ReactivateUserView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(get_user_model_ref(), id=user_id)
+        user.is_paused = False
+        user.save(update_fields=["is_paused"])
+        return Response({"detail": "User reactivated."})

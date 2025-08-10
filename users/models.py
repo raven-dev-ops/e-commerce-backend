@@ -29,6 +29,7 @@ class User(AbstractUser):
         ],
     )
     mfa_secret = models.CharField(max_length=32, blank=True, null=True)
+    is_paused = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username

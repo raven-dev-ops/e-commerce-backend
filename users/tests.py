@@ -41,6 +41,37 @@ class UserModelTest(TestCase):
         self.assertTrue(admin_user.is_staff)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False)
+class UserPauseReactivateTest(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )  # nosec B106
+        self.user = User.objects.create_user(
+            username="regular", email="regular@example.com", password="pass"
+        )  # nosec B106
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.admin)
+
+    def test_pause_and_reactivate_user(self):
+        pause_url = reverse(
+            "pause-user", kwargs={"version": "v1", "user_id": self.user.id}
+        )
+        reactivate_url = reverse(
+            "reactivate-user", kwargs={"version": "v1", "user_id": self.user.id}
+        )
+
+        response = self.client.post(pause_url)
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_paused)
+
+        response = self.client.post(reactivate_url)
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.is_paused)
+
+
 class RemoveExpiredTokensCommandTest(TestCase):
     def test_removes_only_expired_tokens(self):
         old_user = User.objects.create_user(
