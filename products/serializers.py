@@ -32,6 +32,8 @@ class ProductSerializer(DocumentSerializer):
     variants = serializers.ListField(child=serializers.DictField(), required=False)
     tags = serializers.ListField(child=serializers.CharField(), required=False)
     availability = serializers.BooleanField(default=True)
+    publish_at = serializers.DateTimeField(required=False, allow_null=True)
+    unpublish_at = serializers.DateTimeField(required=False, allow_null=True)
     inventory = serializers.IntegerField()
     reserved_inventory = serializers.IntegerField()
     average_rating = serializers.FloatField(read_only=True)
@@ -56,6 +58,8 @@ class ProductSerializer(DocumentSerializer):
             "variants",
             "tags",
             "availability",
+            "publish_at",
+            "unpublish_at",
             "inventory",
             "reserved_inventory",
             "average_rating",
@@ -71,3 +75,12 @@ class ProductSerializer(DocumentSerializer):
     def update(self, instance, validated_data):
         validated_data.pop("uploaded_images", None)
         return super().update(instance, validated_data)
+
+    def validate(self, attrs):
+        publish_at = attrs.get("publish_at")
+        unpublish_at = attrs.get("unpublish_at")
+        if publish_at and unpublish_at and unpublish_at <= publish_at:
+            raise serializers.ValidationError(
+                {"unpublish_at": "Must be after publish_at."}
+            )
+        return attrs

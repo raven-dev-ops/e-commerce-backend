@@ -278,6 +278,44 @@ class ProductAPITestCase(TestCase):
         prices = sorted(float(p["price"]) for p in response.data["results"])
         self.assertEqual(prices, [5.0, 15.0])
 
+    def test_scheduled_publish_and_unpublish(self):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        future = timezone.now() + timedelta(days=1)
+        past = timezone.now() - timedelta(days=1)
+        Product.objects.create(
+            _id="507f1f77bcf86cd799439203",
+            product_name="Future Soap",
+            category="Bath",
+            description="Not yet",
+            price=2.00,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=1,
+            reserved_inventory=0,
+            publish_at=future,
+        )
+        Product.objects.create(
+            _id="507f1f77bcf86cd799439204",
+            product_name="Old Soap",
+            category="Bath",
+            description="Expired",
+            price=2.00,
+            ingredients=[],
+            benefits=[],
+            tags=[],
+            inventory=1,
+            reserved_inventory=0,
+            unpublish_at=past,
+        )
+        url = reverse("product-list", kwargs={"version": "v1"})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["product_name"], "API Soap")
+
     def test_non_staff_cannot_create_product(self):
         url = reverse("product-list", kwargs={"version": "v1"})
         payload = {

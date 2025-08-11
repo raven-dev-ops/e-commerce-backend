@@ -8,8 +8,11 @@ from mongoengine import (
     DictField,
     BooleanField,
     IntField,
+    DateTimeField,
 )
 from mongoengine.queryset.manager import queryset_manager
+from mongoengine.queryset.visitor import Q
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -30,6 +33,8 @@ class Product(Document):
     variants = ListField(DictField(), default=list)
     tags = ListField(StringField(max_length=255))
     availability = BooleanField(default=True)
+    publish_at = DateTimeField(null=True)
+    unpublish_at = DateTimeField(null=True)
     inventory = IntField(default=0)
     reserved_inventory = IntField(default=0)
     average_rating = FloatField(default=0.0)
@@ -43,12 +48,20 @@ class Product(Document):
             "tags",
             "product_name",
             "slug",
+            "publish_at",
+            "unpublish_at",
         ]
     }
 
     @queryset_manager
     def objects(doc_cls, queryset):
-        return queryset.filter(is_deleted=False)
+        now = timezone.now()
+        return queryset.filter(
+            Q(is_deleted=False)
+            & Q(availability=True)
+            & (Q(publish_at=None) | Q(publish_at__lte=now))
+            & (Q(unpublish_at=None) | Q(unpublish_at__gt=now))
+        )
 
     @queryset_manager
     def all_objects(doc_cls, queryset):
@@ -66,7 +79,7 @@ class Product(Document):
             base_slug = slugify(self.product_name)
             slug = base_slug
             counter = 1
-            while Product.objects(slug=slug).first() is not None:
+            while Product.all_objects(slug=slug).first() is not None:
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
