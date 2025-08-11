@@ -107,7 +107,7 @@
 - [ ] Integrate a third-party tax calculation service.
 - [ ] Apply rate limiting to GraphQL queries.
 - [ ] Implement API key management for partner integrations.
-- [ ] Attach correlation IDs to logs and responses for traceability.
+- [x] Attach correlation IDs to logs and responses for traceability.
 - [ ] Log every admin action with user and timestamp metadata.
 - [ ] Provide a CLI tool to assist with complex data migrations.
 - [ ] Offer gRPC endpoints for internal service communication.

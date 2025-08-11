@@ -29,6 +29,22 @@ class SecurityHeadersMiddlewareTest(TestCase):
         )
 
 
+class CorrelationIdMiddlewareTest(TestCase):
+    def test_correlation_id_added(self):
+        response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
+        self.assertIn("X-Correlation-ID", response.headers)
+        self.assertTrue(response.headers["X-Correlation-ID"])
+
+    def test_existing_correlation_id_used(self):
+        response = self.client.get(
+            "/health/",
+            secure=True,
+            HTTP_HOST="localhost",
+            HTTP_X_CORRELATION_ID="test-id",
+        )
+        self.assertEqual(response.headers["X-Correlation-ID"], "test-id")
+
+
 class HealthEndpointTest(TestCase):
     def test_health_returns_ok(self):
         response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
