@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.conf import settings
+from django.db.models import Q
 from authentication.models import Address  # Adjust import if Address is elsewhere
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -69,7 +70,9 @@ class Order(models.Model):
     class Meta:
         indexes = [
             models.Index(
-                fields=["user", "-created_at"], name="idx_order_user_created_at"
+                fields=["user", "-created_at"],
+                name="idx_order_user_created_at",
+                condition=Q(is_deleted=False),
             )
         ]
 

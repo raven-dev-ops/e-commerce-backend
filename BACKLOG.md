@@ -91,7 +91,7 @@
 - [ ] Allow scheduling of product publish and unpublish dates.
 - [ ] Add ability to temporarily pause and reactivate user accounts.
 - [x] Revoke active sessions when a user changes their password.
-- [ ] Use partial indexes in PostgreSQL to optimize soft-delete lookups.
+- [x] Use partial indexes in PostgreSQL to optimize soft-delete lookups.
 - [ ] Implement multi-tenant support for enterprise clients.
 - [ ] Introduce a message queue to decouple event-driven workflows.
 - [ ] Add circuit breaker logic when calling external services.
