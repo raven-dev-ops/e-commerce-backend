@@ -1,4 +1,4 @@
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse, resolve
 from django.core.cache import cache
 from unittest.mock import patch
@@ -158,6 +158,23 @@ class GraphQLIntrospectionCacheTest(TestCase):
             )
 
         self.assertEqual(cached_response.status_code, 200)
+
+
+class GraphQLComplexityLimitTest(TestCase):
+    @override_settings(GRAPHQL_MAX_COMPLEXITY=2)
+    def test_complex_query_rejected(self):
+        query = "{ products { productName category } }"
+        response = self.client.post(
+            "/api/v1/graphql/",
+            data={"query": query},
+            content_type="application/json",
+            secure=True,
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertIn("errors", data)
+        self.assertIn("too complex", data["errors"][0]["message"])
 
 
 class CeleryMonitoringTest(TestCase):

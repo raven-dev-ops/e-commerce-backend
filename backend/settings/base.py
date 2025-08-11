@@ -350,6 +350,8 @@ REST_AUTH_SERIALIZERS = {
 
 GRAPHENE = {"SCHEMA": "backend.schema.schema"}
 
+GRAPHQL_MAX_COMPLEXITY = int(os.getenv("GRAPHQL_MAX_COMPLEXITY", "100"))
+
 warnings.filterwarnings(
     "ignore", message="app_settings.USERNAME_REQUIRED is deprecated"
 )
