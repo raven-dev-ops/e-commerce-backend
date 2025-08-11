@@ -72,6 +72,20 @@ class UserPauseReactivateTest(TestCase):
         self.assertFalse(self.user.is_paused)
 
 
+class RevokeSessionsOnPasswordChangeTest(TestCase):
+    def test_sessions_removed_after_password_change(self):
+        user = User.objects.create_user(username="u", password="oldpass")  # nosec B106
+        client = APIClient()
+        self.assertTrue(client.login(username="u", password="oldpass"))
+        session_key = client.session.session_key
+        self.assertTrue(Session.objects.filter(session_key=session_key).exists())
+
+        user.set_password("newpass")  # nosec B106
+        user.save()
+
+        self.assertFalse(Session.objects.filter(session_key=session_key).exists())
+
+
 class RemoveExpiredTokensCommandTest(TestCase):
     def test_removes_only_expired_tokens(self):
         old_user = User.objects.create_user(
