@@ -3,13 +3,17 @@
 import os
 import sys
 
-# Configure DataDog APM if the optional dependency is available
-import backend.datadog  # noqa: F401
-
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+
+    # Configure DataDog APM if the optional dependency is available
+    import backend.datadog  # noqa: F401
+
+    # Configure OpenTelemetry tracing if the optional dependency is available
+    import backend.opentelemetry  # noqa: F401
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

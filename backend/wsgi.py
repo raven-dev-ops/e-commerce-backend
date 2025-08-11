@@ -9,12 +9,13 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 
 import os
 
-from . import datadog  # noqa: F401
-
-from .mongo_connection import connect_mongodb
-from django.core.wsgi import get_wsgi_application
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+
+from . import datadog  # noqa: F401,E402
+from . import opentelemetry  # noqa: F401,E402
+
+from .mongo_connection import connect_mongodb  # noqa: E402
+from django.core.wsgi import get_wsgi_application  # noqa: E402
 
 application = get_wsgi_application()
 
