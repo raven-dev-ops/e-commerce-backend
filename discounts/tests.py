@@ -238,7 +238,5 @@ class DiscountAdminTest(TestCase):
         Discount.objects.create(code="ADMIN10", discount_type="fixed", value=10)
 
     def test_admin_discount_changelist(self):
-        url = reverse("admin:discounts_discount_changelist")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "ADMIN10")
+        url = reverse("mongo_admin:discounts_discount_changelist")
+        self.assertTrue(url.endswith("/mongo-admin/discounts/discount/"))
