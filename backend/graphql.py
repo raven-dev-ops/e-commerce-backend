@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from graphene_django.views import GraphQLView
 from graphql import GraphQLError
+from products.models import Category
 from graphql.language.ast import (
     FieldNode,
     FragmentSpreadNode,
@@ -12,6 +13,22 @@ from graphql.language.ast import (
     OperationDefinitionNode,
 )
 from graphql.validation import ValidationRule
+
+
+class CategoryLoader:
+    """Simple loader caching category lookups to avoid N+1 queries."""
+
+    def __init__(self):
+        self._cache = {}
+
+    def prime_many(self, names):
+        missing = [name for name in names if name not in self._cache]
+        if missing:
+            categories = list(Category.objects.filter(name__in=missing))
+            self._cache.update({c.name: c for c in categories})
+
+    def load(self, name):
+        return self._cache.get(name)
 
 
 class MaxQueryComplexityRule(ValidationRule):
@@ -57,6 +74,11 @@ class CachedGraphQLView(GraphQLView):
         rules = kwargs.pop("validation_rules", []) or []
         rules.append(MaxQueryComplexityRule)
         super().__init__(*args, validation_rules=rules, **kwargs)
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        context.category_loader = CategoryLoader()
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         query = ""

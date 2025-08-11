@@ -4,7 +4,7 @@ from django.core.cache import cache
 from unittest.mock import patch
 from mongoengine import connect, disconnect
 import mongomock
-from products.models import Product
+from products.models import Product, Category
 from celery import shared_task
 from backend.celery_monitoring import (
     TASK_FAILURES,
@@ -102,6 +102,12 @@ class GraphQLProductQueryTest(TestCase):
 
     def setUp(self):
         Product.drop_collection()
+        Category.drop_collection()
+        Category.objects.create(
+            _id="bath",
+            name="Bath",
+            description="Bath items",
+        )
         Product.objects.create(
             _id="507f1f77bcf86cd799439033",
             product_name="GraphQL Soap",
@@ -116,7 +122,7 @@ class GraphQLProductQueryTest(TestCase):
         )
 
     def test_products_query_returns_data(self):
-        query = "{ products { productName category } }"
+        query = "{ products { productName category { name } } }"
         response = self.client.post(
             "/api/v1/graphql/",
             data={"query": query},
@@ -127,6 +133,10 @@ class GraphQLProductQueryTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["data"]["products"][0]["productName"], "GraphQL Soap")
+        self.assertEqual(
+            data["data"]["products"][0]["category"]["name"],
+            "Bath",
+        )
 
 
 class GraphQLIntrospectionCacheTest(TestCase):
@@ -163,7 +173,7 @@ class GraphQLIntrospectionCacheTest(TestCase):
 class GraphQLComplexityLimitTest(TestCase):
     @override_settings(GRAPHQL_MAX_COMPLEXITY=2)
     def test_complex_query_rejected(self):
-        query = "{ products { productName category } }"
+        query = "{ products { productName category { name } } }"
         response = self.client.post(
             "/api/v1/graphql/",
             data={"query": query},
