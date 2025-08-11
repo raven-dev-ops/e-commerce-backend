@@ -59,6 +59,8 @@ def create_order_from_cart(user, data) -> Order:
 
     shipping_address_id = data.get("shipping_address_id")
     billing_address_id = data.get("billing_address_id")
+    is_gift = data.get("is_gift", False)
+    gift_message = data.get("gift_message", "")
 
     shipping_address: Optional[Address] = Address.objects.filter(
         user=user, is_default_shipping=True
@@ -186,6 +188,8 @@ def create_order_from_cart(user, data) -> Order:
             discount_type=discount_type,
             discount_value=discount_value,
             discount_amount=discount_amount,
+            is_gift=is_gift,
+            gift_message=gift_message,
         )
         OrderItem.objects.bulk_create(
             [OrderItem(order=order, **item) for item in order_items]

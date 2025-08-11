@@ -234,6 +234,33 @@ class CreateOrderFromCartTestCase(TestCase):
         self.assertIsNone(order.discount_code)
         self.assertEqual(self.product.reserved_inventory, 2)
 
+    def test_creates_gift_order(self):
+        cart_qs = self._setup_cart()
+
+        with (
+            patch("orders.services.Cart.objects", return_value=cart_qs),
+            patch("orders.services.Product.objects", self.product_qs),
+            patch(
+                "orders.services.get_or_create_user_ref",
+                return_value=SimpleNamespace(id=self.user.id),
+            ),
+            patch(
+                "orders.services.stripe.PaymentIntent.create",
+                return_value=SimpleNamespace(id="pi_123"),
+            ),
+        ):
+            order = create_order_from_cart(
+                self.user,
+                {
+                    "payment_method_id": "pm_1",
+                    "is_gift": True,
+                    "gift_message": "Happy Birthday!",
+                },
+            )
+
+        self.assertTrue(order.is_gift)
+        self.assertEqual(order.gift_message, "Happy Birthday!")
+
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class OrderIntegrationTestCase(TestCase):
@@ -334,6 +361,37 @@ class OrderIntegrationTestCase(TestCase):
         order = Order.objects.first()
         self.assertEqual(order.discount_code, "SAVE10")
         self.assertAlmostEqual(order.discount_amount, 2.0, places=2)
+
+    @patch("orders.views.send_order_confirmation_email.delay")
+    @patch("orders.services.stripe.PaymentIntent.create")
+    def test_create_order_with_gift_message(self, mock_intent, mock_email):
+        mock_intent.return_value = SimpleNamespace(id="pi_123")
+        cart = DummyCart(
+            items=[SimpleNamespace(product_id=str(self.product._id), quantity=1)]
+        )
+        cart_qs = MagicMock()
+        cart_qs.first.return_value = cart
+        product_qs = MagicMock()
+        product_qs.get.return_value = self.product
+        serializer_mock = MagicMock()
+        serializer_mock.return_value.data = {}
+        with patch("orders.services.Cart.objects", return_value=cart_qs), patch(
+            "orders.services.Product.objects", product_qs
+        ), patch("orders.views.OrderSerializer", serializer_mock):
+            url = reverse("order-list", kwargs={"version": "v1"})
+            response = self.client.post(
+                url,
+                {
+                    "payment_method_id": "pm_1",
+                    "is_gift": True,
+                    "gift_message": "Congrats",
+                },
+                format="json",
+            )
+        self.assertEqual(response.status_code, 201)
+        order = Order.objects.first()
+        self.assertTrue(order.is_gift)
+        self.assertEqual(order.gift_message, "Congrats")
 
     @patch("orders.services.stripe.PaymentIntent.create")
     def test_create_order_out_of_stock(self, mock_intent):

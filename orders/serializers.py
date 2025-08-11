@@ -37,6 +37,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "discount_type",
             "discount_value",
             "discount_amount",
+            "is_gift",
+            "gift_message",
             "items",
         ]
         read_only_fields = [
