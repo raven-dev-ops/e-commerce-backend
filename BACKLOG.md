@@ -130,7 +130,7 @@
 - [ ] Introduce an A/B testing framework for feature experiments.
 - [ ] Support SAML-based single sign-on for enterprise customers.
 - [ ] Add account deletion flow with email confirmation.
-- [ ] Allow marking orders as gifts with custom messages.
+- [x] Allow marking orders as gifts with custom messages.
 - [ ] Encrypt sensitive data at rest using a KMS.
 - [ ] Offer per-user notification preference settings.
 - [ ] Expose an endpoint showing API rate usage and limits.

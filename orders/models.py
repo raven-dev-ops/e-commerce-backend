@@ -62,6 +62,8 @@ class Order(models.Model):
     )
     discount_value = models.FloatField(blank=True, null=True)
     discount_amount = models.FloatField(blank=True, null=True)
+    is_gift = models.BooleanField(default=False)
+    gift_message = models.CharField(max_length=500, blank=True)
     is_deleted = models.BooleanField(default=False)
 
     objects = ActiveOrderManager()
