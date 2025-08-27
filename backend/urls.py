@@ -24,13 +24,18 @@ def custom_404(request, exception=None):
     return JsonResponse({"error": "Endpoint not found"}, status=404)
 
 
-def health(request):
+def readiness(request):
     try:
         connection.ensure_connection()
         db_status = "ok"
     except Exception:
         db_status = "unavailable"
-    return JsonResponse({"status": "ok", "database": db_status})
+    status_code = 200 if db_status == "ok" else 503
+    return JsonResponse({"status": "ok", "database": db_status}, status=status_code)
+
+
+def liveness(request):
+    return JsonResponse({"status": "ok"})
 
 
 def robots_txt(request):
@@ -79,7 +84,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("mongo-admin/", mongo_admin.site.urls),
     path("", home),
-    path("health/", health),
+    path("health/live/", liveness),
+    path("health/ready/", readiness),
+    path("health/", readiness),
     path(".well-known/security.txt", security_txt),
     path("robots.txt", robots_txt),
     path("api/<str:version>/", include(api_urlpatterns)),
