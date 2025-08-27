@@ -112,7 +112,7 @@
 - [ ] Provide a CLI tool to assist with complex data migrations.
 - [ ] Offer gRPC endpoints for internal service communication.
 - [ ] Deploy new versions via canary releases with automated rollback.
-- [ ] Add container health probes for Kubernetes readiness and liveness.
+- [x] Add container health probes for Kubernetes readiness and liveness.
 - [ ] Configure autoscaling policies for Celery worker pools.
 - [ ] Spin up ephemeral review environments for pull requests.
 - [ ] Use GitHub Actions to automate continuous deployments.

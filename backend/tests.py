@@ -92,10 +92,18 @@ class HealthEndpointTest(TestCase):
     @patch("backend.urls.connection.ensure_connection", side_effect=Exception)
     def test_health_reports_database_unavailable(self, mocked_ensure):
         response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 503)
         data = response.json()
         self.assertEqual(data.get("status"), "ok")
         self.assertEqual(data.get("database"), "unavailable")
+
+
+class LivenessEndpointTest(TestCase):
+    def test_liveness_returns_ok(self):
+        response = self.client.get("/health/live/", secure=True, HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data.get("status"), "ok")
 
 
 class RateLimitStatusViewTest(TestCase):
