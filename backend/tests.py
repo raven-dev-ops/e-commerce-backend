@@ -1,5 +1,5 @@
 from django.test import SimpleTestCase, TestCase, override_settings
-from django.urls import reverse, resolve
+from django.urls import reverse, resolve, path
 from django.core.cache import cache
 from unittest.mock import patch
 from mongoengine import connect, disconnect
@@ -12,6 +12,15 @@ from backend.celery_monitoring import (
 )
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from django.http import HttpResponse
+import gzip
+
+
+def big_view(request):
+    return HttpResponse("x" * 1000)
+
+
+urlpatterns = [path("big/", big_view)]
 
 
 class SecurityHeadersMiddlewareTest(TestCase):
@@ -40,6 +49,20 @@ class CorsPreflightCacheTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers.get("Access-Control-Max-Age"), "86400")
+
+
+@override_settings(ROOT_URLCONF=__name__)
+class GZipMiddlewareTest(SimpleTestCase):
+    def test_response_is_gzipped(self):
+        response = self.client.get(
+            "/big/",
+            secure=True,
+            HTTP_HOST="localhost",
+            HTTP_ACCEPT_ENCODING="gzip",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Encoding"], "gzip")
+        self.assertEqual(gzip.decompress(response.content), b"x" * 1000)
 
 
 class CorrelationIdMiddlewareTest(TestCase):

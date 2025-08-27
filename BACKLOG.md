@@ -123,7 +123,7 @@
 - [ ] Generate large dataset fixtures for performance testing.
  - [x] Document onboarding steps for new developers in the README.
 - [ ] Filter noisy log messages to reduce storage costs.
-- [ ] Compress API requests and responses using gzip.
+- [x] Compress API requests and responses using gzip.
 - [ ] Enable HTTP/2 support for faster client communication.
 - [ ] Implement a blue-green deployment workflow.
 - [ ] Provide predictive inventory analytics using machine learning.
