@@ -2,7 +2,15 @@
 
 This repository contains a Django and MongoEngine based backend for an example e-commerce platform.
 
+> **Usage & License Notice**
+>
+> This project is **not open source**. You must obtain explicit written permission from the repository owner before using, copying, modifying, or distributing any part of this codebase.
+>
+> **Private forks or other private copies of this repository are not allowed** for any purpose. Any fork or clone that the owner expressly permits must remain public and clearly reference this repository.
+
 ## Quickstart for Contributors
+
+> Only collaborators who have received explicit written permission from the owner may contribute. Do **not** create private forks or private copies of this repository.
 
 Get a local development instance running with the following commands:
 
@@ -27,6 +35,8 @@ celery -A backend worker -l info
 The API will be available at `http://127.0.0.1:8000/`.
 
 ## Developer Onboarding
+
+> These steps apply only to authorized collaborators. If you have not received explicit permission from the owner, you are not allowed to use this codebase or fork the repository (including private forks).
 
 New contributors can get started quickly by following these steps:
 
@@ -258,5 +268,12 @@ A minimal Python SDK is available in the `sdk` package for interacting with the 
 from sdk import ECommerceClient
 
 client = ECommerceClient("https://api.example.com", token="your-api-token")
+```
+
+## License & Usage
+
+- This project is licensed under a **proprietary license**; see `LICENSE` in the repository root.
+- You must obtain **explicit written permission** from the owner before using, copying, modifying, or distributing this codebase.
+- **Private forks or any other private copies are not permitted.** Any fork or clone that the owner expressly permits must remain public and clearly attribute this repository and its owner.
 products = client.get_products()
 ```
