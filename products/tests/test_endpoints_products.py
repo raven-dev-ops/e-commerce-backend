@@ -1,85 +1,12 @@
-# products/tests.py
-
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.core.cache import cache
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 from rest_framework.test import APIClient
 from unittest.mock import patch
 
-from products.models import Product, Category
-from products.serializers import ProductSerializer
-from products.utils import send_low_stock_notification
-from products.tasks import send_low_stock_email, upload_product_image_to_s3
-from orders.models import Order, OrderItem
-from products.services import get_recommended_products
+from products.models import Product
 from backend.tests.utils import MongoTestCase
-
-
-class ProductModelSerializerTest(MongoTestCase):
-    def setUp(self):
-        Product.drop_collection()
-        self.product = Product.objects.create(
-            _id="507f1f77bcf86cd799439011",
-            product_name="Test Soap",
-            category="Bath",
-            description="A soothing soap",
-            price=9.99,
-            ingredients=["Sodium hydroxide", "Water", "Fragrance"],
-            images=["http://example.com/image1.jpg"],
-            variations=[{"color": "blue"}, {"size": "small"}],
-            weight=0.25,
-            dimensions="3x3x1",
-            benefits=["Moisturizing", "Gentle"],
-            scent_profile="Lavender",
-            variants=[{"type": "bar"}, {"type": "liquid"}],
-            tags=["soap", "bath"],
-            availability=True,
-            inventory=100,
-            reserved_inventory=5,
-            average_rating=4.5,
-            review_count=10,
-        )
-
-    def test_product_str(self):
-        self.assertEqual(str(self.product), "Test Soap")
-
-    def test_product_serializer(self):
-        serializer = ProductSerializer(instance=self.product)
-        data = serializer.data
-        self.assertEqual(data["product_name"], "Test Soap")
-        self.assertEqual(data["slug"], "test-soap")
-        self.assertEqual(data["price"], "9.99")  # Decimal serialized as string
-        self.assertIn("bath", [tag.lower() for tag in data["tags"]])
-        self.assertEqual(data["average_rating"], 4.5)
-        self.assertEqual(data["review_count"], 10)
-
-    def test_product_slug_unique(self):
-        second = Product.objects.create(
-            _id="507f1f77bcf86cd799439012",
-            product_name="Test Soap",
-            category="Bath",
-            description="Another soap",
-            price=9.99,
-            ingredients=[],
-            benefits=[],
-            tags=[],
-            inventory=10,
-            reserved_inventory=0,
-        )
-        self.assertNotEqual(self.product.slug, second.slug)
-
-    def test_soft_delete_and_restore(self):
-        product_id = self.product._id
-        self.product.delete()
-        self.assertIsNone(Product.objects(_id=product_id).first())
-        deleted = Product.all_objects(_id=product_id).first()
-        self.assertIsNotNone(deleted)
-        self.assertTrue(deleted.is_deleted)
-        deleted.restore()
-        self.assertIsNotNone(Product.objects(_id=product_id).first())
+from django.core.cache import cache
 
 
 @override_settings(
@@ -87,7 +14,6 @@ class ProductModelSerializerTest(MongoTestCase):
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
 class ProductAPITestCase(MongoTestCase):
-
     def setUp(self):
         Product.drop_collection()
         cache.clear()
@@ -104,13 +30,13 @@ class ProductAPITestCase(MongoTestCase):
             inventory=10,
             reserved_inventory=0,
         )
-        User = get_user_model()
-        self.regular_user = User.objects.create_user(
-            username="regular", password="pass"
-        )  # nosec B106
-        self.staff_user = User.objects.create_user(
-            username="staff", password="pass", is_staff=True
-        )  # nosec B106
+        user_model = get_user_model()
+        self.regular_user = user_model.objects.create_user(
+            username="regular", password="pass"  # nosec B106
+        )
+        self.staff_user = user_model.objects.create_user(
+            username="staff", password="pass", is_staff=True  # nosec B106
+        )
 
     def test_list_products_endpoint(self):
         url = reverse("product-list", kwargs={"version": "v1"})
@@ -373,16 +299,17 @@ class ProductAPITestCase(MongoTestCase):
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
 class ProductBulkAPITestCase(MongoTestCase):
-
     def setUp(self):
         Product.drop_collection()
         self.client = APIClient()
-        User = get_user_model()
-        self.staff_user = User.objects.create_user(
-            username="staffbulk", password="pass", is_staff=True
-        )  # nosec B106
+        user_model = get_user_model()
+        self.staff_user = user_model.objects.create_user(
+            username="staffbulk", password="pass", is_staff=True  # nosec B106
+        )
 
     def test_bulk_import_creates_products(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
         csv_data = (
             "product_name,category,description,price,inventory,ingredients,benefits,tags\n"
             "Bulk Soap,Bath,Desc,3.00,5,Water|Lye,Clean,Bath\n"
@@ -424,67 +351,18 @@ class ProductBulkAPITestCase(MongoTestCase):
         self.assertIn("Export Soap", lines[1])
 
 
-class ProductTasksTestCase(MongoTestCase):
-
-    def setUp(self):
-        Product.drop_collection()
-
-    @override_settings(
-        DEFAULT_FROM_EMAIL="from@example.com", ADMIN_EMAIL="admin@example.com"
-    )
-    @patch("products.tasks.send_mail")
-    def test_send_low_stock_email_task(self, mock_send_mail):
-        send_low_stock_email("Soap", "1", 2)
-        mock_send_mail.assert_called_once()
-        args = mock_send_mail.call_args[0]
-        self.assertEqual(args[0], "Low Stock Alert: Soap")
-        self.assertIn("Current Stock: 2", args[1])
-        self.assertEqual(args[2], "from@example.com")
-        self.assertEqual(args[3], ["admin@example.com"])
-
-    @override_settings(ADMIN_EMAIL="admin@example.com")
-    @patch("products.utils.send_low_stock_email.delay")
-    def test_send_low_stock_notification_queues_task(self, mock_delay):
-        send_low_stock_notification("Soap", "1", 3)
-        mock_delay.assert_called_once_with("Soap", "1", 3)
-
-    @override_settings(AWS_S3_BUCKET="test-bucket")
-    @patch("products.tasks.boto3.client")
-    def test_upload_product_image_to_s3_task(self, mock_client):
-        product = Product.objects.create(
-            _id="img1",
-            product_name="Img Soap",
-            category="Bath",
-            description="desc",
-            price=5.0,
-            ingredients=[],
-            benefits=[],
-            tags=[],
-            inventory=1,
-            reserved_inventory=0,
-        )
-        mock_s3 = mock_client.return_value
-        mock_s3.upload_fileobj.return_value = None
-        upload_product_image_to_s3(str(product._id), "test.jpg", b"data")
-        mock_s3.upload_fileobj.assert_called_once()
-        updated = Product.objects.get(_id="img1")
-        self.assertEqual(len(updated.images), 1)
-        self.assertTrue(updated.images[0].endswith("test.jpg"))
-
-
 @override_settings(
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
 class ValidationErrorFormatTestCase(MongoTestCase):
-
     def setUp(self):
         Product.drop_collection()
         self.client = APIClient()
-        User = get_user_model()
-        self.admin = User.objects.create_user(
-            username="admin", password="pass", is_staff=True
-        )  # nosec B106
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_user(
+            username="admin", password="pass", is_staff=True  # nosec B106
+        )
 
     def test_structured_validation_errors(self):
         self.client.force_authenticate(self.admin)
@@ -499,131 +377,6 @@ class ValidationErrorFormatTestCase(MongoTestCase):
         data = response.json()
         self.assertIn("errors", data)
         self.assertIsInstance(data["errors"], list)
-        fields = {err.get("field") for err in data["errors"]}
+        fields = {err.get("field") for err in data["errors"]}  # type: ignore[union-attr]
         self.assertIn("product_name", fields)
 
-
-class ProductRecommendationServiceTestCase(MongoTestCase):
-
-    def setUp(self):
-        Product.drop_collection()
-        User = get_user_model()
-        self.user = User.objects.create_user(
-            username="recuser", password="pass"
-        )  # nosec B106
-        Product.objects.create(
-            _id="p1",
-            product_name="Soap A",
-            category="Bath",
-            description="desc",
-            price=1.0,
-            average_rating=4.0,
-        )
-        Product.objects.create(
-            _id="p2",
-            product_name="Soap B",
-            category="Bath",
-            description="desc",
-            price=1.0,
-            average_rating=5.0,
-        )
-        Product.objects.create(
-            _id="p3",
-            product_name="Lotion C",
-            category="Beauty",
-            description="desc",
-            price=1.0,
-        )
-        order = Order.objects.create(
-            user=self.user,
-            total_price=1.0,
-            shipping_cost=0,
-            tax_amount=0,
-            status=Order.Status.PENDING,
-        )
-        OrderItem.objects.create(
-            order=order, product_name="Soap A", quantity=1, unit_price=1.0
-        )
-
-    def test_recommend_products_from_purchase_history(self):
-        recommendations = get_recommended_products(self.user)
-        self.assertEqual(len(recommendations), 1)
-        self.assertEqual(recommendations[0].product_name, "Soap B")
-
-    def test_returns_empty_list_for_new_user(self):
-        User = get_user_model()
-        new_user = User.objects.create_user(
-            username="newuser", password="pass"
-        )  # nosec B106
-        self.assertEqual(get_recommended_products(new_user), [])
-
-
-@override_settings(
-    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
-)
-class PrewarmCachesCommandTest(MongoTestCase):
-
-    def setUp(self):
-        Product.drop_collection()
-        Category.drop_collection()
-        self.product = Product.objects.create(
-            _id="507f1f77bcf86cd799439099",
-            product_name="Cache Soap",
-            category="Bath",
-            description="desc",
-            price=1.0,
-            ingredients=[],
-            benefits=[],
-            tags=[],
-            inventory=10,
-            reserved_inventory=0,
-        )
-        Category.objects.create(
-            _id="507f1f77bcf86cd799439098", name="Bath", description=""
-        )
-        cache.clear()
-
-    def test_command_warms_expected_caches(self):
-        call_command("prewarm_caches")
-        self.assertIsNotNone(cache.get("product_list"))
-        self.assertIsNotNone(cache.get(f"product:{self.product.slug}"))
-        self.assertIsNotNone(cache.get("category_list"))
-
-
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    ERP_API_URL="https://erp.example.com",
-    ERP_API_KEY="testkey",
-    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
-)
-class ERPInventorySyncTest(MongoTestCase):
-    """Tests for syncing inventory with the external ERP system."""
-
-    def setUp(self):
-        Product.drop_collection()
-        self.product = Product.objects.create(
-            _id="erp1",
-            product_name="ERP Soap",
-            category="Bath",
-            description="desc",
-            price=1.0,
-            ingredients=[],
-            benefits=[],
-            tags=[],
-            inventory=0,
-            reserved_inventory=0,
-        )
-
-    @patch("erp.client.requests.get")
-    def test_sync_inventory_command_updates_product(self, mock_get):
-        mock_get.return_value.json.return_value = {"inventory": 25}
-        mock_get.return_value.raise_for_status.return_value = None
-
-        call_command("sync_inventory_from_erp")
-        self.product.reload()
-        self.assertEqual(self.product.inventory, 25)
-        mock_get.assert_called_with(
-            "https://erp.example.com/inventory/erp1",
-            headers={"Authorization": "Bearer testkey"},
-            timeout=5,
-        )
