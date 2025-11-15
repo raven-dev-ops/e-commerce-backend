@@ -1,5 +1,6 @@
-# backend/endpoints.py
+import os
 
+# backend/endpoints.py
 from django.contrib import admin
 from django_mongoengine import mongo_admin
 from django.urls import path, include
