@@ -374,15 +374,30 @@ warnings.filterwarnings(
 warnings.filterwarnings("ignore", message="app_settings.EMAIL_REQUIRED is deprecated")
 
 # Celery configuration
+_celery_result_backend_env = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_RESULT_BACKEND = _celery_result_backend_env or CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_TRANSPORT_OPTIONS: dict[str, Any] = {}
 CELERY_REDIS_BACKEND_USE_SSL: dict[str, Any] | None = None
 
+def _append_ssl_flag(url: str) -> str:
+    if "ssl_cert_reqs=" in url:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}ssl_cert_reqs=none"
+
+
 if CELERY_BROKER_URL.startswith("rediss://"):
+    CELERY_BROKER_URL = _append_ssl_flag(CELERY_BROKER_URL)
+    if _celery_result_backend_env:
+        if CELERY_RESULT_BACKEND.startswith("rediss://"):
+            CELERY_RESULT_BACKEND = _append_ssl_flag(CELERY_RESULT_BACKEND)
+    else:
+        CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+
     ssl_options = {"cert_reqs": ssl.CERT_NONE}
     CELERY_BROKER_TRANSPORT_OPTIONS["ssl"] = ssl_options
     CELERY_REDIS_BACKEND_USE_SSL = ssl_options
