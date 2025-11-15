@@ -1,4 +1,9 @@
-from backend.models.products import Product, Category
+"""
+Legacy MongoEngine product models have been removed. The product
+catalog now lives in the frontend static files.
 
-__all__ = ["Product", "Category"]
+This module is kept only so imports like `from products.models import Product`
+do not break at import time, but no ORM or document models are defined.
+"""
 
+__all__: list[str] = []

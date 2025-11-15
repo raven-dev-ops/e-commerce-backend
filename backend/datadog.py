@@ -10,4 +10,4 @@ if util.find_spec("ddtrace") and os.getenv("DD_TRACE_ENABLED", "true").lower() i
 }:
     from ddtrace import patch_all  # type: ignore
 
-    patch_all(mongoengine=False)
+    patch_all()

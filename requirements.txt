@@ -10,21 +10,16 @@ Django==4.2.21
 django-allauth==0.54.0
 django-cors-headers==4.7.0
 django-filter==25.1
-django-mongoengine @ git+https://github.com/MongoEngine/django-mongoengine.git@298cdcf59b21fe590958f57f27bf28e7192fcc4e
-django-mongoengine-filter==0.4.2
-django-rest-framework-mongoengine @ git+https://github.com/umutbozkurt/django-rest-framework-mongoengine.git@2e1b2d3ce3ebd54b325b4999fe6efaf75c0aec23
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
 dnspython==2.7.0
 gunicorn==23.0.0
 idna==3.10
-mongoengine==0.29.1
 packaging==25.0
 psycopg==3.2.9
 psycopg2-binary==2.9.10
 pycparser==2.22
 PyJWT==2.9.0
-pymongo==4.12.1
 python-dotenv==1.1.0
 python-json-logger==2.0.7
 requests==2.32.3
@@ -36,7 +31,6 @@ typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
 whitenoise==6.9.0
-mongomock==4.1.2
 setuptools==80.9.0
 sentry-sdk==2.1.1
 celery==5.3.6

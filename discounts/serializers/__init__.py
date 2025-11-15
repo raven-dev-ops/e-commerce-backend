@@ -1,7 +1,6 @@
-from backend.serializers.discounts import (  # noqa: F401
-    ProductSerializer,
-    ReviewSerializer,
-    DiscountSerializer,
-    CategorySerializer,
-)
+"""
+Legacy discount serializers removed; discounts are no longer
+managed server-side.
+"""
 
+__all__: list[str] = []

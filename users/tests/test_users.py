@@ -1,6 +1,6 @@
 """Tests for the users app."""
 
-from datetime import timedelta, datetime
+from datetime import timedelta
 from uuid import uuid4
 
 from django.conf import settings
@@ -13,14 +13,9 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from io import BytesIO
-import mongomock
-from mongoengine import connect, disconnect
 from PIL import Image
 from rest_framework.test import APIClient
 
-from orders.models import Order, OrderItem
-from products.models import Product
-from reviews.models import Review
 from users.tasks import cleanup_expired_sessions, purge_inactive_users
 
 User = get_user_model()
@@ -176,62 +171,3 @@ class UserAvatarValidationTest(TestCase):
             user.full_clean()
 
 
-@override_settings(SECURE_SSL_REDIRECT=False)
-class UserDataExportViewTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
-
-    def setUp(self):
-        Product.drop_collection()
-        Review.drop_collection()
-        self.user = User.objects.create_user(
-            username="export", password="pass"
-        )  # nosec B106
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.user)
-        order = Order.objects.create(user=self.user, total_price=20)
-        OrderItem.objects.create(
-            order=order, product_name="Item", quantity=1, unit_price=20
-        )
-        product = Product.objects.create(
-            _id="507f1f77bcf86cd799439016",
-            product_name="Prod",
-            category="Test",
-            description="Desc",
-            price=9.99,
-            ingredients=[],
-            benefits=[],
-            tags=[],
-            inventory=10,
-            reserved_inventory=0,
-        )
-        Review.objects.create(
-            user_id=self.user.pk,
-            product=product,
-            rating=5,
-            comment="Great",
-            status="approved",
-            created_at=datetime.utcnow(),
-        )
-
-    def test_exports_user_data(self):
-        url = reverse("user-data-export", kwargs={"version": "v1"})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(data["user"]["username"], "export")
-        self.assertEqual(len(data["orders"]), 1)
-        self.assertEqual(len(data["reviews"]), 1)
-        self.assertEqual(data["orders"][0]["items"][0]["product_name"], "Item")

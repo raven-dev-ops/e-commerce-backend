@@ -79,8 +79,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.instagram",
-    "django_mongoengine",
-    "django_mongoengine.mongo_admin",
     "drf_yasg",
     "graphene_django",
     "waffle",
@@ -229,19 +227,6 @@ else:
         }
     }
 
-MONGODB_URI = os.getenv("MONGODB_URI", os.getenv("MONGO_URI"))
-if os.getenv("CI") or os.getenv("TESTING"):
-    # Use a local Mongo URI during automated tests to avoid network lookups
-    MONGODB_URI = "mongodb://localhost"
-
-MONGODB_DATABASES = {
-    "default": {
-        "name": "website",
-        "host": MONGODB_URI,
-        "connect": False,
-    }
-}
-
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "dummy")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "dummy")
 if STRIPE_SECRET_KEY == "dummy" or STRIPE_WEBHOOK_SECRET == "dummy":  # nosec B105
@@ -313,16 +298,6 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
-            "level": LOG_LEVEL,
-            "propagate": False,
-        },
-        "products.views": {
-            "handlers": ["console"],
-            "level": LOG_LEVEL,
-            "propagate": False,
-        },
-        "mongoengine": {
             "handlers": ["console"],
             "level": LOG_LEVEL,
             "propagate": False,

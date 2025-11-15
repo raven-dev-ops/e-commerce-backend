@@ -2,7 +2,6 @@ import os
 
 # backend/endpoints.py
 from django.contrib import admin
-from django_mongoengine import mongo_admin
 from django.urls import path, include
 from django.http import HttpResponse, JsonResponse
 from django.db import connection
@@ -124,7 +123,6 @@ api_urlpatterns = [
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("mongo-admin/", mongo_admin.site.urls),
     path("", home),
     path("health/live/", liveness),
     path("health/ready/", readiness),

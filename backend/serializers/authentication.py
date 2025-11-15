@@ -1,14 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework_mongoengine.serializers import DocumentSerializer
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 
 from authentication.models import Address
 
 
-class AddressSerializer(DocumentSerializer):
+class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = (
@@ -81,4 +78,3 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
 
     # You can extend this later to add custom behavior.
     pass
-

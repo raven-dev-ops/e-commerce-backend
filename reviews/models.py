@@ -1,4 +1,6 @@
-from backend.models.reviews import Review
+"""
+Legacy review document models have been removed as reviews are no
+longer stored in MongoDB.
+"""
 
-__all__ = ["Review"]
-
+__all__: list[str] = []

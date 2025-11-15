@@ -8,7 +8,6 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from orders.models import Order
-from reviews.models import Review
 
 
 def get_user_model_ref():
@@ -104,24 +103,7 @@ class UserDataExportView(APIView):
                 }
             )
 
-        reviews = []
-        for review in Review.objects.filter(user_id=user.id):
-            product_name = (
-                review.product.product_name
-                if getattr(review, "product", None)
-                else None
-            )
-            reviews.append(
-                {
-                    "product": product_name,
-                    "rating": review.rating,
-                    "comment": review.comment,
-                    "status": review.status,
-                    "created_at": review.created_at.isoformat(),
-                }
-            )
-
-        data = {"user": user_data, "orders": orders, "reviews": reviews}
+        data = {"user": user_data, "orders": orders, "reviews": []}
         response = Response(data)
         response["Content-Disposition"] = 'attachment; filename="user-data.json"'
         return response
