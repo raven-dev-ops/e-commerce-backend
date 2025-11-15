@@ -181,7 +181,7 @@ MIDDLEWARE = [
     "backend.middleware.SecurityHeadersMiddleware",
 ]
 
-ROOT_URLCONF = "backend.urls"
+ROOT_URLCONF = "backend.endpoints"
 
 TEMPLATES = [
     {

@@ -1,4 +1,4 @@
-# backend/urls.py
+# backend/endpoints.py
 
 from django.contrib import admin
 from django_mongoengine import mongo_admin
@@ -59,17 +59,17 @@ schema_view = get_schema_view(
 )
 
 api_urlpatterns = [
-    path("users/", include("users.urls")),
-    path("products/", include("products.urls")),
-    path("orders/", include("orders.urls")),
-    path("cart/", include("cart.urls")),
-    path("payments/", include("payments.urls")),
-    path("discounts/", include("discounts.urls")),
-    path("reviews/", include("reviews.urls")),
-    path("giftcards/", include("giftcards.urls")),
-    path("referrals/", include("referrals.urls")),
-    path("notifications/", include("notifications.urls")),
-    path("authentication/", include("authentication.urls")),
+    path("users/", include("users.endpoints")),
+    path("products/", include("products.endpoints")),
+    path("orders/", include("orders.endpoints")),
+    path("cart/", include("cart.endpoints")),
+    path("payments/", include("payments.endpoints")),
+    path("discounts/", include("discounts.endpoints")),
+    path("reviews/", include("reviews.endpoints")),
+    path("giftcards/", include("giftcards.endpoints")),
+    path("referrals/", include("referrals.endpoints")),
+    path("notifications/", include("notifications.endpoints")),
+    path("authentication/", include("authentication.endpoints")),
     path("auth/", include("dj_rest_auth.urls")),
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
     path("auth/social/", include("allauth.socialaccount.urls")),
@@ -101,7 +101,7 @@ urlpatterns = [
     ),
 ]
 
-handler404 = "backend.urls.custom_404"
+handler404 = "backend.endpoints.custom_404"
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

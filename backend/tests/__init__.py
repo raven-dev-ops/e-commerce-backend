@@ -89,7 +89,7 @@ class HealthEndpointTest(TestCase):
         self.assertEqual(data.get("status"), "ok")
         self.assertEqual(data.get("database"), "ok")
 
-    @patch("backend.urls.connection.ensure_connection", side_effect=Exception)
+    @patch("backend.endpoints.connection.ensure_connection", side_effect=Exception)
     def test_health_reports_database_unavailable(self, mocked_ensure):
         response = self.client.get("/health/", secure=True, HTTP_HOST="localhost")
         self.assertEqual(response.status_code, 503)
