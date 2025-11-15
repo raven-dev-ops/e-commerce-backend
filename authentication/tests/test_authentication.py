@@ -42,6 +42,13 @@ class EmailVerificationTest(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.email_verified)
 
+    def test_verify_email_with_invalid_token_returns_404(self):
+        url = reverse("verify-email", kwargs={"token": "invalid-token", "version": "v1"})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.email_verified)
+
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class AdminMFATest(TestCase):
@@ -85,6 +92,35 @@ class AdminMFATest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("tokens", response.json())
 
+    def test_admin_login_with_missing_otp_fails(self):
+        response = self.client.post(
+            reverse("login", kwargs={"version": "v1"}),
+            data=json.dumps(
+                {
+                    "email": "admin@example.com",
+                    "password": "adminpass123",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["detail"], "Invalid or missing OTP.")
+
+    def test_admin_login_with_wrong_otp_fails(self):
+        response = self.client.post(
+            reverse("login", kwargs={"version": "v1"}),
+            data=json.dumps(
+                {
+                    "email": "admin@example.com",
+                    "password": "adminpass123",
+                    "otp": "000000",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["detail"], "Invalid or missing OTP.")
+
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class PausedUserLoginTest(TestCase):
@@ -106,3 +142,37 @@ class PausedUserLoginTest(TestCase):
         )
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"], "Account is paused.")
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class LoginInvalidCredentialsTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="valid@example.com",
+            email="valid@example.com",
+            password="testpass123",  # nosec B106
+        )
+        self.user.email_verified = True
+        self.user.save()
+
+    def test_login_with_unknown_email_returns_401(self):
+        response = self.client.post(
+            reverse("login", kwargs={"version": "v1"}),
+            data=json.dumps(
+                {"email": "unknown@example.com", "password": "testpass123"}
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "Invalid credentials.")
+
+    def test_login_with_wrong_password_returns_401(self):
+        response = self.client.post(
+            reverse("login", kwargs={"version": "v1"}),
+            data=json.dumps(
+                {"email": "valid@example.com", "password": "wrongpass"}
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "Invalid credentials.")

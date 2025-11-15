@@ -507,6 +507,17 @@ class OrderCancelReleaseInventoryTestCase(MongoTestCase):
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, Order.Status.CANCELED)
 
+    def test_other_user_cannot_cancel_order(self):
+        other_user = get_user_model().objects.create_user(
+            username="other", password="pass"  # nosec B106
+        )
+        other_client = APIClient()
+        other_client.force_authenticate(other_user)
+        url = reverse("order-cancel", kwargs={"pk": self.order.id, "version": "v1"})
+        response = other_client.post(url)
+        # The view filters by user, so a different user should see 404
+        self.assertEqual(response.status_code, 404)
+
 
 class OrderInvoiceDownloadTestCase(TestCase):
     def setUp(self):
@@ -588,3 +599,49 @@ class ShipmentWebhookTestCase(TestCase):
             HTTP_X_WEBHOOK_TOKEN=INVALID_WEBHOOK_SECRET,
         )
         self.assertEqual(response.status_code, 401)
+
+    @override_settings(
+        SHIPMENT_WEBHOOK_SECRET=WEBHOOK_SECRET,
+        SECURE_SSL_REDIRECT=False,
+        ALLOWED_HOSTS=["testserver"],
+    )
+    def test_missing_order_id_or_status_returns_400(self):
+        base_kwargs = {"version": "v1"}
+        # Missing order_id
+        response = self.client.post(
+            self.url, {"status": Order.Status.SHIPPED}, format="json", HTTP_X_WEBHOOK_TOKEN=WEBHOOK_SECRET
+        )
+        self.assertEqual(response.status_code, 400)
+        # Missing status
+        response = self.client.post(
+            self.url, {"order_id": self.order.id}, format="json", HTTP_X_WEBHOOK_TOKEN=WEBHOOK_SECRET
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @override_settings(
+        SHIPMENT_WEBHOOK_SECRET=WEBHOOK_SECRET,
+        SECURE_SSL_REDIRECT=False,
+        ALLOWED_HOSTS=["testserver"],
+    )
+    def test_invalid_status_returns_400(self):
+        response = self.client.post(
+            self.url,
+            {"order_id": self.order.id, "status": "NOT_A_STATUS"},
+            format="json",
+            HTTP_X_WEBHOOK_TOKEN=WEBHOOK_SECRET,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @override_settings(
+        SHIPMENT_WEBHOOK_SECRET=WEBHOOK_SECRET,
+        SECURE_SSL_REDIRECT=False,
+        ALLOWED_HOSTS=["testserver"],
+    )
+    def test_order_not_found_returns_404(self):
+        response = self.client.post(
+            self.url,
+            {"order_id": 999999, "status": Order.Status.SHIPPED},
+            format="json",
+            HTTP_X_WEBHOOK_TOKEN=WEBHOOK_SECRET,
+        )
+        self.assertEqual(response.status_code, 404)

@@ -19,7 +19,9 @@ from orders.models import Order, OrderItem
 from products.models import Product
 
 
-@override_settings(SECURE_SSL_REDIRECT=False)
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+)
 class StripeWebhookViewTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -129,6 +131,47 @@ class StripeWebhookViewTests(TestCase):
             any("ID evt_test" in message for message in log.output),
         )
         self.assertEqual(log.records[0].levelno, logging.WARNING)
+
+    @patch("stripe.Webhook.construct_event")
+    def test_payment_intent_succeeded_order_not_found_does_not_crash(
+        self, mock_construct_event
+    ):
+        mock_construct_event.return_value = {
+            "type": "payment_intent.succeeded",
+            "data": {"object": {"id": "pi_missing"}},
+        }
+
+        response = self.client.post(
+            reverse("stripe-webhook", kwargs={"version": "v1"}),
+            data={},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        # Existing order should remain unchanged
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PENDING)
+        self.product.reload()
+        self.assertEqual(self.product.reserved_inventory, 1)
+
+    @patch("stripe.Webhook.construct_event")
+    def test_payment_intent_succeeded_is_idempotent(self, mock_construct_event):
+        mock_construct_event.return_value = {
+            "type": "payment_intent.succeeded",
+            "data": {"object": {"id": "pi_test"}},
+        }
+
+        url = reverse("stripe-webhook", kwargs={"version": "v1"})
+
+        first = self.client.post(url, data={}, content_type="application/json")
+        self.assertEqual(first.status_code, 200)
+        second = self.client.post(url, data={}, content_type="application/json")
+        self.assertEqual(second.status_code, 200)
+
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PROCESSING)
+        self.product.reload()
+        self.assertEqual(self.product.reserved_inventory, 1)
 
 
 @override_settings(
@@ -255,3 +298,14 @@ class StripeWebhookIntegrationTests(TestCase):
         self.product.reload()
         self.assertEqual(self.product.reserved_inventory, 1)
 
+
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    STRIPE_SECRET_KEY=None,
+    STRIPE_WEBHOOK_SECRET=None,
+)
+class StripeWebhookConfigTests(TestCase):
+    def test_missing_stripe_configuration_returns_503(self):
+        url = reverse("stripe-webhook", kwargs={"version": "v1"})
+        response = self.client.post(url, data={}, content_type="application/json")
+        self.assertEqual(response.status_code, 503)
