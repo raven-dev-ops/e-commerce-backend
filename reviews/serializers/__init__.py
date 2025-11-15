@@ -3,7 +3,7 @@
 from rest_framework_mongoengine.serializers import DocumentSerializer
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Review
+from reviews.models import Review
 
 
 class ReviewSerializer(DocumentSerializer):

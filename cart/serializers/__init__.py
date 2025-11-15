@@ -2,7 +2,7 @@
 
 from rest_framework_mongoengine.serializers import DocumentSerializer
 
-from .models import Cart, CartItem
+from cart.models import Cart, CartItem
 
 
 class CartItemSerializer(DocumentSerializer):

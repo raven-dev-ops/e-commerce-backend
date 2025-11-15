@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ReferralCode
+from referrals.models import ReferralCode
 
 
 class ReferralCodeSerializer(serializers.ModelSerializer):

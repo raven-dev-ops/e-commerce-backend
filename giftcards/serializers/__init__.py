@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import GiftCard
+from giftcards.models import GiftCard
 
 
 class GiftCardSerializer(serializers.ModelSerializer):

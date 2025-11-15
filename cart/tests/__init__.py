@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from mongoengine import connect, disconnect
 import mongomock
 from products.models import Product
-from .models import Cart, CartItem, UserRef, get_or_create_user_ref
-from .tasks import purge_inactive_carts
+from cart.models import Cart, CartItem, UserRef, get_or_create_user_ref
+from cart.tasks import purge_inactive_carts
 from datetime import datetime, timedelta
 from rest_framework.test import APIClient
 from django.urls import reverse

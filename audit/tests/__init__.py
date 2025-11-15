@@ -6,7 +6,7 @@ import mongomock
 from rest_framework.test import APIClient
 
 from products.models import Product
-from .models import AuditLog
+from audit.models import AuditLog
 
 
 @override_settings(

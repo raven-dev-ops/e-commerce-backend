@@ -12,7 +12,7 @@ import time
 from django.conf import settings
 
 from orders.models import Order, OrderItem
-from .models import Payment, Transaction
+from payments.models import Payment, Transaction
 from products.models import Product
 from mongoengine import connect, disconnect
 import mongomock
