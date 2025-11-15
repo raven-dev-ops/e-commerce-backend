@@ -4,3 +4,4 @@ build:
 
 run:
   web: gunicorn backend.wsgi:application
+  worker: celery -A backend worker -l info
