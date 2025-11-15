@@ -1,17 +1,9 @@
-import os
-import django
-from django.core.management import call_command
+from django.contrib.auth import get_user_model
+from django.test import RequestFactory, TestCase
+from django.utils.crypto import get_random_string
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
-django.setup()
-call_command("migrate", run_syncdb=True, verbosity=0)
-
-from django.contrib.auth import get_user_model  # noqa: E402
-from django.test import RequestFactory, TestCase  # noqa: E402
-from django.utils.crypto import get_random_string  # noqa: E402
-
-from .models import Notification  # noqa: E402
-from .views import _event_stream, notifications_stream  # noqa: E402
+from notifications.models import Notification
+from notifications.views import _event_stream, notifications_stream
 
 
 class NotificationStreamTests(TestCase):
