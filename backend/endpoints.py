@@ -17,7 +17,38 @@ from backend.views import PurgeCacheView, RateLimitStatusView
 
 
 def home(request):
-    return HttpResponse("Welcome to the e-commerce backend API!")
+    try:
+        connection.ensure_connection()
+        db_status = "ok"
+    except Exception:
+        db_status = "unavailable"
+
+    tests_info = {
+        "status": os.getenv("CI_LAST_TEST_STATUS", "unknown"),
+        "last_run": os.getenv("CI_LAST_TEST_RUN", "unknown"),
+    }
+
+    logging_info = {
+        "level": settings.LOGGING.get("root", {}).get("level", "INFO"),
+        "dd_trace_enabled": os.getenv("DD_TRACE_ENABLED", "false"),
+        "otel_trace_enabled": os.getenv("OTEL_TRACE_ENABLED", "false"),
+    }
+
+    return JsonResponse(
+        {
+            "message": "Welcome to the e-commerce backend API!",
+            "status": {
+                "liveness": "ok",
+                "database": db_status,
+            },
+            "tests": tests_info,
+            "logging": logging_info,
+            "version": {
+                "release": os.getenv("HEROKU_RELEASE_VERSION", "unknown"),
+                "commit": os.getenv("GIT_COMMIT_SHA", "unknown"),
+            },
+        }
+    )
 
 
 def custom_404(request, exception=None):
