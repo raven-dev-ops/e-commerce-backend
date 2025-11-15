@@ -20,7 +20,7 @@ from .tasks import send_order_confirmation_email
 from .services import create_order_from_cart, generate_invoice_pdf
 
 from orders.models import Order  # Django ORM
-from .serializers import OrderSerializer
+from backend.serializers.orders import OrderSerializer
 
 logger = logging.getLogger(__name__)
 

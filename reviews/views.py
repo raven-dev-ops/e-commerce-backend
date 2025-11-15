@@ -13,7 +13,7 @@ from .throttles import ReviewCreateThrottle
 
 from .models import Review
 from products.models import Product
-from .serializers import ReviewSerializer
+from backend.serializers.reviews import ReviewSerializer
 
 
 class ReviewPagination(PageNumberPagination):

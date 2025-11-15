@@ -10,7 +10,7 @@ from .throttles import LoginRateThrottle
 import logging
 import pyotp
 
-from authentication.serializers import (
+from backend.serializers.authentication import (
     UserRegistrationSerializer,
     UserProfileSerializer,
     AddressSerializer,

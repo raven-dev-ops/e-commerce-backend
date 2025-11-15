@@ -5,7 +5,7 @@ from django.core.cache import cache
 
 from .models import Discount
 from products.models import Category
-from .serializers import DiscountSerializer, CategorySerializer
+from backend.serializers.discounts import DiscountSerializer, CategorySerializer
 
 
 CATEGORY_LIST_CACHE_KEY = "category_list"

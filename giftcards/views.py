@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import GiftCard
-from .serializers import (
+from backend.serializers.giftcards import (
     GiftCardPurchaseSerializer,
     GiftCardRedeemSerializer,
     GiftCardSerializer,

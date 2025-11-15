@@ -5,7 +5,7 @@ from rest_framework import status
 from django.utils.translation import gettext as _
 
 from .models import Cart, CartItem, get_or_create_user_ref
-from .serializers import CartItemSerializer
+from backend.serializers.cart import CartItemSerializer
 
 
 class CartView(APIView):

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from products.models import Product
-from products.serializers import ProductSerializer
+from backend.serializers.products import ProductSerializer
 from backend.tests.utils import MongoTestCase
 
 
@@ -67,4 +67,3 @@ class ProductModelSerializerTest(MongoTestCase):
         self.assertTrue(deleted.is_deleted)
         deleted.restore()
         self.assertIsNotNone(Product.objects(_id=product_id).first())
-

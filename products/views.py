@@ -10,7 +10,7 @@ from django.http import Http404, HttpResponse
 from django.core.cache import cache
 from products.filters import ProductFilter
 from products.models import Product
-from products.serializers import ProductSerializer
+from backend.serializers.products import ProductSerializer
 from products.tasks import upload_product_image_to_s3
 import csv
 from io import TextIOWrapper

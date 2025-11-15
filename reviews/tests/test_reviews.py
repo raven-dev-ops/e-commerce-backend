@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 
 from reviews.models import Review
 from products.models import Product
-from reviews.serializers import ReviewSerializer
+from backend.serializers.reviews import ReviewSerializer
 from backend.tests.utils import MongoTestCase
 
 User = get_user_model()

@@ -360,7 +360,7 @@ REST_FRAMEWORK = {
 REST_USE_JWT = True
 REST_AUTH_TOKEN_MODEL = None
 REST_AUTH_SERIALIZERS = {
-    "SOCIAL_LOGIN_SERIALIZER": "authentication.serializers.CustomSocialLoginSerializer",
+    "SOCIAL_LOGIN_SERIALIZER": "backend.serializers.authentication.CustomSocialLoginSerializer",
 }
 
 GRAPHENE = {"SCHEMA": "backend.schema.schema"}

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import ReferralCode
-from .serializers import (
+from backend.serializers.referrals import (
     ReferralCodeCreateSerializer,
     ReferralCodeSerializer,
     ReferralCodeTrackSerializer,
