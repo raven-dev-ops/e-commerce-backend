@@ -1,40 +1,13 @@
-from celery import shared_task
-from datetime import timedelta
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.sessions.models import Session
-from django.core.mail import send_mail
-from django.utils import timezone
+from backend.tasks.users import (
+    send_verification_email,
+    cleanup_expired_sessions,
+    perform_user_purge,
+    purge_inactive_users,
+)
 
-
-@shared_task
-def send_verification_email(user_id):
-    User = get_user_model()
-    user = User.objects.get(id=user_id)
-    link = f"{getattr(settings, 'FRONTEND_URL', '')}/authentication/verify-email/{user.verification_token}/"
-    subject = "Verify your email"
-    message = f"Please verify your email by visiting: {link}"
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
-    send_mail(subject, message, from_email, [user.email])
-
-
-@shared_task
-def cleanup_expired_sessions():
-    """Delete expired user sessions."""
-    Session.objects.filter(expire_date__lt=timezone.now()).delete()
-
-
-def perform_user_purge() -> int:
-    """Remove inactive users beyond the retention window."""
-    User = get_user_model()
-    retention = getattr(settings, "PERSONAL_DATA_RETENTION_DAYS", 365)
-    cutoff = timezone.now() - timedelta(days=retention)
-    qs = User.objects.filter(is_active=False, last_login__lt=cutoff)
-    deleted, _ = qs.delete()
-    return deleted
-
-
-@shared_task
-def purge_inactive_users() -> None:
-    """Celery task wrapper for inactive user purge."""
-    perform_user_purge()
+__all__ = [
+    "send_verification_email",
+    "cleanup_expired_sessions",
+    "perform_user_purge",
+    "purge_inactive_users",
+]
