@@ -1,36 +1,23 @@
 # reviews/tests.py
 
-from django.test import TestCase, override_settings
+from datetime import datetime
+
+from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.urls import reverse
-from mongoengine import connect, disconnect
-import mongomock
+from django.core.cache import cache
+from rest_framework import status
+from rest_framework.test import APIClient
+
 from reviews.models import Review
 from products.models import Product
-from django.contrib.auth import get_user_model
 from reviews.serializers import ReviewSerializer
-from rest_framework.test import APIClient
-from rest_framework import status
-from datetime import datetime
-from django.core.cache import cache
+from backend.tests.utils import MongoTestCase
 
 User = get_user_model()
 
 
-class ReviewModelSerializerTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ReviewModelSerializerTest(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -78,21 +65,7 @@ class ReviewModelSerializerTest(TestCase):
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
-class ReviewAPIPaginationTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ReviewAPIPaginationTest(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -142,21 +115,7 @@ class ReviewAPIPaginationTest(TestCase):
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class ReviewCreationThrottleTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ReviewCreationThrottleTest(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -211,21 +170,7 @@ class ReviewCreationThrottleTest(TestCase):
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class ReviewRatingRecalculationTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ReviewRatingRecalculationTest(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()

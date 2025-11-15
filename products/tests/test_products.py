@@ -2,38 +2,23 @@
 
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
-from mongoengine import connect, disconnect
-import mongomock
-from products.models import Product, Category
-from products.serializers import ProductSerializer
 from django.urls import reverse
+from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from rest_framework.test import APIClient
 from unittest.mock import patch
+
+from products.models import Product, Category
+from products.serializers import ProductSerializer
 from products.utils import send_low_stock_notification
 from products.tasks import send_low_stock_email, upload_product_image_to_s3
 from orders.models import Order, OrderItem
 from products.services import get_recommended_products
-from django.core.cache import cache
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
+from backend.tests.utils import MongoTestCase
 
 
-class ProductModelSerializerTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
-
+class ProductModelSerializerTest(MongoTestCase):
     def setUp(self):
         Product.drop_collection()
         self.product = Product.objects.create(
@@ -101,21 +86,7 @@ class ProductModelSerializerTest(TestCase):
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class ProductAPITestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ProductAPITestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -401,21 +372,7 @@ class ProductAPITestCase(TestCase):
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class ProductBulkAPITestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ProductBulkAPITestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -467,21 +424,7 @@ class ProductBulkAPITestCase(TestCase):
         self.assertIn("Export Soap", lines[1])
 
 
-class ProductTasksTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ProductTasksTestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -533,21 +476,7 @@ class ProductTasksTestCase(TestCase):
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class ValidationErrorFormatTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ValidationErrorFormatTestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -574,21 +503,7 @@ class ValidationErrorFormatTestCase(TestCase):
         self.assertIn("product_name", fields)
 
 
-class ProductRecommendationServiceTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class ProductRecommendationServiceTestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -646,21 +561,7 @@ class ProductRecommendationServiceTestCase(TestCase):
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 )
-class PrewarmCachesCommandTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class PrewarmCachesCommandTest(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -695,23 +596,8 @@ class PrewarmCachesCommandTest(TestCase):
     ERP_API_KEY="testkey",
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class ERPInventorySyncTest(TestCase):
+class ERPInventorySyncTest(MongoTestCase):
     """Tests for syncing inventory with the external ERP system."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
 
     def setUp(self):
         Product.drop_collection()

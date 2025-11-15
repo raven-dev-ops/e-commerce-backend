@@ -1,9 +1,7 @@
 """Tests for the discounts app."""
 
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.urls import reverse
-from mongoengine import connect, disconnect
-import mongomock
 from rest_framework.test import APIClient
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
@@ -12,26 +10,11 @@ from django.utils.crypto import get_random_string
 
 from discounts.models import Discount
 from products.models import Product, Category
+from backend.tests.utils import MongoTestCase
 
 
-class DiscountModelTest(TestCase):
+class DiscountModelTest(MongoTestCase):
     """Tests for the Discount model."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        # Ensure we use an in-memory MongoDB for tests
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
 
     def setUp(self):
         Discount.drop_collection()

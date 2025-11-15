@@ -1,9 +1,7 @@
 # cart/tests.py
 
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.contrib.auth import get_user_model
-from mongoengine import connect, disconnect
-import mongomock
 from products.models import Product
 from cart.models import Cart, CartItem, UserRef, get_or_create_user_ref
 from cart.tasks import purge_inactive_carts
@@ -12,24 +10,13 @@ from rest_framework.test import APIClient
 from django.urls import reverse
 from unittest.mock import patch
 
+from backend.tests.utils import MongoTestCase
+
+
 User = get_user_model()
 
 
-class CartModelTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class CartModelTest(MongoTestCase):
 
     def setUp(self):
         Cart.drop_collection()
@@ -70,21 +57,7 @@ class CartModelTest(TestCase):
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
-class CartAPITestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class CartAPITestCase(MongoTestCase):
 
     def setUp(self):
         Cart.drop_collection()
@@ -175,21 +148,7 @@ class CartAPITestCase(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class PurgeInactiveCartsTaskTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class PurgeInactiveCartsTaskTest(MongoTestCase):
 
     def setUp(self):
         Cart.drop_collection()

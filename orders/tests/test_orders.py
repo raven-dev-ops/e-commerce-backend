@@ -1,22 +1,20 @@
-# orders/tests.py
-
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
-from orders.models import Order, OrderItem
+from django.urls import reverse
+from rest_framework.test import APIClient
 from unittest.mock import patch, MagicMock
+from types import SimpleNamespace
+import stripe
+from secrets import token_hex
+
+from orders.models import Order, OrderItem
 from orders.tasks import send_order_confirmation_email
 from orders.services import create_order_from_cart
 from products.models import Product
 from cart.models import Cart
 from discounts.models import Discount
 from authentication.models import Address
-from rest_framework.test import APIClient
-from django.urls import reverse
-from types import SimpleNamespace
-import stripe
-from mongoengine import connect, disconnect
-import mongomock
-from secrets import token_hex
+from backend.tests.utils import MongoTestCase
 
 
 class OrderModelTestCase(TestCase):
@@ -263,21 +261,7 @@ class CreateOrderFromCartTestCase(TestCase):
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
-class OrderIntegrationTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class OrderIntegrationTestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
@@ -476,21 +460,7 @@ class OrderIntegrationTestCase(TestCase):
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
-class OrderCancelReleaseInventoryTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class OrderCancelReleaseInventoryTestCase(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()

@@ -1,33 +1,18 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.urls import reverse
-from mongoengine import connect, disconnect
-import mongomock
 from rest_framework.test import APIClient
 
 from products.models import Product
 from audit.models import AuditLog
+from backend.tests.utils import MongoTestCase
 
 
 @override_settings(
     SECURE_SSL_REDIRECT=False,
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
 )
-class AuditLogMiddlewareTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost",
-            mongo_client_class=mongomock.MongoClient,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        disconnect()
-        super().tearDownClass()
+class AuditLogMiddlewareTest(MongoTestCase):
 
     def setUp(self):
         Product.drop_collection()
