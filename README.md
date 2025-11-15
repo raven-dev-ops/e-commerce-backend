@@ -1,6 +1,6 @@
 # E-Commerce Backend
 
-This repository contains a Django and MongoEngine based backend for an example e-commerce platform.
+This repository contains a Django-based backend for an example e-commerce platform.
 
 > **Usage & License Notice**
 >
@@ -96,7 +96,6 @@ With the server running you can begin making changes and submitting pull request
    DEBUG=True
    ALLOWED_HOSTS=localhost,127.0.0.1
    DATABASE_URL=postgres://user:pass@host:5432/dbname  # or sqlite:///db.sqlite3
-   MONGODB_URI=mongodb://localhost:27017/dbname
    ERP_API_URL=https://erp.example.com
    ERP_API_KEY=your-erp-api-key
    STRIPE_SECRET_KEY=sk_test_your_key
@@ -133,7 +132,7 @@ Without these values, checkout and webhook endpoints will return server errors.
 
 ## Docker Compose
 
-A `docker-compose.yml` file is provided to run the application with PostgreSQL, MongoDB, Redis and a Celery worker.
+A `docker-compose.yml` file is provided to run the application with PostgreSQL, Redis and a Celery worker.
 Create a `.env` file as above and then start the stack:
 
 ```bash
@@ -240,13 +239,11 @@ This project uses [django-waffle](https://waffle.readthedocs.io/) to manage feat
 
 Execute the Django test suite with:
 ```bash
-CI=1 python manage.py test
+python manage.py test
 ```
-Tests require the same environment variables as the development server. Setting
-`CI=1` tells the settings to use the local MongoDB instance defined in
-`MONGODB_URI` instead of any remote value. Ensure `DATABASE_URL` is unset or
-points to a local SQLite database so SSL is not required. When running locally,
-using SQLite and a local MongoDB instance is sufficient.
+Tests require the same environment variables as the development server. Ensure
+`DATABASE_URL` points to a database that is reachable from your environment
+or is unset to fall back to SQLite for local development.
 
 ## Sample Data
 

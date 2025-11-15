@@ -9,7 +9,7 @@ class ProductViewSet(viewsets.GenericViewSet):
     Products are now served entirely from the frontend's static catalog.
 
     This view keeps the /products/ routes alive but no longer reads
-    from MongoDB or any backend product store.
+    from any backend product store.
     """
 
     permission_classes = [AllowAny]

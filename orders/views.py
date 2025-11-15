@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class OrderViewSet(viewsets.ViewSet):
     """
     Order endpoints (list, retrieve, create) using Django ORM.
-    Cart is always read from MongoDB via MongoEngine.
+    The frontend is responsible for cart contents and pricing.
     """
 
     authentication_classes = [JWTAuthentication]

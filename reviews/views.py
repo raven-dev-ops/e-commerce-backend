@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class ReviewViewSet(GenericViewSet):
     """
-    Reviews are no longer stored in MongoDB; this API is effectively disabled.
+    Reviews are no longer stored on the backend; this API is effectively disabled.
     Kept only so the routes exist and return a clear message instead of 500s.
     """
 

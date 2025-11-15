@@ -23,11 +23,12 @@ logger = logging.getLogger(__name__)
 
 def create_order_from_cart(user, data) -> Order:
     """
-    Legacy server-side cart + MongoDB backed checkout has been removed.
+    Legacy server-side cart backed checkout has been removed.
 
     The frontend is now responsible for cart + pricing. If you need a
     server-side checkout again, implement a new flow that takes a
-    fully-priced order payload from the client instead of reading from Mongo.
+    fully-priced order payload from the client instead of reading from a
+    server-side cart store.
     """
 
     raise ValueError("Server-side cart checkout is disabled.")
@@ -35,7 +36,7 @@ def create_order_from_cart(user, data) -> Order:
 
 def release_reserved_inventory(order: Order) -> None:
     """
-    No-op now that inventory is no longer tracked in MongoDB.
+    No-op now that inventory is no longer tracked on the backend.
 
     Left in place so existing call sites don't fail, but it performs
     no database operations.

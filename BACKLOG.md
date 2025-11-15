@@ -3,7 +3,6 @@
 - [x] Make DEBUG configurable via environment variable to ease local development and production configuration.
 - [x] Add additional security headers (e.g., Content-Security-Policy, Strict-Transport-Security) in custom middleware for better hardening.
 - [x] Optimize product list endpoint by reducing verbose logging and adding caching to the list query.
-- [x] Standardize MongoDB connection environment variables between settings and connection helper.
 - [x] Trigger asynchronous order confirmation emails after order creation using Celery.
 - [x] Introduce rate limiting on the login endpoint to mitigate brute-force attacks.
 
@@ -36,7 +35,6 @@
 - [x] Integrate Bandit security scanning into the CI workflow.
 - [x] Add a `pre-commit` configuration to enforce formatting and linting before commits.
 - [x] Introduce static type checking with mypy and add type hints across the codebase.
-- [x] Replace string `user_id` fields in Mongo documents with `ReferenceField` to the `User` model.
 - [x] Cache category list responses and invalidate cache on updates.
 - [x] Internationalize user-facing error messages via Django's translation framework.
 - [x] Document authentication requirements and examples in the README.
