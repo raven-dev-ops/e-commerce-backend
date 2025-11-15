@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import dj_database_url
 import warnings
 import logging
+import ssl
 from typing import Any
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -378,6 +379,13 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+CELERY_BROKER_TRANSPORT_OPTIONS: dict[str, Any] = {}
+CELERY_REDIS_BACKEND_USE_SSL: dict[str, Any] | None = None
+
+if CELERY_BROKER_URL.startswith("rediss://"):
+    ssl_options = {"cert_reqs": ssl.CERT_NONE}
+    CELERY_BROKER_TRANSPORT_OPTIONS["ssl"] = ssl_options
+    CELERY_REDIS_BACKEND_USE_SSL = ssl_options
 
 CELERY_BEAT_SCHEDULE = {
     "purge-inactive-carts": {
