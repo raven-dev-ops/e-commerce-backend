@@ -238,6 +238,15 @@ URLs via `CACHE_URLS`:
 CACHE_URLS=redis://cache1:6379/1,redis://cache2:6379/1,redis://cache3:6379/1
 ```
 
+### Realtime Channels
+
+Django Channels uses the in-memory layer by default. For production, point
+`CHANNEL_REDIS_URL` at a Redis instance:
+
+```env
+CHANNEL_REDIS_URL=redis://localhost:6379/2
+```
+
 ### Feature Flags
 
 This project uses [django-waffle](https://waffle.readthedocs.io/) to manage feature flags for gradual rollouts. Create and toggle flags in the Django admin and check them in code with helpers like `waffle.flag_is_active(request, "my_flag")`.
