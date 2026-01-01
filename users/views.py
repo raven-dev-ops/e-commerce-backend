@@ -4,6 +4,7 @@ from rest_framework.serializers import ModelSerializer, CharField
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
@@ -29,17 +30,34 @@ class UserSerializer(ModelSerializer):
             "first_name",
             "last_name",
             "avatar",
+            "marketing_opt_in",
+            "marketing_opt_in_at",
+            "marketing_opt_out_at",
         ]
+        read_only_fields = ["marketing_opt_in_at", "marketing_opt_out_at"]
 
     def create(self, validated_data):
         password = validated_data.pop("password")
+        marketing_opt_in = validated_data.get("marketing_opt_in", False)
         user = get_user_model_ref()(**validated_data)
+        if marketing_opt_in:
+            user.marketing_opt_in_at = timezone.now()
+            user.marketing_opt_out_at = None
         user.set_password(password)
         user.save()
         return user
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
+        marketing_opt_in = validated_data.pop("marketing_opt_in", None)
+        if marketing_opt_in is not None and marketing_opt_in != instance.marketing_opt_in:
+            instance.marketing_opt_in = marketing_opt_in
+            now = timezone.now()
+            if marketing_opt_in:
+                instance.marketing_opt_in_at = now
+                instance.marketing_opt_out_at = None
+            else:
+                instance.marketing_opt_out_at = now
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         if password:

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 
 from authentication.models import Address
@@ -31,10 +32,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password")
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ("username", "email", "password", "marketing_opt_in")
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "marketing_opt_in": {"required": False},
+        }
 
     def create(self, validated_data):
+        if validated_data.get("marketing_opt_in"):
+            validated_data["marketing_opt_in_at"] = timezone.now()
+            validated_data["marketing_opt_out_at"] = None
         return User.objects.create_user(**validated_data)
 
 
@@ -51,9 +58,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "date_joined",
             "last_login",
+            "marketing_opt_in",
+            "marketing_opt_in_at",
+            "marketing_opt_out_at",
             "default_shipping_address",
             "default_billing_address",
         )
+        read_only_fields = ("marketing_opt_in_at", "marketing_opt_out_at")
+
+    def update(self, instance, validated_data):
+        marketing_opt_in = validated_data.pop("marketing_opt_in", None)
+        if marketing_opt_in is not None and marketing_opt_in != instance.marketing_opt_in:
+            instance.marketing_opt_in = marketing_opt_in
+            now = timezone.now()
+            if marketing_opt_in:
+                instance.marketing_opt_in_at = now
+                instance.marketing_opt_out_at = None
+            else:
+                instance.marketing_opt_out_at = now
+        return super().update(instance, validated_data)
 
     def get_default_shipping_address(self, obj):
         try:

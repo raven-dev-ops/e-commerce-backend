@@ -111,6 +111,44 @@ class UserPauseReactivateTest(TestCase):
         self.assertFalse(self.user.is_paused)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False)
+class MarketingConsentTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="consent", email="consent@example.com", password="pass"
+        )  # nosec B106
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse("profile", kwargs={"version": "v1"})
+
+    def test_opt_in_sets_timestamp(self):
+        response = self.client.patch(
+            self.url, {"marketing_opt_in": True}, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.marketing_opt_in)
+        self.assertIsNotNone(self.user.marketing_opt_in_at)
+        self.assertIsNone(self.user.marketing_opt_out_at)
+
+    def test_opt_out_sets_timestamp(self):
+        self.user.marketing_opt_in = True
+        self.user.marketing_opt_in_at = timezone.now() - timedelta(days=1)
+        self.user.save(
+            update_fields=["marketing_opt_in", "marketing_opt_in_at"]
+        )
+
+        response = self.client.patch(
+            self.url, {"marketing_opt_in": False}, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.marketing_opt_in)
+        self.assertIsNotNone(self.user.marketing_opt_out_at)
+
+
 class RevokeSessionsOnPasswordChangeTest(TestCase):
     def test_sessions_removed_after_password_change(self):
         old_password = uuid4().hex

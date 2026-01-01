@@ -31,6 +31,9 @@ class User(AbstractUser):
     )
     mfa_secret = models.CharField(max_length=32, blank=True, null=True)
     is_paused = models.BooleanField(default=False)
+    marketing_opt_in = models.BooleanField(default=False)
+    marketing_opt_in_at = models.DateTimeField(null=True, blank=True)
+    marketing_opt_out_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.email:

@@ -9,11 +9,22 @@ from .models import User
 class UserAdmin(DefaultUserAdmin):
     # Add any custom fields you added to User in 'fieldsets' and 'add_fieldsets'
     fieldsets = DefaultUserAdmin.fieldsets + (
-        ("Extra info", {"fields": ("phone_number",)}),
+        (
+            "Extra info",
+            {
+                "fields": (
+                    "phone_number",
+                    "marketing_opt_in",
+                    "marketing_opt_in_at",
+                    "marketing_opt_out_at",
+                )
+            },
+        ),
     )
     add_fieldsets = DefaultUserAdmin.add_fieldsets + (
-        ("Extra info", {"fields": ("phone_number",)}),
+        ("Extra info", {"fields": ("phone_number", "marketing_opt_in")}),
     )
+    readonly_fields = ("marketing_opt_in_at", "marketing_opt_out_at")
     list_display = (
         "username",
         "email",
@@ -21,6 +32,7 @@ class UserAdmin(DefaultUserAdmin):
         "is_staff",
         "is_superuser",
         "phone_number",
+        "marketing_opt_in",
     )
     search_fields = ("username", "email", "phone_number")
     list_filter = ("is_active", "is_staff", "is_superuser")
