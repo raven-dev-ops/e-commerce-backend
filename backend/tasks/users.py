@@ -8,10 +8,19 @@ from django.core.mail import send_mail
 from django.utils import timezone
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_backoff_max=3600,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 5},
+)
 def send_verification_email(user_id):
     User = get_user_model()
-    user = User.objects.get(id=user_id)
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return
     link = f"{getattr(settings, 'FRONTEND_URL', '')}/authentication/verify-email/{user.verification_token}/"
     subject = "Verify your email"
     message = f"Please verify your email by visiting: {link}"

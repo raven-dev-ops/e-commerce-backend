@@ -10,7 +10,13 @@ from orders.models import Order
 logger = logging.getLogger(__name__)
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_backoff_max=3600,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 5},
+)
 def send_order_confirmation_email(order_id, user_email):
     """Send order confirmation email to the user."""
     subject = f"Order Confirmation #{order_id}"
@@ -19,7 +25,13 @@ def send_order_confirmation_email(order_id, user_email):
     send_mail(subject, message, from_email, [user_email])
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_backoff_max=3600,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 5},
+)
 def send_order_status_sms(order_id, status, to_phone):
     """Send SMS notification for order status updates."""
     account_sid = getattr(settings, "TWILIO_ACCOUNT_SID", "")
