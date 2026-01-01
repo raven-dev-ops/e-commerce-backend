@@ -115,6 +115,7 @@ With the server running you can begin making changes and submitting pull request
    INSTAGRAM_APP_ID=your-instagram-app-id
    INSTAGRAM_APP_SECRET=your-instagram-app-secret
    SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
+   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/your/webhook/url
    DD_AGENT_HOST=localhost
    DD_TRACE_AGENT_PORT=8126
    DD_SERVICE=ecommerce-backend
@@ -129,6 +130,7 @@ With the server running you can begin making changes and submitting pull request
 
 Setting `SENTRY_DSN` enables centralized error tracking with Sentry for both Django and Celery tasks.
 Providing `DD_AGENT_HOST` and related variables enables DataDog APM tracing.
+Setting `SLACK_WEBHOOK_URL` sends ERROR-level logs to a Slack channel.
 
 ### Stripe
 

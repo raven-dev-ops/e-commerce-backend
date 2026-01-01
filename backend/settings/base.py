@@ -24,6 +24,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.herokuapp.com")
 )
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET", "")
 DB_SLOW_QUERY_THRESHOLD = float(os.getenv("DB_SLOW_QUERY_THRESHOLD", "0.5"))
@@ -293,6 +294,10 @@ LOGGING = {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
         },
+        "slack": {
+            "format": "[{levelname}] {name}: {message}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
@@ -313,6 +318,15 @@ LOGGING = {
         },
     },
 }
+
+if SLACK_WEBHOOK_URL:
+    LOGGING["handlers"]["slack"] = {
+        "class": "backend.logging_handlers.SlackWebhookHandler",
+        "level": "ERROR",
+        "formatter": "slack",
+        "webhook_url": SLACK_WEBHOOK_URL,
+    }
+    LOGGING["root"]["handlers"].append("slack")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
