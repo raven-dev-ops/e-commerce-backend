@@ -399,10 +399,17 @@ CELERY_BEAT_SCHEDULE = {
         "task": "users.tasks.purge_inactive_users",
         "schedule": crontab(hour=0, minute=0),
     },
+    "auto-cancel-stale-orders": {
+        "task": "orders.tasks.auto_cancel_stale_pending_orders",
+        "schedule": crontab(minute="*/15"),
+    },
 }
 
 CART_INACTIVITY_DAYS = int(os.getenv("CART_INACTIVITY_DAYS", "30"))
 PERSONAL_DATA_RETENTION_DAYS = int(os.getenv("PERSONAL_DATA_RETENTION_DAYS", "365"))
+ORDER_PENDING_TIMEOUT_MINUTES = int(
+    os.getenv("ORDER_PENDING_TIMEOUT_MINUTES", "30")
+)
 
 # Cache configuration
 if os.getenv("CI") or os.getenv("TESTING"):

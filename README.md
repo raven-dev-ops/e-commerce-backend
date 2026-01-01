@@ -124,6 +124,7 @@ With the server running you can begin making changes and submitting pull request
    GLOBAL_USER_THROTTLE_RATE=1000/day
    CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com,http://localhost:3000
    PERSONAL_DATA_RETENTION_DAYS=365  # days to retain inactive user data before purging
+   ORDER_PENDING_TIMEOUT_MINUTES=30  # minutes before pending orders are canceled
 ```
 
 Setting `SENTRY_DSN` enables centralized error tracking with Sentry for both Django and Celery tasks.
